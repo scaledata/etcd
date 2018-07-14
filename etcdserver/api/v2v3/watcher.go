@@ -18,9 +18,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/etcdserver/api/v2error"
-	"github.com/coreos/etcd/etcdserver/api/v2store"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/etcdserver/api/v2error"
+	"github.com/scaledata/etcd/etcdserver/api/v2store"
 )
 
 func (s *v2v3Store) Watch(prefix string, recursive, stream bool, sinceIndex uint64) (v2store.Watcher, error) {

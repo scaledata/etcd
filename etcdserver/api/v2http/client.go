@@ -27,17 +27,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/api"
-	"github.com/coreos/etcd/etcdserver/api/etcdhttp"
-	"github.com/coreos/etcd/etcdserver/api/membership"
-	"github.com/coreos/etcd/etcdserver/api/v2auth"
-	"github.com/coreos/etcd/etcdserver/api/v2error"
-	"github.com/coreos/etcd/etcdserver/api/v2http/httptypes"
-	stats "github.com/coreos/etcd/etcdserver/api/v2stats"
-	"github.com/coreos/etcd/etcdserver/api/v2store"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/pkg/types"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/api"
+	"github.com/scaledata/etcd/etcdserver/api/etcdhttp"
+	"github.com/scaledata/etcd/etcdserver/api/membership"
+	"github.com/scaledata/etcd/etcdserver/api/v2auth"
+	"github.com/scaledata/etcd/etcdserver/api/v2error"
+	"github.com/scaledata/etcd/etcdserver/api/v2http/httptypes"
+	stats "github.com/scaledata/etcd/etcdserver/api/v2stats"
+	"github.com/scaledata/etcd/etcdserver/api/v2store"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/pkg/types"
 
 	"github.com/jonboulle/clockwork"
 	"go.uber.org/zap"
@@ -367,9 +367,9 @@ func (h *statsHandler) serveLeader(w http.ResponseWriter, r *http.Request) {
 // parseKeyRequest converts a received http.Request on keysPrefix to
 // a server Request, performing validation of supplied fields as appropriate.
 // If any validation fails, an empty Request and non-nil error is returned.
-func parseKeyRequest(r *http.Request, clock clockwork.Clock) (etcdserverpb.Request, bool, error) {
+func parseKeyRequest(r *http.Request, clock clockwork.Clock) (sdetcdserverpb.Request, bool, error) {
 	var noValueOnSuccess bool
-	emptyReq := etcdserverpb.Request{}
+	emptyReq := sdetcdserverpb.Request{}
 
 	err := r.ParseForm()
 	if err != nil {
@@ -517,7 +517,7 @@ func parseKeyRequest(r *http.Request, clock clockwork.Clock) (etcdserverpb.Reque
 		}
 	}
 
-	rr := etcdserverpb.Request{
+	rr := sdetcdserverpb.Request{
 		Method:    r.Method,
 		Path:      p,
 		Val:       r.FormValue("value"),

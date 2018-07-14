@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "etcdserver/api/v3lock/v3lockpb/v3lock.proto",
+    "title": "etcdserver/api/v3lock/sdv3lockpb/v3lock.proto",
     "version": "version not set"
   },
   "schemes": [
@@ -23,7 +23,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/v3lockpbLockResponse"
+              "$ref": "#/definitions/sdv3lockpbLockResponse"
             }
           }
         },
@@ -33,7 +33,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v3lockpbLockRequest"
+              "$ref": "#/definitions/sdv3lockpbLockRequest"
             }
           }
         ],
@@ -50,7 +50,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/v3lockpbUnlockResponse"
+              "$ref": "#/definitions/sdv3lockpbUnlockResponse"
             }
           }
         },
@@ -60,7 +60,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v3lockpbUnlockRequest"
+              "$ref": "#/definitions/sdv3lockpbUnlockRequest"
             }
           }
         ],
@@ -71,7 +71,7 @@
     }
   },
   "definitions": {
-    "etcdserverpbResponseHeader": {
+    "sdetcdserverpbResponseHeader": {
       "type": "object",
       "properties": {
         "cluster_id": {
@@ -96,7 +96,7 @@
         }
       }
     },
-    "v3lockpbLockRequest": {
+    "sdv3lockpbLockRequest": {
       "type": "object",
       "properties": {
         "name": {
@@ -111,11 +111,11 @@
         }
       }
     },
-    "v3lockpbLockResponse": {
+    "sdv3lockpbLockResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "key": {
           "type": "string",
@@ -124,7 +124,7 @@
         }
       }
     },
-    "v3lockpbUnlockRequest": {
+    "sdv3lockpbUnlockRequest": {
       "type": "object",
       "properties": {
         "key": {
@@ -134,11 +134,11 @@
         }
       }
     },
-    "v3lockpbUnlockResponse": {
+    "sdv3lockpbUnlockResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     }

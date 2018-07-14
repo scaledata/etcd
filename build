@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # set some environment variables
-ORG_PATH="github.com/coreos"
+ORG_PATH="github.com/scaledata"
 REPO_PATH="${ORG_PATH}/etcd"
 
 GIT_SHA=$(git rev-parse --short HEAD || echo "GitNotFound")

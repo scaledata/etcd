@@ -18,8 +18,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/coreos/etcd/pkg/srv"
-	"github.com/coreos/etcd/pkg/transport"
+	"github.com/scaledata/etcd/pkg/srv"
+	"github.com/scaledata/etcd/pkg/transport"
 
 	"go.uber.org/zap"
 )

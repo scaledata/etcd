@@ -24,10 +24,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/auth/authpb"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/auth/sdauthpb"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc/rpctypes"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/mvcc/backend"
 
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
@@ -332,8 +332,8 @@ func TestRoleGrantPermission(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	perm := &authpb.Permission{
-		PermType: authpb.WRITE,
+	perm := &sdauthpb.Permission{
+		PermType: sdauthpb.WRITE,
 		Key:      []byte("Keys"),
 		RangeEnd: []byte("RangeEnd"),
 	}
@@ -365,8 +365,8 @@ func TestRoleRevokePermission(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	perm := &authpb.Permission{
-		PermType: authpb.WRITE,
+	perm := &sdauthpb.Permission{
+		PermType: sdauthpb.WRITE,
 		Key:      []byte("Keys"),
 		RangeEnd: []byte("RangeEnd"),
 	}
@@ -678,7 +678,7 @@ func TestHammerSimpleAuthenticate(t *testing.T) {
 	}
 }
 
-// TestRolesOrder tests authpb.User.Roles is sorted
+// TestRolesOrder tests sdauthpb.User.Roles is sorted
 func TestRolesOrder(t *testing.T) {
 	b, tPath := backend.NewDefaultTmpBackend()
 	defer os.Remove(tPath)

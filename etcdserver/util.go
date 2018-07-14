@@ -20,10 +20,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver/api/membership"
-	"github.com/coreos/etcd/etcdserver/api/rafthttp"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/pkg/types"
+	"github.com/scaledata/etcd/etcdserver/api/membership"
+	"github.com/scaledata/etcd/etcdserver/api/rafthttp"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/pkg/types"
 	"github.com/golang/protobuf/proto"
 
 	"go.uber.org/zap"

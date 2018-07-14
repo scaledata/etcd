@@ -15,9 +15,9 @@
 package mockstorage
 
 import (
-	"github.com/coreos/etcd/pkg/testutil"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 type storageRecorder struct {
@@ -33,12 +33,12 @@ func NewStorageRecorderStream(db string) *storageRecorder {
 	return &storageRecorder{testutil.NewRecorderStream(), db}
 }
 
-func (p *storageRecorder) Save(st raftpb.HardState, ents []raftpb.Entry) error {
+func (p *storageRecorder) Save(st sdraftpb.HardState, ents []sdraftpb.Entry) error {
 	p.Record(testutil.Action{Name: "Save"})
 	return nil
 }
 
-func (p *storageRecorder) SaveSnap(st raftpb.Snapshot) error {
+func (p *storageRecorder) SaveSnap(st sdraftpb.Snapshot) error {
 	if !raft.IsEmptySnap(st) {
 		p.Record(testutil.Action{Name: "SaveSnap"})
 	}

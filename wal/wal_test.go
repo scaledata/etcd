@@ -24,10 +24,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 
 	"go.uber.org/zap"
 )
@@ -65,17 +65,17 @@ func TestNew(t *testing.T) {
 
 	var wb bytes.Buffer
 	e := newEncoder(&wb, 0, 0)
-	err = e.encode(&walpb.Record{Type: crcType, Crc: 0})
+	err = e.encode(&sdwalpb.Record{Type: crcType, Crc: 0})
 	if err != nil {
 		t.Fatalf("err = %v, want nil", err)
 	}
-	err = e.encode(&walpb.Record{Type: metadataType, Data: []byte("somedata")})
+	err = e.encode(&sdwalpb.Record{Type: metadataType, Data: []byte("somedata")})
 	if err != nil {
 		t.Fatalf("err = %v, want nil", err)
 	}
-	r := &walpb.Record{
+	r := &sdwalpb.Record{
 		Type: snapshotType,
-		Data: pbutil.MustMarshal(&walpb.Snapshot{}),
+		Data: pbutil.MustMarshal(&sdwalpb.Snapshot{}),
 	}
 	if err = e.encode(r); err != nil {
 		t.Fatalf("err = %v, want nil", err)
@@ -145,7 +145,7 @@ func TestOpenAtIndex(t *testing.T) {
 	}
 	f.Close()
 
-	w, err := Open(zap.NewExample(), dir, walpb.Snapshot{})
+	w, err := Open(zap.NewExample(), dir, sdwalpb.Snapshot{})
 	if err != nil {
 		t.Fatalf("err = %v, want nil", err)
 	}
@@ -164,7 +164,7 @@ func TestOpenAtIndex(t *testing.T) {
 	}
 	f.Close()
 
-	w, err = Open(zap.NewExample(), dir, walpb.Snapshot{Index: 5})
+	w, err = Open(zap.NewExample(), dir, sdwalpb.Snapshot{Index: 5})
 	if err != nil {
 		t.Fatalf("err = %v, want nil", err)
 	}
@@ -181,7 +181,7 @@ func TestOpenAtIndex(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(emptydir)
-	if _, err = Open(zap.NewExample(), emptydir, walpb.Snapshot{}); err != ErrFileNotFound {
+	if _, err = Open(zap.NewExample(), emptydir, sdwalpb.Snapshot{}); err != ErrFileNotFound {
 		t.Errorf("err = %v, want %v", err, ErrFileNotFound)
 	}
 }
@@ -200,7 +200,7 @@ func TestCut(t *testing.T) {
 	}
 	defer w.Close()
 
-	state := raftpb.HardState{Term: 1}
+	state := sdraftpb.HardState{Term: 1}
 	if err = w.Save(state, nil); err != nil {
 		t.Fatal(err)
 	}
@@ -212,14 +212,14 @@ func TestCut(t *testing.T) {
 		t.Errorf("name = %s, want %s", g, wname)
 	}
 
-	es := []raftpb.Entry{{Index: 1, Term: 1, Data: []byte{1}}}
-	if err = w.Save(raftpb.HardState{}, es); err != nil {
+	es := []sdraftpb.Entry{{Index: 1, Term: 1, Data: []byte{1}}}
+	if err = w.Save(sdraftpb.HardState{}, es); err != nil {
 		t.Fatal(err)
 	}
 	if err = w.cut(); err != nil {
 		t.Fatal(err)
 	}
-	snap := walpb.Snapshot{Index: 2, Term: 1}
+	snap := sdwalpb.Snapshot{Index: 2, Term: 1}
 	if err = w.SaveSnapshot(snap); err != nil {
 		t.Fatal(err)
 	}
@@ -261,7 +261,7 @@ func TestSaveWithCut(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	state := raftpb.HardState{Term: 1}
+	state := sdraftpb.HardState{Term: 1}
 	if err = w.Save(state, nil); err != nil {
 		t.Fatal(err)
 	}
@@ -275,7 +275,7 @@ func TestSaveWithCut(t *testing.T) {
 	defer func() { SegmentSizeBytes = restoreLater }()
 	var index uint64 = 0
 	for totalSize := 0; totalSize < int(SegmentSizeBytes); totalSize += EntrySize {
-		ents := []raftpb.Entry{{Index: index, Term: 1, Data: bigData}}
+		ents := []sdraftpb.Entry{{Index: index, Term: 1, Data: bigData}}
 		if err = w.Save(state, ents); err != nil {
 			t.Fatal(err)
 		}
@@ -284,7 +284,7 @@ func TestSaveWithCut(t *testing.T) {
 
 	w.Close()
 
-	neww, err := Open(zap.NewExample(), p, walpb.Snapshot{})
+	neww, err := Open(zap.NewExample(), p, sdwalpb.Snapshot{})
 	if err != nil {
 		t.Fatalf("err = %v, want nil", err)
 	}
@@ -323,14 +323,14 @@ func TestRecover(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = w.SaveSnapshot(walpb.Snapshot{}); err != nil {
+	if err = w.SaveSnapshot(sdwalpb.Snapshot{}); err != nil {
 		t.Fatal(err)
 	}
-	ents := []raftpb.Entry{{Index: 1, Term: 1, Data: []byte{1}}, {Index: 2, Term: 2, Data: []byte{2}}}
-	if err = w.Save(raftpb.HardState{}, ents); err != nil {
+	ents := []sdraftpb.Entry{{Index: 1, Term: 1, Data: []byte{1}}, {Index: 2, Term: 2, Data: []byte{2}}}
+	if err = w.Save(sdraftpb.HardState{}, ents); err != nil {
 		t.Fatal(err)
 	}
-	sts := []raftpb.HardState{{Term: 1, Vote: 1, Commit: 1}, {Term: 2, Vote: 2, Commit: 2}}
+	sts := []sdraftpb.HardState{{Term: 1, Vote: 1, Commit: 1}, {Term: 2, Vote: 2, Commit: 2}}
 	for _, s := range sts {
 		if err = w.Save(s, nil); err != nil {
 			t.Fatal(err)
@@ -338,7 +338,7 @@ func TestRecover(t *testing.T) {
 	}
 	w.Close()
 
-	if w, err = Open(zap.NewExample(), p, walpb.Snapshot{}); err != nil {
+	if w, err = Open(zap.NewExample(), p, sdwalpb.Snapshot{}); err != nil {
 		t.Fatal(err)
 	}
 	metadata, state, entries, err := w.ReadAll()
@@ -439,11 +439,11 @@ func TestRecoverAfterCut(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i := 0; i < 10; i++ {
-		if err = md.SaveSnapshot(walpb.Snapshot{Index: uint64(i)}); err != nil {
+		if err = md.SaveSnapshot(sdwalpb.Snapshot{Index: uint64(i)}); err != nil {
 			t.Fatal(err)
 		}
-		es := []raftpb.Entry{{Index: uint64(i)}}
-		if err = md.Save(raftpb.HardState{}, es); err != nil {
+		es := []sdraftpb.Entry{{Index: uint64(i)}}
+		if err = md.Save(sdraftpb.HardState{}, es); err != nil {
 			t.Fatal(err)
 		}
 		if err = md.cut(); err != nil {
@@ -457,7 +457,7 @@ func TestRecoverAfterCut(t *testing.T) {
 	}
 
 	for i := 0; i < 10; i++ {
-		w, err := Open(zap.NewExample(), p, walpb.Snapshot{Index: uint64(i)})
+		w, err := Open(zap.NewExample(), p, sdwalpb.Snapshot{Index: uint64(i)})
 		if err != nil {
 			if i <= 4 {
 				if err != ErrFileNotFound {
@@ -496,15 +496,15 @@ func TestOpenAtUncommittedIndex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = w.SaveSnapshot(walpb.Snapshot{}); err != nil {
+	if err = w.SaveSnapshot(sdwalpb.Snapshot{}); err != nil {
 		t.Fatal(err)
 	}
-	if err = w.Save(raftpb.HardState{}, []raftpb.Entry{{Index: 0}}); err != nil {
+	if err = w.Save(sdraftpb.HardState{}, []sdraftpb.Entry{{Index: 0}}); err != nil {
 		t.Fatal(err)
 	}
 	w.Close()
 
-	w, err = Open(zap.NewExample(), p, walpb.Snapshot{})
+	w, err = Open(zap.NewExample(), p, sdwalpb.Snapshot{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -533,8 +533,8 @@ func TestOpenForRead(t *testing.T) {
 	defer w.Close()
 	// make 10 separate files
 	for i := 0; i < 10; i++ {
-		es := []raftpb.Entry{{Index: uint64(i)}}
-		if err = w.Save(raftpb.HardState{}, es); err != nil {
+		es := []sdraftpb.Entry{{Index: uint64(i)}}
+		if err = w.Save(sdraftpb.HardState{}, es); err != nil {
 			t.Fatal(err)
 		}
 		if err = w.cut(); err != nil {
@@ -546,7 +546,7 @@ func TestOpenForRead(t *testing.T) {
 	w.ReleaseLockTo(unlockIndex)
 
 	// All are available for read
-	w2, err := OpenForRead(zap.NewExample(), p, walpb.Snapshot{})
+	w2, err := OpenForRead(zap.NewExample(), p, sdwalpb.Snapshot{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -562,7 +562,7 @@ func TestOpenForRead(t *testing.T) {
 
 func TestSaveEmpty(t *testing.T) {
 	var buf bytes.Buffer
-	var est raftpb.HardState
+	var est sdraftpb.HardState
 	w := WAL{
 		encoder: newEncoder(&buf, 0, 0),
 	}
@@ -599,8 +599,8 @@ func TestReleaseLockTo(t *testing.T) {
 
 	// make 10 separate files
 	for i := 0; i < 10; i++ {
-		es := []raftpb.Entry{{Index: uint64(i)}}
-		if err = w.Save(raftpb.HardState{}, es); err != nil {
+		es := []sdraftpb.Entry{{Index: uint64(i)}}
+		if err = w.Save(sdraftpb.HardState{}, es); err != nil {
 			t.Fatal(err)
 		}
 		if err = w.cut(); err != nil {
@@ -660,8 +660,8 @@ func TestTailWriteNoSlackSpace(t *testing.T) {
 	}
 	// write some entries
 	for i := 1; i <= 5; i++ {
-		es := []raftpb.Entry{{Index: uint64(i), Term: 1, Data: []byte{byte(i)}}}
-		if err = w.Save(raftpb.HardState{Term: 1}, es); err != nil {
+		es := []sdraftpb.Entry{{Index: uint64(i), Term: 1, Data: []byte{byte(i)}}}
+		if err = w.Save(sdraftpb.HardState{Term: 1}, es); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -676,7 +676,7 @@ func TestTailWriteNoSlackSpace(t *testing.T) {
 	w.Close()
 
 	// open, write more
-	w, err = Open(zap.NewExample(), p, walpb.Snapshot{})
+	w, err = Open(zap.NewExample(), p, sdwalpb.Snapshot{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -689,15 +689,15 @@ func TestTailWriteNoSlackSpace(t *testing.T) {
 	}
 	// write more entries
 	for i := 6; i <= 10; i++ {
-		es := []raftpb.Entry{{Index: uint64(i), Term: 1, Data: []byte{byte(i)}}}
-		if err = w.Save(raftpb.HardState{Term: 1}, es); err != nil {
+		es := []sdraftpb.Entry{{Index: uint64(i), Term: 1, Data: []byte{byte(i)}}}
+		if err = w.Save(sdraftpb.HardState{Term: 1}, es); err != nil {
 			t.Fatal(err)
 		}
 	}
 	w.Close()
 
 	// confirm all writes
-	w, err = Open(zap.NewExample(), p, walpb.Snapshot{})
+	w, err = Open(zap.NewExample(), p, sdwalpb.Snapshot{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -737,7 +737,7 @@ func TestRestartCreateWal(t *testing.T) {
 		t.Fatalf("got %q exists, expected it to not exist", tmpdir)
 	}
 
-	if w, err = OpenForRead(zap.NewExample(), p, walpb.Snapshot{}); err != nil {
+	if w, err = OpenForRead(zap.NewExample(), p, sdwalpb.Snapshot{}); err != nil {
 		t.Fatal(err)
 	}
 	defer w.Close()
@@ -771,8 +771,8 @@ func TestOpenOnTornWrite(t *testing.T) {
 	// get offset of end of each saved entry
 	offsets := make([]int64, maxEntries)
 	for i := range offsets {
-		es := []raftpb.Entry{{Index: uint64(i)}}
-		if err = w.Save(raftpb.HardState{}, es); err != nil {
+		es := []sdraftpb.Entry{{Index: uint64(i)}}
+		if err = w.Save(sdraftpb.HardState{}, es); err != nil {
 			t.Fatal(err)
 		}
 		if offsets[i], err = w.tail().Seek(0, io.SeekCurrent); err != nil {
@@ -800,7 +800,7 @@ func TestOpenOnTornWrite(t *testing.T) {
 	}
 	f.Close()
 
-	w, err = Open(zap.NewExample(), p, walpb.Snapshot{})
+	w, err = Open(zap.NewExample(), p, sdwalpb.Snapshot{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -813,15 +813,15 @@ func TestOpenOnTornWrite(t *testing.T) {
 	// write a few entries past the clobbered entry
 	for i := 0; i < overwriteEntries; i++ {
 		// Index is different from old, truncated entries
-		es := []raftpb.Entry{{Index: uint64(i + clobberIdx), Data: []byte("new")}}
-		if err = w.Save(raftpb.HardState{}, es); err != nil {
+		es := []sdraftpb.Entry{{Index: uint64(i + clobberIdx), Data: []byte("new")}}
+		if err = w.Save(sdraftpb.HardState{}, es); err != nil {
 			t.Fatal(err)
 		}
 	}
 	w.Close()
 
 	// read back the entries, confirm number of entries matches expectation
-	w, err = OpenForRead(zap.NewExample(), p, walpb.Snapshot{})
+	w, err = OpenForRead(zap.NewExample(), p, sdwalpb.Snapshot{})
 	if err != nil {
 		t.Fatal(err)
 	}

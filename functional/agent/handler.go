@@ -25,10 +25,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/coreos/etcd/embed"
-	"github.com/coreos/etcd/functional/rpcpb"
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/coreos/etcd/pkg/proxy"
+	"github.com/scaledata/etcd/embed"
+	"github.com/scaledata/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/pkg/proxy"
 
 	"go.uber.org/zap"
 )

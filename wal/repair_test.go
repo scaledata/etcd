@@ -21,8 +21,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 
 	"go.uber.org/zap"
 )
@@ -43,7 +43,7 @@ func TestRepairTruncate(t *testing.T) {
 	testRepair(t, makeEnts(10), corruptf, 9)
 }
 
-func testRepair(t *testing.T, ents [][]raftpb.Entry, corrupt corruptFunc, expectedEnts int) {
+func testRepair(t *testing.T, ents [][]sdraftpb.Entry, corrupt corruptFunc, expectedEnts int) {
 	p, err := ioutil.TempDir(os.TempDir(), "waltest")
 	if err != nil {
 		t.Fatal(err)
@@ -62,7 +62,7 @@ func testRepair(t *testing.T, ents [][]raftpb.Entry, corrupt corruptFunc, expect
 	}
 
 	for _, es := range ents {
-		if err = w.Save(raftpb.HardState{}, es); err != nil {
+		if err = w.Save(sdraftpb.HardState{}, es); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -79,7 +79,7 @@ func testRepair(t *testing.T, ents [][]raftpb.Entry, corrupt corruptFunc, expect
 	}
 
 	// verify we broke the wal
-	w, err = Open(zap.NewExample(), p, walpb.Snapshot{})
+	w, err = Open(zap.NewExample(), p, sdwalpb.Snapshot{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +95,7 @@ func testRepair(t *testing.T, ents [][]raftpb.Entry, corrupt corruptFunc, expect
 	}
 
 	// read it back
-	w, err = Open(zap.NewExample(), p, walpb.Snapshot{})
+	w, err = Open(zap.NewExample(), p, sdwalpb.Snapshot{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,15 +109,15 @@ func testRepair(t *testing.T, ents [][]raftpb.Entry, corrupt corruptFunc, expect
 
 	// write some more entries to repaired log
 	for i := 1; i <= 10; i++ {
-		es := []raftpb.Entry{{Index: uint64(expectedEnts + i)}}
-		if err = w.Save(raftpb.HardState{}, es); err != nil {
+		es := []sdraftpb.Entry{{Index: uint64(expectedEnts + i)}}
+		if err = w.Save(sdraftpb.HardState{}, es); err != nil {
 			t.Fatal(err)
 		}
 	}
 	w.Close()
 
 	// read back entries following repair, ensure it's all there
-	w, err = Open(zap.NewExample(), p, walpb.Snapshot{})
+	w, err = Open(zap.NewExample(), p, sdwalpb.Snapshot{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,9 +130,9 @@ func testRepair(t *testing.T, ents [][]raftpb.Entry, corrupt corruptFunc, expect
 	}
 }
 
-func makeEnts(ents int) (ret [][]raftpb.Entry) {
+func makeEnts(ents int) (ret [][]sdraftpb.Entry) {
 	for i := 1; i <= ents; i++ {
-		ret = append(ret, []raftpb.Entry{{Index: uint64(i)}})
+		ret = append(ret, []sdraftpb.Entry{{Index: uint64(i)}})
 	}
 	return ret
 }
@@ -204,7 +204,7 @@ func TestRepairFailDeleteDir(t *testing.T) {
 		SegmentSizeBytes = oldSegmentSizeBytes
 	}()
 	for _, es := range makeEnts(50) {
-		if err = w.Save(raftpb.HardState{}, es); err != nil {
+		if err = w.Save(sdraftpb.HardState{}, es); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -224,7 +224,7 @@ func TestRepairFailDeleteDir(t *testing.T) {
 	}
 	f.Close()
 
-	w, err = Open(zap.NewExample(), p, walpb.Snapshot{})
+	w, err = Open(zap.NewExample(), p, sdwalpb.Snapshot{})
 	if err != nil {
 		t.Fatal(err)
 	}

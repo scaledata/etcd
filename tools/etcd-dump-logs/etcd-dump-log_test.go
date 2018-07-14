@@ -24,12 +24,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coreos/etcd/auth/authpb"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/wal"
+	"github.com/scaledata/etcd/auth/sdauthpb"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/wal"
 	"go.uber.org/zap"
 )
 
@@ -72,7 +72,7 @@ func TestEtcdDumpLogEntryType(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ents := make([]raftpb.Entry, 0)
+	ents := make([]sdraftpb.Entry, 0)
 
 	// append entries into wal log
 	appendConfigChangeEnts(&ents)
@@ -81,7 +81,7 @@ func TestEtcdDumpLogEntryType(t *testing.T) {
 	appendUnknownNormalEnts(&ents)
 
 	// force commit newly appended entries
-	err = w.Save(raftpb.HardState{}, ents)
+	err = w.Save(sdraftpb.HardState{}, ents)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,27 +135,27 @@ func TestEtcdDumpLogEntryType(t *testing.T) {
 
 }
 
-func appendConfigChangeEnts(ents *[]raftpb.Entry) {
-	configChangeData := []raftpb.ConfChange{
-		{ID: 1, Type: raftpb.ConfChangeAddNode, NodeID: 2, Context: []byte("")},
-		{ID: 2, Type: raftpb.ConfChangeRemoveNode, NodeID: 2, Context: []byte("")},
-		{ID: 3, Type: raftpb.ConfChangeUpdateNode, NodeID: 2, Context: []byte("")},
-		{ID: 4, Type: raftpb.ConfChangeAddLearnerNode, NodeID: 3, Context: []byte("")},
+func appendConfigChangeEnts(ents *[]sdraftpb.Entry) {
+	configChangeData := []sdraftpb.ConfChange{
+		{ID: 1, Type: sdraftpb.ConfChangeAddNode, NodeID: 2, Context: []byte("")},
+		{ID: 2, Type: sdraftpb.ConfChangeRemoveNode, NodeID: 2, Context: []byte("")},
+		{ID: 3, Type: sdraftpb.ConfChangeUpdateNode, NodeID: 2, Context: []byte("")},
+		{ID: 4, Type: sdraftpb.ConfChangeAddLearnerNode, NodeID: 3, Context: []byte("")},
 	}
-	configChangeEntries := []raftpb.Entry{
-		{Term: 1, Index: 1, Type: raftpb.EntryConfChange, Data: pbutil.MustMarshal(&configChangeData[0])},
-		{Term: 2, Index: 2, Type: raftpb.EntryConfChange, Data: pbutil.MustMarshal(&configChangeData[1])},
-		{Term: 2, Index: 3, Type: raftpb.EntryConfChange, Data: pbutil.MustMarshal(&configChangeData[2])},
-		{Term: 2, Index: 4, Type: raftpb.EntryConfChange, Data: pbutil.MustMarshal(&configChangeData[3])},
+	configChangeEntries := []sdraftpb.Entry{
+		{Term: 1, Index: 1, Type: sdraftpb.EntryConfChange, Data: pbutil.MustMarshal(&configChangeData[0])},
+		{Term: 2, Index: 2, Type: sdraftpb.EntryConfChange, Data: pbutil.MustMarshal(&configChangeData[1])},
+		{Term: 2, Index: 3, Type: sdraftpb.EntryConfChange, Data: pbutil.MustMarshal(&configChangeData[2])},
+		{Term: 2, Index: 4, Type: sdraftpb.EntryConfChange, Data: pbutil.MustMarshal(&configChangeData[3])},
 	}
 	*ents = append(*ents, configChangeEntries...)
 }
 
-func appendNormalRequestEnts(ents *[]raftpb.Entry) {
+func appendNormalRequestEnts(ents *[]sdraftpb.Entry) {
 	a := true
 	b := false
 
-	requests := []etcdserverpb.Request{
+	requests := []sdetcdserverpb.Request{
 		{ID: 0, Method: "", Path: "/path0", Val: "{\"hey\":\"ho\",\"hi\":[\"yo\"]}", Dir: true, PrevValue: "", PrevIndex: 0, PrevExist: &b, Expiration: 9, Wait: false, Since: 1, Recursive: false, Sorted: false, Quorum: false, Time: 1, Stream: false, Refresh: &b},
 		{ID: 1, Method: "QGET", Path: "/path1", Val: "{\"0\":\"1\",\"2\":[\"3\"]}", Dir: false, PrevValue: "", PrevIndex: 0, PrevExist: &b, Expiration: 9, Wait: false, Since: 1, Recursive: false, Sorted: false, Quorum: false, Time: 1, Stream: false, Refresh: &b},
 		{ID: 2, Method: "SYNC", Path: "/path2", Val: "{\"0\":\"1\",\"2\":[\"3\"]}", Dir: false, PrevValue: "", PrevIndex: 0, PrevExist: &b, Expiration: 2, Wait: false, Since: 1, Recursive: false, Sorted: false, Quorum: false, Time: 1, Stream: false, Refresh: &b},
@@ -164,78 +164,78 @@ func appendNormalRequestEnts(ents *[]raftpb.Entry) {
 	}
 
 	for i, request := range requests {
-		var currentry raftpb.Entry
+		var currentry sdraftpb.Entry
 		currentry.Term = 3
 		currentry.Index = uint64(i + 5)
-		currentry.Type = raftpb.EntryNormal
+		currentry.Type = sdraftpb.EntryNormal
 		currentry.Data = pbutil.MustMarshal(&request)
 		*ents = append(*ents, currentry)
 	}
 }
 
-func appendNormalIRREnts(ents *[]raftpb.Entry) {
-	irrrange := &etcdserverpb.RangeRequest{Key: []byte("1"), RangeEnd: []byte("hi"), Limit: 6, Revision: 1, SortOrder: 1, SortTarget: 0, Serializable: false, KeysOnly: false, CountOnly: false, MinModRevision: 0, MaxModRevision: 20000, MinCreateRevision: 0, MaxCreateRevision: 20000}
+func appendNormalIRREnts(ents *[]sdraftpb.Entry) {
+	irrrange := &sdetcdserverpb.RangeRequest{Key: []byte("1"), RangeEnd: []byte("hi"), Limit: 6, Revision: 1, SortOrder: 1, SortTarget: 0, Serializable: false, KeysOnly: false, CountOnly: false, MinModRevision: 0, MaxModRevision: 20000, MinCreateRevision: 0, MaxCreateRevision: 20000}
 
-	irrput := &etcdserverpb.PutRequest{Key: []byte("foo1"), Value: []byte("bar1"), Lease: 1, PrevKv: false, IgnoreValue: false, IgnoreLease: true}
+	irrput := &sdetcdserverpb.PutRequest{Key: []byte("foo1"), Value: []byte("bar1"), Lease: 1, PrevKv: false, IgnoreValue: false, IgnoreLease: true}
 
-	irrdeleterange := &etcdserverpb.DeleteRangeRequest{Key: []byte("0"), RangeEnd: []byte("9"), PrevKv: true}
+	irrdeleterange := &sdetcdserverpb.DeleteRangeRequest{Key: []byte("0"), RangeEnd: []byte("9"), PrevKv: true}
 
-	delInRangeReq := &etcdserverpb.RequestOp{Request: &etcdserverpb.RequestOp_RequestDeleteRange{
-		RequestDeleteRange: &etcdserverpb.DeleteRangeRequest{
+	delInRangeReq := &sdetcdserverpb.RequestOp{Request: &sdetcdserverpb.RequestOp_RequestDeleteRange{
+		RequestDeleteRange: &sdetcdserverpb.DeleteRangeRequest{
 			Key: []byte("a"), RangeEnd: []byte("b"),
 		},
 	},
 	}
 
-	irrtxn := &etcdserverpb.TxnRequest{Success: []*etcdserverpb.RequestOp{delInRangeReq}, Failure: []*etcdserverpb.RequestOp{delInRangeReq}}
+	irrtxn := &sdetcdserverpb.TxnRequest{Success: []*sdetcdserverpb.RequestOp{delInRangeReq}, Failure: []*sdetcdserverpb.RequestOp{delInRangeReq}}
 
-	irrcompaction := &etcdserverpb.CompactionRequest{Revision: 0, Physical: true}
+	irrcompaction := &sdetcdserverpb.CompactionRequest{Revision: 0, Physical: true}
 
-	irrleasegrant := &etcdserverpb.LeaseGrantRequest{TTL: 1, ID: 1}
+	irrleasegrant := &sdetcdserverpb.LeaseGrantRequest{TTL: 1, ID: 1}
 
-	irrleaserevoke := &etcdserverpb.LeaseRevokeRequest{ID: 2}
+	irrleaserevoke := &sdetcdserverpb.LeaseRevokeRequest{ID: 2}
 
-	irralarm := &etcdserverpb.AlarmRequest{Action: 3, MemberID: 4, Alarm: 5}
+	irralarm := &sdetcdserverpb.AlarmRequest{Action: 3, MemberID: 4, Alarm: 5}
 
-	irrauthenable := &etcdserverpb.AuthEnableRequest{}
+	irrauthenable := &sdetcdserverpb.AuthEnableRequest{}
 
-	irrauthdisable := &etcdserverpb.AuthDisableRequest{}
+	irrauthdisable := &sdetcdserverpb.AuthDisableRequest{}
 
-	irrauthenticate := &etcdserverpb.InternalAuthenticateRequest{Name: "myname", Password: "password", SimpleToken: "token"}
+	irrauthenticate := &sdetcdserverpb.InternalAuthenticateRequest{Name: "myname", Password: "password", SimpleToken: "token"}
 
-	irrauthuseradd := &etcdserverpb.AuthUserAddRequest{Name: "name1", Password: "pass1"}
+	irrauthuseradd := &sdetcdserverpb.AuthUserAddRequest{Name: "name1", Password: "pass1"}
 
-	irrauthuserdelete := &etcdserverpb.AuthUserDeleteRequest{Name: "name1"}
+	irrauthuserdelete := &sdetcdserverpb.AuthUserDeleteRequest{Name: "name1"}
 
-	irrauthuserget := &etcdserverpb.AuthUserGetRequest{Name: "name1"}
+	irrauthuserget := &sdetcdserverpb.AuthUserGetRequest{Name: "name1"}
 
-	irrauthuserchangepassword := &etcdserverpb.AuthUserChangePasswordRequest{Name: "name1", Password: "pass2"}
+	irrauthuserchangepassword := &sdetcdserverpb.AuthUserChangePasswordRequest{Name: "name1", Password: "pass2"}
 
-	irrauthusergrantrole := &etcdserverpb.AuthUserGrantRoleRequest{User: "user1", Role: "role1"}
+	irrauthusergrantrole := &sdetcdserverpb.AuthUserGrantRoleRequest{User: "user1", Role: "role1"}
 
-	irrauthuserrevokerole := &etcdserverpb.AuthUserRevokeRoleRequest{Name: "user2", Role: "role2"}
+	irrauthuserrevokerole := &sdetcdserverpb.AuthUserRevokeRoleRequest{Name: "user2", Role: "role2"}
 
-	irrauthuserlist := &etcdserverpb.AuthUserListRequest{}
+	irrauthuserlist := &sdetcdserverpb.AuthUserListRequest{}
 
-	irrauthrolelist := &etcdserverpb.AuthRoleListRequest{}
+	irrauthrolelist := &sdetcdserverpb.AuthRoleListRequest{}
 
-	irrauthroleadd := &etcdserverpb.AuthRoleAddRequest{Name: "role2"}
+	irrauthroleadd := &sdetcdserverpb.AuthRoleAddRequest{Name: "role2"}
 
-	irrauthroledelete := &etcdserverpb.AuthRoleDeleteRequest{Role: "role1"}
+	irrauthroledelete := &sdetcdserverpb.AuthRoleDeleteRequest{Role: "role1"}
 
-	irrauthroleget := &etcdserverpb.AuthRoleGetRequest{Role: "role3"}
+	irrauthroleget := &sdetcdserverpb.AuthRoleGetRequest{Role: "role3"}
 
-	perm := &authpb.Permission{
-		PermType: authpb.WRITE,
+	perm := &sdauthpb.Permission{
+		PermType: sdauthpb.WRITE,
 		Key:      []byte("Keys"),
 		RangeEnd: []byte("RangeEnd"),
 	}
 
-	irrauthrolegrantpermission := &etcdserverpb.AuthRoleGrantPermissionRequest{Name: "role3", Perm: perm}
+	irrauthrolegrantpermission := &sdetcdserverpb.AuthRoleGrantPermissionRequest{Name: "role3", Perm: perm}
 
-	irrauthrolerevokepermission := &etcdserverpb.AuthRoleRevokePermissionRequest{Role: "role3", Key: []byte("key"), RangeEnd: []byte("rangeend")}
+	irrauthrolerevokepermission := &sdetcdserverpb.AuthRoleRevokePermissionRequest{Role: "role3", Key: []byte("key"), RangeEnd: []byte("rangeend")}
 
-	irrs := []etcdserverpb.InternalRaftRequest{
+	irrs := []sdetcdserverpb.InternalRaftRequest{
 		{ID: 5, Range: irrrange},
 		{ID: 6, Put: irrput},
 		{ID: 7, DeleteRange: irrdeleterange},
@@ -263,20 +263,20 @@ func appendNormalIRREnts(ents *[]raftpb.Entry) {
 	}
 
 	for i, irr := range irrs {
-		var currentry raftpb.Entry
+		var currentry sdraftpb.Entry
 		currentry.Term = uint64(i + 4)
 		currentry.Index = uint64(i + 10)
-		currentry.Type = raftpb.EntryNormal
+		currentry.Type = sdraftpb.EntryNormal
 		currentry.Data = pbutil.MustMarshal(&irr)
 		*ents = append(*ents, currentry)
 	}
 }
 
-func appendUnknownNormalEnts(ents *[]raftpb.Entry) {
-	var currentry raftpb.Entry
+func appendUnknownNormalEnts(ents *[]sdraftpb.Entry) {
+	var currentry sdraftpb.Entry
 	currentry.Term = 27
 	currentry.Index = 34
-	currentry.Type = raftpb.EntryNormal
+	currentry.Type = sdraftpb.EntryNormal
 	currentry.Data = []byte("?")
 	*ents = append(*ents, currentry)
 }

@@ -23,11 +23,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	"github.com/coreos/etcd/integration"
-	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/coreos/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc/rpctypes"
+	"github.com/scaledata/etcd/integration"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
+	"github.com/scaledata/etcd/pkg/testutil"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -242,7 +242,7 @@ func TestKVRange(t *testing.T) {
 		rev        int64
 		opts       []clientv3.OpOption
 
-		wantSet []*mvccpb.KeyValue
+		wantSet []*sdmvccpb.KeyValue
 	}{
 		// range first two
 		{
@@ -250,7 +250,7 @@ func TestKVRange(t *testing.T) {
 			0,
 			nil,
 
-			[]*mvccpb.KeyValue{
+			[]*sdmvccpb.KeyValue{
 				{Key: []byte("a"), Value: nil, CreateRevision: 2, ModRevision: 2, Version: 1},
 				{Key: []byte("b"), Value: nil, CreateRevision: 3, ModRevision: 3, Version: 1},
 			},
@@ -261,7 +261,7 @@ func TestKVRange(t *testing.T) {
 			0,
 			[]clientv3.OpOption{clientv3.WithSerializable()},
 
-			[]*mvccpb.KeyValue{
+			[]*sdmvccpb.KeyValue{
 				{Key: []byte("a"), Value: nil, CreateRevision: 2, ModRevision: 2, Version: 1},
 				{Key: []byte("b"), Value: nil, CreateRevision: 3, ModRevision: 3, Version: 1},
 			},
@@ -272,7 +272,7 @@ func TestKVRange(t *testing.T) {
 			2,
 			nil,
 
-			[]*mvccpb.KeyValue{
+			[]*sdmvccpb.KeyValue{
 				{Key: []byte("a"), Value: nil, CreateRevision: 2, ModRevision: 2, Version: 1},
 			},
 		},
@@ -290,7 +290,7 @@ func TestKVRange(t *testing.T) {
 			0,
 			[]clientv3.OpOption{clientv3.WithSort(clientv3.SortByKey, clientv3.SortAscend)},
 
-			[]*mvccpb.KeyValue{
+			[]*sdmvccpb.KeyValue{
 				{Key: []byte("a"), Value: nil, CreateRevision: 2, ModRevision: 2, Version: 1},
 				{Key: []byte("b"), Value: nil, CreateRevision: 3, ModRevision: 3, Version: 1},
 				{Key: []byte("c"), Value: nil, CreateRevision: 4, ModRevision: 6, Version: 3},
@@ -305,7 +305,7 @@ func TestKVRange(t *testing.T) {
 			0,
 			[]clientv3.OpOption{clientv3.WithSort(clientv3.SortByKey, clientv3.SortNone)},
 
-			[]*mvccpb.KeyValue{
+			[]*sdmvccpb.KeyValue{
 				{Key: []byte("a"), Value: nil, CreateRevision: 2, ModRevision: 2, Version: 1},
 				{Key: []byte("b"), Value: nil, CreateRevision: 3, ModRevision: 3, Version: 1},
 				{Key: []byte("c"), Value: nil, CreateRevision: 4, ModRevision: 6, Version: 3},
@@ -320,7 +320,7 @@ func TestKVRange(t *testing.T) {
 			0,
 			[]clientv3.OpOption{clientv3.WithSort(clientv3.SortByCreateRevision, clientv3.SortDescend)},
 
-			[]*mvccpb.KeyValue{
+			[]*sdmvccpb.KeyValue{
 				{Key: []byte("fop"), Value: nil, CreateRevision: 9, ModRevision: 9, Version: 1},
 				{Key: []byte("foo/abc"), Value: nil, CreateRevision: 8, ModRevision: 8, Version: 1},
 				{Key: []byte("foo"), Value: nil, CreateRevision: 7, ModRevision: 7, Version: 1},
@@ -335,7 +335,7 @@ func TestKVRange(t *testing.T) {
 			0,
 			[]clientv3.OpOption{clientv3.WithSort(clientv3.SortByCreateRevision, clientv3.SortNone)},
 
-			[]*mvccpb.KeyValue{
+			[]*sdmvccpb.KeyValue{
 				{Key: []byte("a"), Value: nil, CreateRevision: 2, ModRevision: 2, Version: 1},
 				{Key: []byte("b"), Value: nil, CreateRevision: 3, ModRevision: 3, Version: 1},
 				{Key: []byte("c"), Value: nil, CreateRevision: 4, ModRevision: 6, Version: 3},
@@ -350,7 +350,7 @@ func TestKVRange(t *testing.T) {
 			0,
 			[]clientv3.OpOption{clientv3.WithSort(clientv3.SortByModRevision, clientv3.SortDescend)},
 
-			[]*mvccpb.KeyValue{
+			[]*sdmvccpb.KeyValue{
 				{Key: []byte("fop"), Value: nil, CreateRevision: 9, ModRevision: 9, Version: 1},
 				{Key: []byte("foo/abc"), Value: nil, CreateRevision: 8, ModRevision: 8, Version: 1},
 				{Key: []byte("foo"), Value: nil, CreateRevision: 7, ModRevision: 7, Version: 1},
@@ -365,7 +365,7 @@ func TestKVRange(t *testing.T) {
 			0,
 			[]clientv3.OpOption{clientv3.WithPrefix()},
 
-			[]*mvccpb.KeyValue{
+			[]*sdmvccpb.KeyValue{
 				{Key: []byte("foo"), Value: nil, CreateRevision: 7, ModRevision: 7, Version: 1},
 				{Key: []byte("foo/abc"), Value: nil, CreateRevision: 8, ModRevision: 8, Version: 1},
 			},
@@ -376,7 +376,7 @@ func TestKVRange(t *testing.T) {
 			0,
 			[]clientv3.OpOption{clientv3.WithFromKey()},
 
-			[]*mvccpb.KeyValue{
+			[]*sdmvccpb.KeyValue{
 				{Key: []byte("foo"), Value: nil, CreateRevision: 7, ModRevision: 7, Version: 1},
 				{Key: []byte("foo/abc"), Value: nil, CreateRevision: 8, ModRevision: 8, Version: 1},
 				{Key: []byte("fop"), Value: nil, CreateRevision: 9, ModRevision: 9, Version: 1},
@@ -388,7 +388,7 @@ func TestKVRange(t *testing.T) {
 			0,
 			[]clientv3.OpOption{clientv3.WithFromKey(), clientv3.WithSort(clientv3.SortByKey, clientv3.SortAscend)},
 
-			[]*mvccpb.KeyValue{
+			[]*sdmvccpb.KeyValue{
 				{Key: []byte("a"), Value: nil, CreateRevision: 2, ModRevision: 2, Version: 1},
 				{Key: []byte("b"), Value: nil, CreateRevision: 3, ModRevision: 3, Version: 1},
 				{Key: []byte("c"), Value: nil, CreateRevision: 4, ModRevision: 6, Version: 3},
@@ -403,7 +403,7 @@ func TestKVRange(t *testing.T) {
 			0,
 			[]clientv3.OpOption{clientv3.WithPrefix(), clientv3.WithSort(clientv3.SortByKey, clientv3.SortAscend)},
 
-			[]*mvccpb.KeyValue{
+			[]*sdmvccpb.KeyValue{
 				{Key: []byte("a"), Value: nil, CreateRevision: 2, ModRevision: 2, Version: 1},
 				{Key: []byte("b"), Value: nil, CreateRevision: 3, ModRevision: 3, Version: 1},
 				{Key: []byte("c"), Value: nil, CreateRevision: 4, ModRevision: 6, Version: 3},
@@ -691,7 +691,7 @@ func TestKVGetRetry(t *testing.T) {
 		if gerr != nil {
 			t.Fatal(gerr)
 		}
-		wkvs := []*mvccpb.KeyValue{
+		wkvs := []*sdmvccpb.KeyValue{
 			{
 				Key:            []byte("foo"),
 				Value:          []byte("bar"),

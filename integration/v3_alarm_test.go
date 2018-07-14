@@ -22,11 +22,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/mvcc"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc/rpctypes"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/mvcc"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/pkg/testutil"
 
 	"go.uber.org/zap"
 )

@@ -22,10 +22,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/embed"
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/embed"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/pkg/testutil"
 )
 
 // TestSnapshotV3RestoreMultiMemberAdd ensures that multiple members

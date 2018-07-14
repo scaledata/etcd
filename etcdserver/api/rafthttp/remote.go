@@ -15,8 +15,8 @@
 package rafthttp
 
 import (
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 
 	"go.uber.org/zap"
 )
@@ -51,7 +51,7 @@ func startRemote(tr *Transport, urls types.URLs, id types.ID) *remote {
 	}
 }
 
-func (g *remote) send(m raftpb.Message) {
+func (g *remote) send(m sdraftpb.Message) {
 	select {
 	case g.pipeline.msgc <- m:
 	default:

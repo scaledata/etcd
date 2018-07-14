@@ -25,8 +25,8 @@ import (
 	"strings"
 	"time"
 
-	v3 "github.com/coreos/etcd/clientv3"
-	pb "github.com/coreos/etcd/mvcc/mvccpb"
+	v3 "github.com/scaledata/etcd/clientv3"
+	pb "github.com/scaledata/etcd/mvcc/sdmvccpb"
 
 	"github.com/spf13/cobra"
 )

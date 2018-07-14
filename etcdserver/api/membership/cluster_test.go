@@ -21,11 +21,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coreos/etcd/etcdserver/api/v2store"
-	"github.com/coreos/etcd/pkg/mock/mockstore"
-	"github.com/coreos/etcd/pkg/testutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/etcdserver/api/v2store"
+	"github.com/scaledata/etcd/pkg/mock/mockstore"
+	"github.com/scaledata/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 
 	"go.uber.org/zap"
 )
@@ -309,63 +309,63 @@ func TestClusterValidateConfigurationChange(t *testing.T) {
 	}
 
 	tests := []struct {
-		cc   raftpb.ConfChange
+		cc   sdraftpb.ConfChange
 		werr error
 	}{
 		{
-			raftpb.ConfChange{
-				Type:   raftpb.ConfChangeRemoveNode,
+			sdraftpb.ConfChange{
+				Type:   sdraftpb.ConfChangeRemoveNode,
 				NodeID: 3,
 			},
 			nil,
 		},
 		{
-			raftpb.ConfChange{
-				Type:   raftpb.ConfChangeAddNode,
+			sdraftpb.ConfChange{
+				Type:   sdraftpb.ConfChangeAddNode,
 				NodeID: 4,
 			},
 			ErrIDRemoved,
 		},
 		{
-			raftpb.ConfChange{
-				Type:   raftpb.ConfChangeRemoveNode,
+			sdraftpb.ConfChange{
+				Type:   sdraftpb.ConfChangeRemoveNode,
 				NodeID: 4,
 			},
 			ErrIDRemoved,
 		},
 		{
-			raftpb.ConfChange{
-				Type:   raftpb.ConfChangeAddNode,
+			sdraftpb.ConfChange{
+				Type:   sdraftpb.ConfChangeAddNode,
 				NodeID: 1,
 			},
 			ErrIDExists,
 		},
 		{
-			raftpb.ConfChange{
-				Type:    raftpb.ConfChangeAddNode,
+			sdraftpb.ConfChange{
+				Type:    sdraftpb.ConfChangeAddNode,
 				NodeID:  5,
 				Context: ctx,
 			},
 			ErrPeerURLexists,
 		},
 		{
-			raftpb.ConfChange{
-				Type:   raftpb.ConfChangeRemoveNode,
+			sdraftpb.ConfChange{
+				Type:   sdraftpb.ConfChangeRemoveNode,
 				NodeID: 5,
 			},
 			ErrIDNotFound,
 		},
 		{
-			raftpb.ConfChange{
-				Type:    raftpb.ConfChangeAddNode,
+			sdraftpb.ConfChange{
+				Type:    sdraftpb.ConfChangeAddNode,
 				NodeID:  5,
 				Context: ctx5,
 			},
 			nil,
 		},
 		{
-			raftpb.ConfChange{
-				Type:    raftpb.ConfChangeUpdateNode,
+			sdraftpb.ConfChange{
+				Type:    sdraftpb.ConfChangeUpdateNode,
 				NodeID:  5,
 				Context: ctx,
 			},
@@ -373,16 +373,16 @@ func TestClusterValidateConfigurationChange(t *testing.T) {
 		},
 		// try to change the peer url of 2 to the peer url of 3
 		{
-			raftpb.ConfChange{
-				Type:    raftpb.ConfChangeUpdateNode,
+			sdraftpb.ConfChange{
+				Type:    sdraftpb.ConfChangeUpdateNode,
 				NodeID:  2,
 				Context: ctx2to3,
 			},
 			ErrPeerURLexists,
 		},
 		{
-			raftpb.ConfChange{
-				Type:    raftpb.ConfChangeUpdateNode,
+			sdraftpb.ConfChange{
+				Type:    sdraftpb.ConfChangeUpdateNode,
 				NodeID:  2,
 				Context: ctx2to5,
 			},

@@ -20,9 +20,9 @@ import (
 
 	"net/http"
 
-	"github.com/coreos/etcd/etcdserver/api/v2error"
-	"github.com/coreos/etcd/etcdserver/api/v2http/httptypes"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
+	"github.com/scaledata/etcd/etcdserver/api/v2error"
+	"github.com/scaledata/etcd/etcdserver/api/v2http/httptypes"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -63,21 +63,21 @@ func init() {
 	prometheus.MustRegister(successfulEventsHandlingSec)
 }
 
-func reportRequestReceived(request etcdserverpb.Request) {
+func reportRequestReceived(request sdetcdserverpb.Request) {
 	incomingEvents.WithLabelValues(methodFromRequest(request)).Inc()
 }
 
-func reportRequestCompleted(request etcdserverpb.Request, startTime time.Time) {
+func reportRequestCompleted(request sdetcdserverpb.Request, startTime time.Time) {
 	method := methodFromRequest(request)
 	successfulEventsHandlingSec.WithLabelValues(method).Observe(time.Since(startTime).Seconds())
 }
 
-func reportRequestFailed(request etcdserverpb.Request, err error) {
+func reportRequestFailed(request sdetcdserverpb.Request, err error) {
 	method := methodFromRequest(request)
 	failedEvents.WithLabelValues(method, strconv.Itoa(codeFromError(err))).Inc()
 }
 
-func methodFromRequest(request etcdserverpb.Request) string {
+func methodFromRequest(request sdetcdserverpb.Request) string {
 	if request.Method == "GET" && request.Quorum {
 		return "QGET"
 	}

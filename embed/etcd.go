@@ -29,18 +29,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/api/etcdhttp"
-	"github.com/coreos/etcd/etcdserver/api/rafthttp"
-	"github.com/coreos/etcd/etcdserver/api/v2http"
-	"github.com/coreos/etcd/etcdserver/api/v2v3"
-	"github.com/coreos/etcd/etcdserver/api/v3client"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc"
-	"github.com/coreos/etcd/pkg/debugutil"
-	runtimeutil "github.com/coreos/etcd/pkg/runtime"
-	"github.com/coreos/etcd/pkg/transport"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/version"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/api/etcdhttp"
+	"github.com/scaledata/etcd/etcdserver/api/rafthttp"
+	"github.com/scaledata/etcd/etcdserver/api/v2http"
+	"github.com/scaledata/etcd/etcdserver/api/v2v3"
+	"github.com/scaledata/etcd/etcdserver/api/v3client"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc"
+	"github.com/scaledata/etcd/pkg/debugutil"
+	runtimeutil "github.com/scaledata/etcd/pkg/runtime"
+	"github.com/scaledata/etcd/pkg/transport"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/version"
 
 	"github.com/coreos/pkg/capnslog"
 	"github.com/grpc-ecosystem/go-grpc-prometheus"
@@ -50,7 +50,7 @@ import (
 	"google.golang.org/grpc/keepalive"
 )
 
-var plog = capnslog.NewPackageLogger("github.com/coreos/etcd", "embed")
+var plog = capnslog.NewPackageLogger("github.com/scaledata/etcd", "embed")
 
 const (
 	// internal fd usage includes disk usage and transport usage.
@@ -412,7 +412,7 @@ func stopServers(ctx context.Context, ss *servers) {
 
 	// do not grpc.Server.GracefulStop with TLS enabled etcd server
 	// See https://github.com/grpc/grpc-go/issues/1384#issuecomment-317124531
-	// and https://github.com/coreos/etcd/issues/8916
+	// and https://github.com/scaledata/etcd/issues/8916
 	if ss.secure {
 		shutdownNow()
 		return

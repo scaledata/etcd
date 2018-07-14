@@ -15,9 +15,9 @@
 package mvcc
 
 import (
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 	"go.uber.org/zap"
 )
 
@@ -56,7 +56,7 @@ type storeTxnWrite struct {
 	tx backend.BatchTx
 	// beginRev is the revision where the txn begins; it will write to the next revision.
 	beginRev int64
-	changes  []mvccpb.KeyValue
+	changes  []sdmvccpb.KeyValue
 }
 
 func (s *store) Write() TxnWrite {
@@ -67,7 +67,7 @@ func (s *store) Write() TxnWrite {
 		storeTxnRead: storeTxnRead{s, tx, 0, 0},
 		tx:           tx,
 		beginRev:     s.currentRev,
-		changes:      make([]mvccpb.KeyValue, 0, 4),
+		changes:      make([]sdmvccpb.KeyValue, 0, 4),
 	}
 	return newMetricsTxnWrite(tw)
 }
@@ -134,7 +134,7 @@ func (tr *storeTxnRead) rangeKeys(key, end []byte, curRev int64, ro RangeOptions
 		limit = len(revpairs)
 	}
 
-	kvs := make([]mvccpb.KeyValue, limit)
+	kvs := make([]sdmvccpb.KeyValue, limit)
 	revBytes := newRevBytes()
 	for i, revpair := range revpairs[:len(kvs)] {
 		revToBytes(revpair, revBytes)
@@ -153,7 +153,7 @@ func (tr *storeTxnRead) rangeKeys(key, end []byte, curRev int64, ro RangeOptions
 		if err := kvs[i].Unmarshal(vs[0]); err != nil {
 			if tr.s.lg != nil {
 				tr.s.lg.Fatal(
-					"failed to unmarshal mvccpb.KeyValue",
+					"failed to unmarshal sdmvccpb.KeyValue",
 					zap.Error(err),
 				)
 			} else {
@@ -182,7 +182,7 @@ func (tw *storeTxnWrite) put(key, value []byte, leaseID lease.LeaseID) {
 	revToBytes(idxRev, ibytes)
 
 	ver = ver + 1
-	kv := mvccpb.KeyValue{
+	kv := sdmvccpb.KeyValue{
 		Key:            key,
 		Value:          value,
 		CreateRevision: c,
@@ -195,7 +195,7 @@ func (tw *storeTxnWrite) put(key, value []byte, leaseID lease.LeaseID) {
 	if err != nil {
 		if tw.storeTxnRead.s.lg != nil {
 			tw.storeTxnRead.s.lg.Fatal(
-				"failed to marshal mvccpb.KeyValue",
+				"failed to marshal sdmvccpb.KeyValue",
 				zap.Error(err),
 			)
 		} else {
@@ -261,13 +261,13 @@ func (tw *storeTxnWrite) delete(key []byte) {
 		ibytes = appendMarkTombstone(nil, ibytes)
 	}
 
-	kv := mvccpb.KeyValue{Key: key}
+	kv := sdmvccpb.KeyValue{Key: key}
 
 	d, err := kv.Marshal()
 	if err != nil {
 		if tw.storeTxnRead.s.lg != nil {
 			tw.storeTxnRead.s.lg.Fatal(
-				"failed to marshal mvccpb.KeyValue",
+				"failed to marshal sdmvccpb.KeyValue",
 				zap.Error(err),
 			)
 		} else {
@@ -308,4 +308,4 @@ func (tw *storeTxnWrite) delete(key []byte) {
 	}
 }
 
-func (tw *storeTxnWrite) Changes() []mvccpb.KeyValue { return tw.changes }
+func (tw *storeTxnWrite) Changes() []sdmvccpb.KeyValue { return tw.changes }

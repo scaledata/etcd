@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/client"
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/client"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/pkg/testutil"
 )
 
 func init() {
@@ -450,7 +450,7 @@ func TestRejectUnhealthyRemove(t *testing.T) {
 
 // TestRestartRemoved ensures that restarting removed member must exit
 // if 'initial-cluster-state' is set 'new' and old data directory still exists
-// (see https://github.com/coreos/etcd/issues/7512 for more).
+// (see https://github.com/scaledata/etcd/issues/7512 for more).
 func TestRestartRemoved(t *testing.T) {
 	defer testutil.AfterTest(t)
 

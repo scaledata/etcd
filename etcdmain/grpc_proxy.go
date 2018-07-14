@@ -27,18 +27,18 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/clientv3/leasing"
-	"github.com/coreos/etcd/clientv3/namespace"
-	"github.com/coreos/etcd/clientv3/ordering"
-	"github.com/coreos/etcd/etcdserver/api/etcdhttp"
-	"github.com/coreos/etcd/etcdserver/api/v3election/v3electionpb"
-	"github.com/coreos/etcd/etcdserver/api/v3lock/v3lockpb"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/pkg/debugutil"
-	"github.com/coreos/etcd/pkg/logutil"
-	"github.com/coreos/etcd/pkg/transport"
-	"github.com/coreos/etcd/proxy/grpcproxy"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/clientv3/leasing"
+	"github.com/scaledata/etcd/clientv3/namespace"
+	"github.com/scaledata/etcd/clientv3/ordering"
+	"github.com/scaledata/etcd/etcdserver/api/etcdhttp"
+	"github.com/scaledata/etcd/etcdserver/api/v3election/sdv3electionpb"
+	"github.com/scaledata/etcd/etcdserver/api/v3lock/sdv3lockpb"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/pkg/debugutil"
+	"github.com/scaledata/etcd/pkg/logutil"
+	"github.com/scaledata/etcd/pkg/transport"
+	"github.com/scaledata/etcd/proxy/grpcproxy"
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/soheilhy/cmux"
@@ -379,8 +379,8 @@ func newGRPCProxyServer(lg *zap.Logger, client *clientv3.Client) *grpc.Server {
 	pb.RegisterLeaseServer(server, leasep)
 	pb.RegisterMaintenanceServer(server, mainp)
 	pb.RegisterAuthServer(server, authp)
-	v3electionpb.RegisterElectionServer(server, electionp)
-	v3lockpb.RegisterLockServer(server, lockp)
+	sdv3electionpb.RegisterElectionServer(server, electionp)
+	sdv3lockpb.RegisterLockServer(server, lockp)
 
 	// set zero values for metrics registered for this grpc server
 	grpc_prometheus.Register(server)

@@ -11,7 +11,7 @@
   ],
   "swagger": "2.0",
   "info": {
-    "title": "etcdserver/etcdserverpb/rpc.proto",
+    "title": "etcdserver/sdetcdserverpb/rpc.proto",
     "version": "version not set"
   },
   "paths": {
@@ -20,7 +20,7 @@
         "tags": [
           "Auth"
         ],
-        "summary": "Authenticate processes an authenticate request.",
+        "summary": "DeleteRange deletes the given range from the key-value store.\nA delete request increments the revision of the key-value store\nand generates a delete event in the event history for every deleted key.",
         "operationId": "Authenticate",
         "parameters": [
           {
@@ -28,7 +28,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthenticateRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthenticateRequest"
             }
           }
         ],
@@ -36,7 +36,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthenticateResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthenticateResponse"
             }
           }
         }
@@ -47,7 +47,7 @@
         "tags": [
           "Auth"
         ],
-        "summary": "AuthDisable disables authentication.",
+        "summary": "Put puts the given key into the key-value store.\nA put request increments the revision of the key-value store\nand generates one event in the event history.",
         "operationId": "AuthDisable",
         "parameters": [
           {
@@ -55,7 +55,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthDisableRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthDisableRequest"
             }
           }
         ],
@@ -63,7 +63,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthDisableResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthDisableResponse"
             }
           }
         }
@@ -74,7 +74,7 @@
         "tags": [
           "Auth"
         ],
-        "summary": "AuthEnable enables authentication.",
+        "summary": "Range gets the keys in the range from the key-value store.",
         "operationId": "AuthEnable",
         "parameters": [
           {
@@ -82,7 +82,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthEnableRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthEnableRequest"
             }
           }
         ],
@@ -90,7 +90,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthEnableResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthEnableResponse"
             }
           }
         }
@@ -109,7 +109,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthRoleAddRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthRoleAddRequest"
             }
           }
         ],
@@ -117,7 +117,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthRoleAddResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthRoleAddResponse"
             }
           }
         }
@@ -136,7 +136,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthRoleDeleteRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthRoleDeleteRequest"
             }
           }
         ],
@@ -144,7 +144,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthRoleDeleteResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthRoleDeleteResponse"
             }
           }
         }
@@ -163,7 +163,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthRoleGetRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthRoleGetRequest"
             }
           }
         ],
@@ -171,7 +171,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthRoleGetResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthRoleGetResponse"
             }
           }
         }
@@ -190,7 +190,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthRoleGrantPermissionRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthRoleGrantPermissionRequest"
             }
           }
         ],
@@ -198,7 +198,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthRoleGrantPermissionResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthRoleGrantPermissionResponse"
             }
           }
         }
@@ -217,7 +217,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthRoleListRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthRoleListRequest"
             }
           }
         ],
@@ -225,7 +225,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthRoleListResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthRoleListResponse"
             }
           }
         }
@@ -244,7 +244,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthRoleRevokePermissionRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthRoleRevokePermissionRequest"
             }
           }
         ],
@@ -252,7 +252,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthRoleRevokePermissionResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthRoleRevokePermissionResponse"
             }
           }
         }
@@ -263,7 +263,7 @@
         "tags": [
           "Auth"
         ],
-        "summary": "UserAdd adds a new user.",
+        "summary": "Txn processes multiple requests in a single transaction.\nA txn request increments the revision of the key-value store\nand generates events with the same revision for every completed request.\nIt is not allowed to modify the same key several times within one txn.",
         "operationId": "UserAdd",
         "parameters": [
           {
@@ -271,7 +271,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserAddRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserAddRequest"
             }
           }
         ],
@@ -279,7 +279,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserAddResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserAddResponse"
             }
           }
         }
@@ -298,7 +298,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserChangePasswordRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserChangePasswordRequest"
             }
           }
         ],
@@ -306,7 +306,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserChangePasswordResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserChangePasswordResponse"
             }
           }
         }
@@ -317,7 +317,7 @@
         "tags": [
           "Auth"
         ],
-        "summary": "UserDelete deletes a specified user.",
+        "summary": "MoveLeader requests current leader node to transfer its leadership to transferee.",
         "operationId": "UserDelete",
         "parameters": [
           {
@@ -325,7 +325,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserDeleteRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserDeleteRequest"
             }
           }
         ],
@@ -333,7 +333,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserDeleteResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserDeleteResponse"
             }
           }
         }
@@ -344,7 +344,7 @@
         "tags": [
           "Auth"
         ],
-        "summary": "UserGet gets detailed user information.",
+        "summary": "Compact compacts the event history in the etcd key-value store. The key-value\nstore should be periodically compacted or the event history will continue to grow\nindefinitely.",
         "operationId": "UserGet",
         "parameters": [
           {
@@ -352,7 +352,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserGetRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserGetRequest"
             }
           }
         ],
@@ -360,7 +360,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserGetResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserGetResponse"
             }
           }
         }
@@ -379,7 +379,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserGrantRoleRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserGrantRoleRequest"
             }
           }
         ],
@@ -387,7 +387,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserGrantRoleResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserGrantRoleResponse"
             }
           }
         }
@@ -398,7 +398,7 @@
         "tags": [
           "Auth"
         ],
-        "summary": "UserList gets a list of all users.",
+        "summary": "Snapshot sends a snapshot of the entire backend from a member over a stream to a client.",
         "operationId": "UserList",
         "parameters": [
           {
@@ -406,7 +406,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserListRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserListRequest"
             }
           }
         ],
@@ -414,7 +414,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserListResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserListResponse"
             }
           }
         }
@@ -433,7 +433,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserRevokeRoleRequest"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserRevokeRoleRequest"
             }
           }
         ],
@@ -441,7 +441,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAuthUserRevokeRoleResponse"
+              "$ref": "#/definitions/sdetcdserverpbAuthUserRevokeRoleResponse"
             }
           }
         }
@@ -452,7 +452,7 @@
         "tags": [
           "Cluster"
         ],
-        "summary": "MemberAdd adds a member into the cluster.",
+        "summary": "Range gets the keys in the range from the key-value store.",
         "operationId": "MemberAdd",
         "parameters": [
           {
@@ -460,7 +460,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbMemberAddRequest"
+              "$ref": "#/definitions/sdetcdserverpbMemberAddRequest"
             }
           }
         ],
@@ -468,7 +468,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbMemberAddResponse"
+              "$ref": "#/definitions/sdetcdserverpbMemberAddResponse"
             }
           }
         }
@@ -479,7 +479,7 @@
         "tags": [
           "Cluster"
         ],
-        "summary": "MemberList lists all the members in the cluster.",
+        "summary": "Txn processes multiple requests in a single transaction.\nA txn request increments the revision of the key-value store\nand generates events with the same revision for every completed request.\nIt is not allowed to modify the same key several times within one txn.",
         "operationId": "MemberList",
         "parameters": [
           {
@@ -487,7 +487,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbMemberListRequest"
+              "$ref": "#/definitions/sdetcdserverpbMemberListRequest"
             }
           }
         ],
@@ -495,7 +495,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbMemberListResponse"
+              "$ref": "#/definitions/sdetcdserverpbMemberListResponse"
             }
           }
         }
@@ -506,7 +506,7 @@
         "tags": [
           "Cluster"
         ],
-        "summary": "MemberRemove removes an existing member from the cluster.",
+        "summary": "Put puts the given key into the key-value store.\nA put request increments the revision of the key-value store\nand generates one event in the event history.",
         "operationId": "MemberRemove",
         "parameters": [
           {
@@ -514,7 +514,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbMemberRemoveRequest"
+              "$ref": "#/definitions/sdetcdserverpbMemberRemoveRequest"
             }
           }
         ],
@@ -522,7 +522,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbMemberRemoveResponse"
+              "$ref": "#/definitions/sdetcdserverpbMemberRemoveResponse"
             }
           }
         }
@@ -533,7 +533,7 @@
         "tags": [
           "Cluster"
         ],
-        "summary": "MemberUpdate updates the member configuration.",
+        "summary": "DeleteRange deletes the given range from the key-value store.\nA delete request increments the revision of the key-value store\nand generates a delete event in the event history for every deleted key.",
         "operationId": "MemberUpdate",
         "parameters": [
           {
@@ -541,7 +541,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbMemberUpdateRequest"
+              "$ref": "#/definitions/sdetcdserverpbMemberUpdateRequest"
             }
           }
         ],
@@ -549,7 +549,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbMemberUpdateResponse"
+              "$ref": "#/definitions/sdetcdserverpbMemberUpdateResponse"
             }
           }
         }
@@ -568,7 +568,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbCompactionRequest"
+              "$ref": "#/definitions/sdetcdserverpbCompactionRequest"
             }
           }
         ],
@@ -576,7 +576,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbCompactionResponse"
+              "$ref": "#/definitions/sdetcdserverpbCompactionResponse"
             }
           }
         }
@@ -595,7 +595,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbDeleteRangeRequest"
+              "$ref": "#/definitions/sdetcdserverpbDeleteRangeRequest"
             }
           }
         ],
@@ -603,7 +603,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbDeleteRangeResponse"
+              "$ref": "#/definitions/sdetcdserverpbDeleteRangeResponse"
             }
           }
         }
@@ -614,7 +614,7 @@
         "tags": [
           "Lease"
         ],
-        "summary": "LeaseLeases lists all existing leases.",
+        "summary": "Compact compacts the event history in the etcd key-value store. The key-value\nstore should be periodically compacted or the event history will continue to grow\nindefinitely.",
         "operationId": "LeaseLeases2",
         "parameters": [
           {
@@ -622,7 +622,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseLeasesRequest"
+              "$ref": "#/definitions/sdetcdserverpbLeaseLeasesRequest"
             }
           }
         ],
@@ -630,7 +630,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseLeasesResponse"
+              "$ref": "#/definitions/sdetcdserverpbLeaseLeasesResponse"
             }
           }
         }
@@ -641,7 +641,7 @@
         "tags": [
           "Lease"
         ],
-        "summary": "LeaseRevoke revokes a lease. All keys attached to the lease will expire and be deleted.",
+        "summary": "Put puts the given key into the key-value store.\nA put request increments the revision of the key-value store\nand generates one event in the event history.",
         "operationId": "LeaseRevoke2",
         "parameters": [
           {
@@ -649,7 +649,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseRevokeRequest"
+              "$ref": "#/definitions/sdetcdserverpbLeaseRevokeRequest"
             }
           }
         ],
@@ -657,7 +657,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseRevokeResponse"
+              "$ref": "#/definitions/sdetcdserverpbLeaseRevokeResponse"
             }
           }
         }
@@ -668,7 +668,7 @@
         "tags": [
           "Lease"
         ],
-        "summary": "LeaseTimeToLive retrieves lease information.",
+        "summary": "Txn processes multiple requests in a single transaction.\nA txn request increments the revision of the key-value store\nand generates events with the same revision for every completed request.\nIt is not allowed to modify the same key several times within one txn.",
         "operationId": "LeaseTimeToLive2",
         "parameters": [
           {
@@ -676,7 +676,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseTimeToLiveRequest"
+              "$ref": "#/definitions/sdetcdserverpbLeaseTimeToLiveRequest"
             }
           }
         ],
@@ -684,7 +684,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseTimeToLiveResponse"
+              "$ref": "#/definitions/sdetcdserverpbLeaseTimeToLiveResponse"
             }
           }
         }
@@ -703,7 +703,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbPutRequest"
+              "$ref": "#/definitions/sdetcdserverpbPutRequest"
             }
           }
         ],
@@ -711,7 +711,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbPutResponse"
+              "$ref": "#/definitions/sdetcdserverpbPutResponse"
             }
           }
         }
@@ -730,7 +730,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbRangeRequest"
+              "$ref": "#/definitions/sdetcdserverpbRangeRequest"
             }
           }
         ],
@@ -738,7 +738,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbRangeResponse"
+              "$ref": "#/definitions/sdetcdserverpbRangeResponse"
             }
           }
         }
@@ -757,7 +757,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbTxnRequest"
+              "$ref": "#/definitions/sdetcdserverpbTxnRequest"
             }
           }
         ],
@@ -765,7 +765,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbTxnResponse"
+              "$ref": "#/definitions/sdetcdserverpbTxnResponse"
             }
           }
         }
@@ -776,7 +776,7 @@
         "tags": [
           "Lease"
         ],
-        "summary": "LeaseGrant creates a lease which expires if the server does not receive a keepAlive\nwithin a given time to live period. All keys attached to the lease will be expired and\ndeleted if the lease expires. Each expired key generates a delete event in the event history.",
+        "summary": "Range gets the keys in the range from the key-value store.",
         "operationId": "LeaseGrant",
         "parameters": [
           {
@@ -784,7 +784,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseGrantRequest"
+              "$ref": "#/definitions/sdetcdserverpbLeaseGrantRequest"
             }
           }
         ],
@@ -792,7 +792,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseGrantResponse"
+              "$ref": "#/definitions/sdetcdserverpbLeaseGrantResponse"
             }
           }
         }
@@ -803,16 +803,16 @@
         "tags": [
           "Lease"
         ],
-        "summary": "LeaseKeepAlive keeps the lease alive by streaming keep alive requests from the client\nto the server and streaming keep alive responses from the server to the client.",
+        "summary": "DeleteRange deletes the given range from the key-value store.\nA delete request increments the revision of the key-value store\nand generates a delete event in the event history for every deleted key.",
         "operationId": "LeaseKeepAlive",
         "parameters": [
           {
-            "description": "(streaming inputs)",
+            "description": " (streaming inputs)",
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseKeepAliveRequest"
+              "$ref": "#/definitions/sdetcdserverpbLeaseKeepAliveRequest"
             }
           }
         ],
@@ -820,7 +820,7 @@
           "200": {
             "description": "(streaming responses)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseKeepAliveResponse"
+              "$ref": "#/definitions/sdetcdserverpbLeaseKeepAliveResponse"
             }
           }
         }
@@ -831,7 +831,7 @@
         "tags": [
           "Lease"
         ],
-        "summary": "LeaseLeases lists all existing leases.",
+        "summary": "Compact compacts the event history in the etcd key-value store. The key-value\nstore should be periodically compacted or the event history will continue to grow\nindefinitely.",
         "operationId": "LeaseLeases",
         "parameters": [
           {
@@ -839,7 +839,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseLeasesRequest"
+              "$ref": "#/definitions/sdetcdserverpbLeaseLeasesRequest"
             }
           }
         ],
@@ -847,7 +847,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseLeasesResponse"
+              "$ref": "#/definitions/sdetcdserverpbLeaseLeasesResponse"
             }
           }
         }
@@ -858,7 +858,7 @@
         "tags": [
           "Lease"
         ],
-        "summary": "LeaseRevoke revokes a lease. All keys attached to the lease will expire and be deleted.",
+        "summary": "Put puts the given key into the key-value store.\nA put request increments the revision of the key-value store\nand generates one event in the event history.",
         "operationId": "LeaseRevoke",
         "parameters": [
           {
@@ -866,7 +866,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseRevokeRequest"
+              "$ref": "#/definitions/sdetcdserverpbLeaseRevokeRequest"
             }
           }
         ],
@@ -874,7 +874,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseRevokeResponse"
+              "$ref": "#/definitions/sdetcdserverpbLeaseRevokeResponse"
             }
           }
         }
@@ -885,7 +885,7 @@
         "tags": [
           "Lease"
         ],
-        "summary": "LeaseTimeToLive retrieves lease information.",
+        "summary": "Txn processes multiple requests in a single transaction.\nA txn request increments the revision of the key-value store\nand generates events with the same revision for every completed request.\nIt is not allowed to modify the same key several times within one txn.",
         "operationId": "LeaseTimeToLive",
         "parameters": [
           {
@@ -893,7 +893,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseTimeToLiveRequest"
+              "$ref": "#/definitions/sdetcdserverpbLeaseTimeToLiveRequest"
             }
           }
         ],
@@ -901,7 +901,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbLeaseTimeToLiveResponse"
+              "$ref": "#/definitions/sdetcdserverpbLeaseTimeToLiveResponse"
             }
           }
         }
@@ -912,7 +912,7 @@
         "tags": [
           "Maintenance"
         ],
-        "summary": "Alarm activates, deactivates, and queries alarms regarding cluster health.",
+        "summary": "Range gets the keys in the range from the key-value store.",
         "operationId": "Alarm",
         "parameters": [
           {
@@ -920,7 +920,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAlarmRequest"
+              "$ref": "#/definitions/sdetcdserverpbAlarmRequest"
             }
           }
         ],
@@ -928,7 +928,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbAlarmResponse"
+              "$ref": "#/definitions/sdetcdserverpbAlarmResponse"
             }
           }
         }
@@ -939,7 +939,7 @@
         "tags": [
           "Maintenance"
         ],
-        "summary": "Defragment defragments a member's backend database to recover storage space.",
+        "summary": "DeleteRange deletes the given range from the key-value store.\nA delete request increments the revision of the key-value store\nand generates a delete event in the event history for every deleted key.",
         "operationId": "Defragment",
         "parameters": [
           {
@@ -947,7 +947,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbDefragmentRequest"
+              "$ref": "#/definitions/sdetcdserverpbDefragmentRequest"
             }
           }
         ],
@@ -955,7 +955,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbDefragmentResponse"
+              "$ref": "#/definitions/sdetcdserverpbDefragmentResponse"
             }
           }
         }
@@ -966,7 +966,7 @@
         "tags": [
           "Maintenance"
         ],
-        "summary": "HashKV computes the hash of all MVCC keys up to a given revision.\nIt only iterates \"key\" bucket in backend storage.",
+        "summary": "Compact compacts the event history in the etcd key-value store. The key-value\nstore should be periodically compacted or the event history will continue to grow\nindefinitely.",
         "operationId": "HashKV",
         "parameters": [
           {
@@ -974,7 +974,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbHashKVRequest"
+              "$ref": "#/definitions/sdetcdserverpbHashKVRequest"
             }
           }
         ],
@@ -982,7 +982,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbHashKVResponse"
+              "$ref": "#/definitions/sdetcdserverpbHashKVResponse"
             }
           }
         }
@@ -1001,7 +1001,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbSnapshotRequest"
+              "$ref": "#/definitions/sdetcdserverpbSnapshotRequest"
             }
           }
         ],
@@ -1009,7 +1009,7 @@
           "200": {
             "description": "(streaming responses)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbSnapshotResponse"
+              "$ref": "#/definitions/sdetcdserverpbSnapshotResponse"
             }
           }
         }
@@ -1020,7 +1020,7 @@
         "tags": [
           "Maintenance"
         ],
-        "summary": "Status gets the status of the member.",
+        "summary": "Put puts the given key into the key-value store.\nA put request increments the revision of the key-value store\nand generates one event in the event history.",
         "operationId": "Status",
         "parameters": [
           {
@@ -1028,7 +1028,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbStatusRequest"
+              "$ref": "#/definitions/sdetcdserverpbStatusRequest"
             }
           }
         ],
@@ -1036,7 +1036,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbStatusResponse"
+              "$ref": "#/definitions/sdetcdserverpbStatusResponse"
             }
           }
         }
@@ -1055,7 +1055,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbMoveLeaderRequest"
+              "$ref": "#/definitions/sdetcdserverpbMoveLeaderRequest"
             }
           }
         ],
@@ -1063,7 +1063,7 @@
           "200": {
             "description": "(empty)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbMoveLeaderResponse"
+              "$ref": "#/definitions/sdetcdserverpbMoveLeaderResponse"
             }
           }
         }
@@ -1074,16 +1074,16 @@
         "tags": [
           "Watch"
         ],
-        "summary": "Watch watches for events happening or that have happened. Both input and output\nare streams; the input stream is for creating and canceling watchers and the output\nstream sends events. One watch RPC can watch on multiple key ranges, streaming events\nfor several watches at once. The entire event history can be watched starting from the\nlast compaction revision.",
+        "summary": "Range gets the keys in the range from the key-value store.",
         "operationId": "Watch",
         "parameters": [
           {
-            "description": "(streaming inputs)",
+            "description": " (streaming inputs)",
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/etcdserverpbWatchRequest"
+              "$ref": "#/definitions/sdetcdserverpbWatchRequest"
             }
           }
         ],
@@ -1091,7 +1091,7 @@
           "200": {
             "description": "(streaming responses)",
             "schema": {
-              "$ref": "#/definitions/etcdserverpbWatchResponse"
+              "$ref": "#/definitions/sdetcdserverpbWatchResponse"
             }
           }
         }
@@ -1166,7 +1166,7 @@
         "NODELETE"
       ]
     },
-    "authpbPermission": {
+    "sdauthpbPermission": {
       "type": "object",
       "title": "Permission is a single entity",
       "properties": {
@@ -1175,7 +1175,7 @@
           "format": "byte"
         },
         "permType": {
-          "$ref": "#/definitions/authpbPermissionType"
+          "$ref": "#/definitions/sdauthpbPermissionType"
         },
         "range_end": {
           "type": "string",
@@ -1183,7 +1183,7 @@
         }
       }
     },
-    "authpbPermissionType": {
+    "sdauthpbPermissionType": {
       "type": "string",
       "default": "READ",
       "enum": [
@@ -1192,12 +1192,12 @@
         "READWRITE"
       ]
     },
-    "etcdserverpbAlarmMember": {
+    "sdetcdserverpbAlarmMember": {
       "type": "object",
       "properties": {
         "alarm": {
           "description": "alarm is the type of alarm which has been raised.",
-          "$ref": "#/definitions/etcdserverpbAlarmType"
+          "$ref": "#/definitions/sdetcdserverpbAlarmType"
         },
         "memberID": {
           "description": "memberID is the ID of the member associated with the raised alarm.",
@@ -1206,7 +1206,7 @@
         }
       }
     },
-    "etcdserverpbAlarmRequest": {
+    "sdetcdserverpbAlarmRequest": {
       "type": "object",
       "properties": {
         "action": {
@@ -1215,7 +1215,7 @@
         },
         "alarm": {
           "description": "alarm is the type of alarm to consider for this request.",
-          "$ref": "#/definitions/etcdserverpbAlarmType"
+          "$ref": "#/definitions/sdetcdserverpbAlarmType"
         },
         "memberID": {
           "description": "memberID is the ID of the member associated with the alarm. If memberID is 0, the\nalarm request covers all members.",
@@ -1224,22 +1224,22 @@
         }
       }
     },
-    "etcdserverpbAlarmResponse": {
+    "sdetcdserverpbAlarmResponse": {
       "type": "object",
       "properties": {
         "alarms": {
           "description": "alarms is a list of alarms associated with the alarm request.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/etcdserverpbAlarmMember"
+            "$ref": "#/definitions/sdetcdserverpbAlarmMember"
           }
         },
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbAlarmType": {
+    "sdetcdserverpbAlarmType": {
       "type": "string",
       "default": "NONE",
       "enum": [
@@ -1248,29 +1248,29 @@
         "CORRUPT"
       ]
     },
-    "etcdserverpbAuthDisableRequest": {
+    "sdetcdserverpbAuthDisableRequest": {
       "type": "object"
     },
-    "etcdserverpbAuthDisableResponse": {
+    "sdetcdserverpbAuthDisableResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbAuthEnableRequest": {
+    "sdetcdserverpbAuthEnableRequest": {
       "type": "object"
     },
-    "etcdserverpbAuthEnableResponse": {
+    "sdetcdserverpbAuthEnableResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbAuthRoleAddRequest": {
+    "sdetcdserverpbAuthRoleAddRequest": {
       "type": "object",
       "properties": {
         "name": {
@@ -1279,15 +1279,15 @@
         }
       }
     },
-    "etcdserverpbAuthRoleAddResponse": {
+    "sdetcdserverpbAuthRoleAddResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbAuthRoleDeleteRequest": {
+    "sdetcdserverpbAuthRoleDeleteRequest": {
       "type": "object",
       "properties": {
         "role": {
@@ -1295,15 +1295,15 @@
         }
       }
     },
-    "etcdserverpbAuthRoleDeleteResponse": {
+    "sdetcdserverpbAuthRoleDeleteResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbAuthRoleGetRequest": {
+    "sdetcdserverpbAuthRoleGetRequest": {
       "type": "object",
       "properties": {
         "role": {
@@ -1311,21 +1311,21 @@
         }
       }
     },
-    "etcdserverpbAuthRoleGetResponse": {
+    "sdetcdserverpbAuthRoleGetResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "perm": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/authpbPermission"
+            "$ref": "#/definitions/sdauthpbPermission"
           }
         }
       }
     },
-    "etcdserverpbAuthRoleGrantPermissionRequest": {
+    "sdetcdserverpbAuthRoleGrantPermissionRequest": {
       "type": "object",
       "properties": {
         "name": {
@@ -1334,26 +1334,26 @@
         },
         "perm": {
           "description": "perm is the permission to grant to the role.",
-          "$ref": "#/definitions/authpbPermission"
+          "$ref": "#/definitions/sdauthpbPermission"
         }
       }
     },
-    "etcdserverpbAuthRoleGrantPermissionResponse": {
+    "sdetcdserverpbAuthRoleGrantPermissionResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbAuthRoleListRequest": {
+    "sdetcdserverpbAuthRoleListRequest": {
       "type": "object"
     },
-    "etcdserverpbAuthRoleListResponse": {
+    "sdetcdserverpbAuthRoleListResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "roles": {
           "type": "array",
@@ -1363,7 +1363,7 @@
         }
       }
     },
-    "etcdserverpbAuthRoleRevokePermissionRequest": {
+    "sdetcdserverpbAuthRoleRevokePermissionRequest": {
       "type": "object",
       "properties": {
         "key": {
@@ -1379,15 +1379,15 @@
         }
       }
     },
-    "etcdserverpbAuthRoleRevokePermissionResponse": {
+    "sdetcdserverpbAuthRoleRevokePermissionResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbAuthUserAddRequest": {
+    "sdetcdserverpbAuthUserAddRequest": {
       "type": "object",
       "properties": {
         "name": {
@@ -1398,15 +1398,15 @@
         }
       }
     },
-    "etcdserverpbAuthUserAddResponse": {
+    "sdetcdserverpbAuthUserAddResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbAuthUserChangePasswordRequest": {
+    "sdetcdserverpbAuthUserChangePasswordRequest": {
       "type": "object",
       "properties": {
         "name": {
@@ -1419,15 +1419,15 @@
         }
       }
     },
-    "etcdserverpbAuthUserChangePasswordResponse": {
+    "sdetcdserverpbAuthUserChangePasswordResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbAuthUserDeleteRequest": {
+    "sdetcdserverpbAuthUserDeleteRequest": {
       "type": "object",
       "properties": {
         "name": {
@@ -1436,15 +1436,15 @@
         }
       }
     },
-    "etcdserverpbAuthUserDeleteResponse": {
+    "sdetcdserverpbAuthUserDeleteResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbAuthUserGetRequest": {
+    "sdetcdserverpbAuthUserGetRequest": {
       "type": "object",
       "properties": {
         "name": {
@@ -1452,11 +1452,11 @@
         }
       }
     },
-    "etcdserverpbAuthUserGetResponse": {
+    "sdetcdserverpbAuthUserGetResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "roles": {
           "type": "array",
@@ -1466,7 +1466,7 @@
         }
       }
     },
-    "etcdserverpbAuthUserGrantRoleRequest": {
+    "sdetcdserverpbAuthUserGrantRoleRequest": {
       "type": "object",
       "properties": {
         "role": {
@@ -1479,22 +1479,22 @@
         }
       }
     },
-    "etcdserverpbAuthUserGrantRoleResponse": {
+    "sdetcdserverpbAuthUserGrantRoleResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbAuthUserListRequest": {
+    "sdetcdserverpbAuthUserListRequest": {
       "type": "object"
     },
-    "etcdserverpbAuthUserListResponse": {
+    "sdetcdserverpbAuthUserListResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "users": {
           "type": "array",
@@ -1504,7 +1504,7 @@
         }
       }
     },
-    "etcdserverpbAuthUserRevokeRoleRequest": {
+    "sdetcdserverpbAuthUserRevokeRoleRequest": {
       "type": "object",
       "properties": {
         "name": {
@@ -1515,15 +1515,15 @@
         }
       }
     },
-    "etcdserverpbAuthUserRevokeRoleResponse": {
+    "sdetcdserverpbAuthUserRevokeRoleResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbAuthenticateRequest": {
+    "sdetcdserverpbAuthenticateRequest": {
       "type": "object",
       "properties": {
         "name": {
@@ -1534,11 +1534,11 @@
         }
       }
     },
-    "etcdserverpbAuthenticateResponse": {
+    "sdetcdserverpbAuthenticateResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "token": {
           "type": "string",
@@ -1546,7 +1546,7 @@
         }
       }
     },
-    "etcdserverpbCompactionRequest": {
+    "sdetcdserverpbCompactionRequest": {
       "description": "CompactionRequest compacts the key-value store up to a given revision. All superseded keys\nwith a revision less than the compaction revision will be removed.",
       "type": "object",
       "properties": {
@@ -1562,15 +1562,15 @@
         }
       }
     },
-    "etcdserverpbCompactionResponse": {
+    "sdetcdserverpbCompactionResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbCompare": {
+    "sdetcdserverpbCompare": {
       "type": "object",
       "properties": {
         "create_revision": {
@@ -1618,18 +1618,18 @@
         }
       }
     },
-    "etcdserverpbDefragmentRequest": {
+    "sdetcdserverpbDefragmentRequest": {
       "type": "object"
     },
-    "etcdserverpbDefragmentResponse": {
+    "sdetcdserverpbDefragmentResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbDeleteRangeRequest": {
+    "sdetcdserverpbDeleteRangeRequest": {
       "type": "object",
       "properties": {
         "key": {
@@ -1649,7 +1649,7 @@
         }
       }
     },
-    "etcdserverpbDeleteRangeResponse": {
+    "sdetcdserverpbDeleteRangeResponse": {
       "type": "object",
       "properties": {
         "deleted": {
@@ -1658,18 +1658,18 @@
           "format": "int64"
         },
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "prev_kvs": {
           "description": "if prev_kv is set in the request, the previous key-value pairs will be returned.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/mvccpbKeyValue"
+            "$ref": "#/definitions/sdmvccpbKeyValue"
           }
         }
       }
     },
-    "etcdserverpbHashKVRequest": {
+    "sdetcdserverpbHashKVRequest": {
       "type": "object",
       "properties": {
         "revision": {
@@ -1679,7 +1679,7 @@
         }
       }
     },
-    "etcdserverpbHashKVResponse": {
+    "sdetcdserverpbHashKVResponse": {
       "type": "object",
       "properties": {
         "compact_revision": {
@@ -1693,14 +1693,14 @@
           "format": "int64"
         },
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbHashRequest": {
+    "sdetcdserverpbHashRequest": {
       "type": "object"
     },
-    "etcdserverpbHashResponse": {
+    "sdetcdserverpbHashResponse": {
       "type": "object",
       "properties": {
         "hash": {
@@ -1709,11 +1709,11 @@
           "format": "int64"
         },
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbLeaseGrantRequest": {
+    "sdetcdserverpbLeaseGrantRequest": {
       "type": "object",
       "properties": {
         "ID": {
@@ -1728,7 +1728,7 @@
         }
       }
     },
-    "etcdserverpbLeaseGrantResponse": {
+    "sdetcdserverpbLeaseGrantResponse": {
       "type": "object",
       "properties": {
         "ID": {
@@ -1745,11 +1745,11 @@
           "type": "string"
         },
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbLeaseKeepAliveRequest": {
+    "sdetcdserverpbLeaseKeepAliveRequest": {
       "type": "object",
       "properties": {
         "ID": {
@@ -1759,7 +1759,7 @@
         }
       }
     },
-    "etcdserverpbLeaseKeepAliveResponse": {
+    "sdetcdserverpbLeaseKeepAliveResponse": {
       "type": "object",
       "properties": {
         "ID": {
@@ -1773,28 +1773,28 @@
           "format": "int64"
         },
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbLeaseLeasesRequest": {
+    "sdetcdserverpbLeaseLeasesRequest": {
       "type": "object"
     },
-    "etcdserverpbLeaseLeasesResponse": {
+    "sdetcdserverpbLeaseLeasesResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "leases": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/etcdserverpbLeaseStatus"
+            "$ref": "#/definitions/sdetcdserverpbLeaseStatus"
           }
         }
       }
     },
-    "etcdserverpbLeaseRevokeRequest": {
+    "sdetcdserverpbLeaseRevokeRequest": {
       "type": "object",
       "properties": {
         "ID": {
@@ -1804,15 +1804,15 @@
         }
       }
     },
-    "etcdserverpbLeaseRevokeResponse": {
+    "sdetcdserverpbLeaseRevokeResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbLeaseStatus": {
+    "sdetcdserverpbLeaseStatus": {
       "type": "object",
       "properties": {
         "ID": {
@@ -1821,7 +1821,7 @@
         }
       }
     },
-    "etcdserverpbLeaseTimeToLiveRequest": {
+    "sdetcdserverpbLeaseTimeToLiveRequest": {
       "type": "object",
       "properties": {
         "ID": {
@@ -1836,7 +1836,7 @@
         }
       }
     },
-    "etcdserverpbLeaseTimeToLiveResponse": {
+    "sdetcdserverpbLeaseTimeToLiveResponse": {
       "type": "object",
       "properties": {
         "ID": {
@@ -1855,7 +1855,7 @@
           "format": "int64"
         },
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "keys": {
           "description": "Keys is the list of keys attached to this lease.",
@@ -1867,7 +1867,7 @@
         }
       }
     },
-    "etcdserverpbMember": {
+    "sdetcdserverpbMember": {
       "type": "object",
       "properties": {
         "ID": {
@@ -1895,7 +1895,7 @@
         }
       }
     },
-    "etcdserverpbMemberAddRequest": {
+    "sdetcdserverpbMemberAddRequest": {
       "type": "object",
       "properties": {
         "peerURLs": {
@@ -1907,44 +1907,44 @@
         }
       }
     },
-    "etcdserverpbMemberAddResponse": {
+    "sdetcdserverpbMemberAddResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "member": {
           "description": "member is the member information for the added member.",
-          "$ref": "#/definitions/etcdserverpbMember"
+          "$ref": "#/definitions/sdetcdserverpbMember"
         },
         "members": {
           "description": "members is a list of all members after adding the new member.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/etcdserverpbMember"
+            "$ref": "#/definitions/sdetcdserverpbMember"
           }
         }
       }
     },
-    "etcdserverpbMemberListRequest": {
+    "sdetcdserverpbMemberListRequest": {
       "type": "object"
     },
-    "etcdserverpbMemberListResponse": {
+    "sdetcdserverpbMemberListResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "members": {
           "description": "members is a list of all members associated with the cluster.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/etcdserverpbMember"
+            "$ref": "#/definitions/sdetcdserverpbMember"
           }
         }
       }
     },
-    "etcdserverpbMemberRemoveRequest": {
+    "sdetcdserverpbMemberRemoveRequest": {
       "type": "object",
       "properties": {
         "ID": {
@@ -1954,22 +1954,22 @@
         }
       }
     },
-    "etcdserverpbMemberRemoveResponse": {
+    "sdetcdserverpbMemberRemoveResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "members": {
           "description": "members is a list of all members after removing the member.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/etcdserverpbMember"
+            "$ref": "#/definitions/sdetcdserverpbMember"
           }
         }
       }
     },
-    "etcdserverpbMemberUpdateRequest": {
+    "sdetcdserverpbMemberUpdateRequest": {
       "type": "object",
       "properties": {
         "ID": {
@@ -1986,22 +1986,22 @@
         }
       }
     },
-    "etcdserverpbMemberUpdateResponse": {
+    "sdetcdserverpbMemberUpdateResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "members": {
           "description": "members is a list of all members after updating the member.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/etcdserverpbMember"
+            "$ref": "#/definitions/sdetcdserverpbMember"
           }
         }
       }
     },
-    "etcdserverpbMoveLeaderRequest": {
+    "sdetcdserverpbMoveLeaderRequest": {
       "type": "object",
       "properties": {
         "targetID": {
@@ -2011,15 +2011,15 @@
         }
       }
     },
-    "etcdserverpbMoveLeaderResponse": {
+    "sdetcdserverpbMoveLeaderResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         }
       }
     },
-    "etcdserverpbPutRequest": {
+    "sdetcdserverpbPutRequest": {
       "type": "object",
       "properties": {
         "ignore_lease": {
@@ -2054,19 +2054,19 @@
         }
       }
     },
-    "etcdserverpbPutResponse": {
+    "sdetcdserverpbPutResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "prev_kv": {
           "description": "if prev_kv is set in the request, the previous key-value pair will be returned.",
-          "$ref": "#/definitions/mvccpbKeyValue"
+          "$ref": "#/definitions/sdmvccpbKeyValue"
         }
       }
     },
-    "etcdserverpbRangeRequest": {
+    "sdetcdserverpbRangeRequest": {
       "type": "object",
       "properties": {
         "count_only": {
@@ -2134,7 +2134,7 @@
         }
       }
     },
-    "etcdserverpbRangeResponse": {
+    "sdetcdserverpbRangeResponse": {
       "type": "object",
       "properties": {
         "count": {
@@ -2143,13 +2143,13 @@
           "format": "int64"
         },
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "kvs": {
           "description": "kvs is the list of key-value pairs matched by the range request.\nkvs is empty when count is requested.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/mvccpbKeyValue"
+            "$ref": "#/definitions/sdmvccpbKeyValue"
           }
         },
         "more": {
@@ -2159,24 +2159,24 @@
         }
       }
     },
-    "etcdserverpbRequestOp": {
+    "sdetcdserverpbRequestOp": {
       "type": "object",
       "properties": {
         "request_delete_range": {
-          "$ref": "#/definitions/etcdserverpbDeleteRangeRequest"
+          "$ref": "#/definitions/sdetcdserverpbDeleteRangeRequest"
         },
         "request_put": {
-          "$ref": "#/definitions/etcdserverpbPutRequest"
+          "$ref": "#/definitions/sdetcdserverpbPutRequest"
         },
         "request_range": {
-          "$ref": "#/definitions/etcdserverpbRangeRequest"
+          "$ref": "#/definitions/sdetcdserverpbRangeRequest"
         },
         "request_txn": {
-          "$ref": "#/definitions/etcdserverpbTxnRequest"
+          "$ref": "#/definitions/sdetcdserverpbTxnRequest"
         }
       }
     },
-    "etcdserverpbResponseHeader": {
+    "sdetcdserverpbResponseHeader": {
       "type": "object",
       "properties": {
         "cluster_id": {
@@ -2201,27 +2201,27 @@
         }
       }
     },
-    "etcdserverpbResponseOp": {
+    "sdetcdserverpbResponseOp": {
       "type": "object",
       "properties": {
         "response_delete_range": {
-          "$ref": "#/definitions/etcdserverpbDeleteRangeResponse"
+          "$ref": "#/definitions/sdetcdserverpbDeleteRangeResponse"
         },
         "response_put": {
-          "$ref": "#/definitions/etcdserverpbPutResponse"
+          "$ref": "#/definitions/sdetcdserverpbPutResponse"
         },
         "response_range": {
-          "$ref": "#/definitions/etcdserverpbRangeResponse"
+          "$ref": "#/definitions/sdetcdserverpbRangeResponse"
         },
         "response_txn": {
-          "$ref": "#/definitions/etcdserverpbTxnResponse"
+          "$ref": "#/definitions/sdetcdserverpbTxnResponse"
         }
       }
     },
-    "etcdserverpbSnapshotRequest": {
+    "sdetcdserverpbSnapshotRequest": {
       "type": "object"
     },
-    "etcdserverpbSnapshotResponse": {
+    "sdetcdserverpbSnapshotResponse": {
       "type": "object",
       "properties": {
         "blob": {
@@ -2231,7 +2231,7 @@
         },
         "header": {
           "description": "header has the current key-value store information. The first header in the snapshot\nstream indicates the point in time of the snapshot.",
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "remaining_bytes": {
           "type": "string",
@@ -2240,10 +2240,10 @@
         }
       }
     },
-    "etcdserverpbStatusRequest": {
+    "sdetcdserverpbStatusRequest": {
       "type": "object"
     },
-    "etcdserverpbStatusResponse": {
+    "sdetcdserverpbStatusResponse": {
       "type": "object",
       "properties": {
         "dbSize": {
@@ -2264,7 +2264,7 @@
           }
         },
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "leader": {
           "description": "leader is the member ID which the responding member believes is the current leader.",
@@ -2292,7 +2292,7 @@
         }
       }
     },
-    "etcdserverpbTxnRequest": {
+    "sdetcdserverpbTxnRequest": {
       "description": "From google paxosdb paper:\nOur implementation hinges around a powerful primitive which we call MultiOp. All other database\noperations except for iteration are implemented as a single call to MultiOp. A MultiOp is applied atomically\nand consists of three components:\n1. A list of tests called guard. Each test in guard checks a single entry in the database. It may check\nfor the absence or presence of a value, or compare with a given value. Two different tests in the guard\nmay apply to the same or different entries in the database. All tests in the guard are applied and\nMultiOp returns the results. If all tests are true, MultiOp executes t op (see item 2 below), otherwise\nit executes f op (see item 3 below).\n2. A list of database operations called t op. Each operation in the list is either an insert, delete, or\nlookup operation, and applies to a single database entry. Two different operations in the list may apply\nto the same or different entries in the database. These operations are executed\nif guard evaluates to\ntrue.\n3. A list of database operations called f op. Like t op, but executed if guard evaluates to false.",
       "type": "object",
       "properties": {
@@ -2300,36 +2300,36 @@
           "description": "compare is a list of predicates representing a conjunction of terms.\nIf the comparisons succeed, then the success requests will be processed in order,\nand the response will contain their respective responses in order.\nIf the comparisons fail, then the failure requests will be processed in order,\nand the response will contain their respective responses in order.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/etcdserverpbCompare"
+            "$ref": "#/definitions/sdetcdserverpbCompare"
           }
         },
         "failure": {
           "description": "failure is a list of requests which will be applied when compare evaluates to false.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/etcdserverpbRequestOp"
+            "$ref": "#/definitions/sdetcdserverpbRequestOp"
           }
         },
         "success": {
           "description": "success is a list of requests which will be applied when compare evaluates to true.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/etcdserverpbRequestOp"
+            "$ref": "#/definitions/sdetcdserverpbRequestOp"
           }
         }
       }
     },
-    "etcdserverpbTxnResponse": {
+    "sdetcdserverpbTxnResponse": {
       "type": "object",
       "properties": {
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "responses": {
           "description": "responses is a list of responses corresponding to the results from applying\nsuccess if succeeded is true or failure if succeeded is false.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/etcdserverpbResponseOp"
+            "$ref": "#/definitions/sdetcdserverpbResponseOp"
           }
         },
         "succeeded": {
@@ -2339,7 +2339,7 @@
         }
       }
     },
-    "etcdserverpbWatchCancelRequest": {
+    "sdetcdserverpbWatchCancelRequest": {
       "type": "object",
       "properties": {
         "watch_id": {
@@ -2349,7 +2349,7 @@
         }
       }
     },
-    "etcdserverpbWatchCreateRequest": {
+    "sdetcdserverpbWatchCreateRequest": {
       "type": "object",
       "properties": {
         "filters": {
@@ -2396,25 +2396,25 @@
         }
       }
     },
-    "etcdserverpbWatchProgressRequest": {
+    "sdetcdserverpbWatchProgressRequest": {
       "description": "Requests the a watch stream progress status be sent in the watch response stream as soon as\npossible.",
       "type": "object"
     },
-    "etcdserverpbWatchRequest": {
+    "sdetcdserverpbWatchRequest": {
       "type": "object",
       "properties": {
         "cancel_request": {
-          "$ref": "#/definitions/etcdserverpbWatchCancelRequest"
+          "$ref": "#/definitions/sdetcdserverpbWatchCancelRequest"
         },
         "create_request": {
-          "$ref": "#/definitions/etcdserverpbWatchCreateRequest"
+          "$ref": "#/definitions/sdetcdserverpbWatchCreateRequest"
         },
         "progress_request": {
-          "$ref": "#/definitions/etcdserverpbWatchProgressRequest"
+          "$ref": "#/definitions/sdetcdserverpbWatchProgressRequest"
         }
       }
     },
-    "etcdserverpbWatchResponse": {
+    "sdetcdserverpbWatchResponse": {
       "type": "object",
       "properties": {
         "cancel_reason": {
@@ -2439,7 +2439,7 @@
         "events": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/mvccpbEvent"
+            "$ref": "#/definitions/sdmvccpbEvent"
           }
         },
         "fragment": {
@@ -2448,7 +2448,7 @@
           "format": "boolean"
         },
         "header": {
-          "$ref": "#/definitions/etcdserverpbResponseHeader"
+          "$ref": "#/definitions/sdetcdserverpbResponseHeader"
         },
         "watch_id": {
           "description": "watch_id is the ID of the watcher that corresponds to the response.",
@@ -2457,16 +2457,16 @@
         }
       }
     },
-    "mvccpbEvent": {
+    "sdmvccpbEvent": {
       "type": "object",
       "properties": {
         "kv": {
           "description": "kv holds the KeyValue for the event.\nA PUT event contains current kv pair.\nA PUT event with kv.Version=1 indicates the creation of a key.\nA DELETE/EXPIRE event contains the deleted key with\nits modification revision set to the revision of deletion.",
-          "$ref": "#/definitions/mvccpbKeyValue"
+          "$ref": "#/definitions/sdmvccpbKeyValue"
         },
         "prev_kv": {
           "description": "prev_kv holds the key-value pair before the event happens.",
-          "$ref": "#/definitions/mvccpbKeyValue"
+          "$ref": "#/definitions/sdmvccpbKeyValue"
         },
         "type": {
           "description": "type is the kind of event. If type is a PUT, it indicates\nnew data has been stored to the key. If type is a DELETE,\nit indicates the key was deleted.",
@@ -2474,7 +2474,7 @@
         }
       }
     },
-    "mvccpbKeyValue": {
+    "sdmvccpbKeyValue": {
       "type": "object",
       "properties": {
         "create_revision": {

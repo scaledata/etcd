@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
+	"github.com/scaledata/etcd/clientv3"
 )
 
 func TestCtlV3AuthEnable(t *testing.T)              { testCtl(t, authEnableTest) }

@@ -20,9 +20,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/raft"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/raft"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -91,7 +91,7 @@ func checkHealth(srv etcdserver.ServerV2) Health {
 
 	if h.Health == "true" {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		_, err := srv.Do(ctx, etcdserverpb.Request{Method: "QGET"})
+		_, err := srv.Do(ctx, sdetcdserverpb.Request{Method: "QGET"})
 		cancel()
 		if err != nil {
 			h.Health = "false"

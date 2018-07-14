@@ -19,8 +19,8 @@ import (
 	"errors"
 	"io"
 
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 // messageEncoder is a encoder that can encode all kinds of messages.
@@ -29,7 +29,7 @@ type messageEncoder struct {
 	w io.Writer
 }
 
-func (enc *messageEncoder) encode(m *raftpb.Message) error {
+func (enc *messageEncoder) encode(m *sdraftpb.Message) error {
 	if err := binary.Write(enc.w, binary.BigEndian, uint64(m.Size())); err != nil {
 		return err
 	}
@@ -47,12 +47,12 @@ var (
 	ErrExceedSizeLimit        = errors.New("rafthttp: error limit exceeded")
 )
 
-func (dec *messageDecoder) decode() (raftpb.Message, error) {
+func (dec *messageDecoder) decode() (sdraftpb.Message, error) {
 	return dec.decodeLimit(readBytesLimit)
 }
 
-func (dec *messageDecoder) decodeLimit(numBytes uint64) (raftpb.Message, error) {
-	var m raftpb.Message
+func (dec *messageDecoder) decodeLimit(numBytes uint64) (sdraftpb.Message, error) {
+	var m sdraftpb.Message
 	var l uint64
 	if err := binary.Read(dec.r, binary.BigEndian, &l); err != nil {
 		return m, err

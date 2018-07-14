@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/coreos/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/pkg/fileutil"
 
 	"go.uber.org/zap"
 )

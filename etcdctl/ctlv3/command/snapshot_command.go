@@ -20,7 +20,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/coreos/etcd/clientv3/snapshot"
+	"github.com/scaledata/etcd/clientv3/snapshot"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"

@@ -18,7 +18,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/coreos/etcd/pkg/types"
+	"github.com/scaledata/etcd/pkg/types"
 
 	"go.uber.org/zap"
 )

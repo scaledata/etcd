@@ -20,8 +20,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 type node struct {
@@ -35,7 +35,7 @@ type node struct {
 	storage *raft.MemoryStorage
 
 	mu    sync.Mutex // guards state
-	state raftpb.HardState
+	state sdraftpb.HardState
 }
 
 func startNode(id uint64, peers []raft.Peer, iface iface) *node {
@@ -92,7 +92,7 @@ func (n *node) start() {
 				close(n.stopc)
 				return
 			case p := <-n.pausec:
-				recvms := make([]raftpb.Message, 0)
+				recvms := make([]sdraftpb.Message, 0)
 				for p {
 					select {
 					case m := <-n.iface.recv():

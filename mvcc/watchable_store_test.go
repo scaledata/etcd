@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 	"go.uber.org/zap"
 )
 
@@ -209,8 +209,8 @@ func TestSyncWatchers(t *testing.T) {
 	if len(evs) != 1 {
 		t.Errorf("len(evs) got = %d, want = 1", len(evs))
 	}
-	if evs[0].Type != mvccpb.PUT {
-		t.Errorf("got = %v, want = %v", evs[0].Type, mvccpb.PUT)
+	if evs[0].Type != sdmvccpb.PUT {
+		t.Errorf("got = %v, want = %v", evs[0].Type, sdmvccpb.PUT)
 	}
 	if !bytes.Equal(evs[0].Kv.Key, testKey) {
 		t.Errorf("got = %s, want = %s", evs[0].Kv.Key, testKey)
@@ -435,32 +435,32 @@ func TestNewMapwatcherToEventMap(t *testing.T) {
 
 	ws := []*watcher{{key: k0}, {key: k1}, {key: k2}}
 
-	evs := []mvccpb.Event{
+	evs := []sdmvccpb.Event{
 		{
-			Type: mvccpb.PUT,
-			Kv:   &mvccpb.KeyValue{Key: k0, Value: v0},
+			Type: sdmvccpb.PUT,
+			Kv:   &sdmvccpb.KeyValue{Key: k0, Value: v0},
 		},
 		{
-			Type: mvccpb.PUT,
-			Kv:   &mvccpb.KeyValue{Key: k1, Value: v1},
+			Type: sdmvccpb.PUT,
+			Kv:   &sdmvccpb.KeyValue{Key: k1, Value: v1},
 		},
 		{
-			Type: mvccpb.PUT,
-			Kv:   &mvccpb.KeyValue{Key: k2, Value: v2},
+			Type: sdmvccpb.PUT,
+			Kv:   &sdmvccpb.KeyValue{Key: k2, Value: v2},
 		},
 	}
 
 	tests := []struct {
 		sync []*watcher
-		evs  []mvccpb.Event
+		evs  []sdmvccpb.Event
 
-		wwe map[*watcher][]mvccpb.Event
+		wwe map[*watcher][]sdmvccpb.Event
 	}{
 		// no watcher in sync, some events should return empty wwe
 		{
 			nil,
 			evs,
-			map[*watcher][]mvccpb.Event{},
+			map[*watcher][]sdmvccpb.Event{},
 		},
 
 		// one watcher in sync, one event that does not match the key of that
@@ -468,7 +468,7 @@ func TestNewMapwatcherToEventMap(t *testing.T) {
 		{
 			[]*watcher{ws[2]},
 			evs[:1],
-			map[*watcher][]mvccpb.Event{},
+			map[*watcher][]sdmvccpb.Event{},
 		},
 
 		// one watcher in sync, one event that matches the key of that
@@ -476,7 +476,7 @@ func TestNewMapwatcherToEventMap(t *testing.T) {
 		{
 			[]*watcher{ws[1]},
 			evs[1:2],
-			map[*watcher][]mvccpb.Event{
+			map[*watcher][]sdmvccpb.Event{
 				ws[1]: evs[1:2],
 			},
 		},
@@ -487,7 +487,7 @@ func TestNewMapwatcherToEventMap(t *testing.T) {
 		{
 			[]*watcher{ws[0], ws[2]},
 			evs[2:],
-			map[*watcher][]mvccpb.Event{
+			map[*watcher][]sdmvccpb.Event{
 				ws[2]: evs[2:],
 			},
 		},
@@ -497,7 +497,7 @@ func TestNewMapwatcherToEventMap(t *testing.T) {
 		{
 			[]*watcher{ws[0], ws[1]},
 			evs[:2],
-			map[*watcher][]mvccpb.Event{
+			map[*watcher][]sdmvccpb.Event{
 				ws[0]: evs[:1],
 				ws[1]: evs[1:2],
 			},

@@ -14,14 +14,14 @@
 
 package rafthttp
 
-import "github.com/coreos/etcd/raft/raftpb"
+import "github.com/scaledata/etcd/raft/sdraftpb"
 
 type encoder interface {
 	// encode encodes the given message to an output stream.
-	encode(m *raftpb.Message) error
+	encode(m *sdraftpb.Message) error
 }
 
 type decoder interface {
 	// decode decodes the message from an input stream.
-	decode() (raftpb.Message, error)
+	decode() (sdraftpb.Message, error)
 }

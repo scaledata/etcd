@@ -23,11 +23,11 @@ import (
 	"path"
 	"strings"
 
-	"github.com/coreos/etcd/etcdserver/api/snap"
-	pioutil "github.com/coreos/etcd/pkg/ioutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/version"
+	"github.com/scaledata/etcd/etcdserver/api/snap"
+	pioutil "github.com/scaledata/etcd/pkg/ioutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/version"
 
 	humanize "github.com/dustin/go-humanize"
 	"go.uber.org/zap"
@@ -119,7 +119,7 @@ func (h *pipelineHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var m raftpb.Message
+	var m sdraftpb.Message
 	if err := m.Unmarshal(b); err != nil {
 		if h.lg != nil {
 			h.lg.Warn(
@@ -233,7 +233,7 @@ func (h *snapshotHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	msgSize := m.Size()
 	receivedBytes.WithLabelValues(types.ID(m.From).String()).Add(float64(msgSize))
 
-	if m.Type != raftpb.MsgSnap {
+	if m.Type != sdraftpb.MsgSnap {
 		if h.lg != nil {
 			h.lg.Warn(
 				"unexpected Raft message type",

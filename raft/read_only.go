@@ -14,7 +14,7 @@
 
 package raft
 
-import pb "github.com/coreos/etcd/raft/raftpb"
+import pb "github.com/scaledata/etcd/raft/sdraftpb"
 
 // ReadState provides state for read only query.
 // It's caller's responsibility to call ReadIndex first before getting

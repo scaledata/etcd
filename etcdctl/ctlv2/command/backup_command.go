@@ -23,15 +23,15 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver/api/membership"
-	"github.com/coreos/etcd/etcdserver/api/snap"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/coreos/etcd/pkg/idutil"
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/wal"
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/etcdserver/api/membership"
+	"github.com/scaledata/etcd/etcdserver/api/snap"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/pkg/idutil"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/wal"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 
 	bolt "github.com/coreos/bbolt"
 	"github.com/urfave/cli"
@@ -102,7 +102,7 @@ func handleBackup(c *cli.Context) error {
 	return nil
 }
 
-func saveSnap(destSnap, srcSnap string) (walsnap walpb.Snapshot) {
+func saveSnap(destSnap, srcSnap string) (walsnap sdwalpb.Snapshot) {
 	ss := snap.New(zap.NewExample(), srcSnap)
 	snapshot, err := ss.Load()
 	if err != nil && err != snap.ErrNoSnapshot {
@@ -118,7 +118,7 @@ func saveSnap(destSnap, srcSnap string) (walsnap walpb.Snapshot) {
 	return walsnap
 }
 
-func loadWAL(srcWAL string, walsnap walpb.Snapshot, v3 bool) (etcdserverpb.Metadata, raftpb.HardState, []raftpb.Entry) {
+func loadWAL(srcWAL string, walsnap sdwalpb.Snapshot, v3 bool) (sdetcdserverpb.Metadata, sdraftpb.HardState, []sdraftpb.Entry) {
 	w, err := wal.OpenForRead(zap.NewExample(), srcWAL, walsnap)
 	if err != nil {
 		log.Fatal(err)
@@ -146,18 +146,18 @@ func loadWAL(srcWAL string, walsnap walpb.Snapshot, v3 bool) (etcdserverpb.Metad
 	}
 	for i = 0; i < len(ents); i++ {
 		ents[i].Index -= removed
-		if ents[i].Type == raftpb.EntryConfChange {
+		if ents[i].Type == sdraftpb.EntryConfChange {
 			log.Println("ignoring EntryConfChange raft entry")
 			remove()
 			continue
 		}
 
-		var raftReq etcdserverpb.InternalRaftRequest
-		var v2Req *etcdserverpb.Request
+		var raftReq sdetcdserverpb.InternalRaftRequest
+		var v2Req *sdetcdserverpb.Request
 		if pbutil.MaybeUnmarshal(&raftReq, ents[i].Data) {
 			v2Req = raftReq.V2
 		} else {
-			v2Req = &etcdserverpb.Request{}
+			v2Req = &sdetcdserverpb.Request{}
 			pbutil.MustUnmarshal(v2Req, ents[i].Data)
 		}
 
@@ -178,7 +178,7 @@ func loadWAL(srcWAL string, walsnap walpb.Snapshot, v3 bool) (etcdserverpb.Metad
 		remove()
 	}
 	state.Commit -= removed
-	var metadata etcdserverpb.Metadata
+	var metadata sdetcdserverpb.Metadata
 	pbutil.MustUnmarshal(&metadata, wmetadata)
 	return metadata, state, ents
 }

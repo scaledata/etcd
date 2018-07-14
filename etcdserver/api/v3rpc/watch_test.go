@@ -19,8 +19,8 @@ import (
 	"math"
 	"testing"
 
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 func TestSendFragment(t *testing.T) {
@@ -83,10 +83,10 @@ func TestSendFragment(t *testing.T) {
 }
 
 func createResponse(dataSize, events int) (resp *pb.WatchResponse) {
-	resp = &pb.WatchResponse{Events: make([]*mvccpb.Event, events)}
+	resp = &pb.WatchResponse{Events: make([]*sdmvccpb.Event, events)}
 	for i := range resp.Events {
-		resp.Events[i] = &mvccpb.Event{
-			Kv: &mvccpb.KeyValue{
+		resp.Events[i] = &sdmvccpb.Event{
+			Kv: &sdmvccpb.KeyValue{
 				Key: bytes.Repeat([]byte("a"), dataSize),
 			},
 		}

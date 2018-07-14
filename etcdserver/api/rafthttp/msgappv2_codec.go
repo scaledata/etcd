@@ -20,10 +20,10 @@ import (
 	"io"
 	"time"
 
-	stats "github.com/coreos/etcd/etcdserver/api/v2stats"
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
+	stats "github.com/scaledata/etcd/etcdserver/api/v2stats"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 const (
@@ -82,7 +82,7 @@ func newMsgAppV2Encoder(w io.Writer, fs *stats.FollowerStats) *msgAppV2Encoder {
 	}
 }
 
-func (enc *msgAppV2Encoder) encode(m *raftpb.Message) error {
+func (enc *msgAppV2Encoder) encode(m *sdraftpb.Message) error {
 	start := time.Now()
 	switch {
 	case isLinkHeartbeatMessage(m):
@@ -171,9 +171,9 @@ func newMsgAppV2Decoder(r io.Reader, local, remote types.ID) *msgAppV2Decoder {
 	}
 }
 
-func (dec *msgAppV2Decoder) decode() (raftpb.Message, error) {
+func (dec *msgAppV2Decoder) decode() (sdraftpb.Message, error) {
 	var (
-		m   raftpb.Message
+		m   sdraftpb.Message
 		typ uint8
 	)
 	if _, err := io.ReadFull(dec.r, dec.uint8buf); err != nil {
@@ -184,8 +184,8 @@ func (dec *msgAppV2Decoder) decode() (raftpb.Message, error) {
 	case msgTypeLinkHeartbeat:
 		return linkHeartbeatMessage, nil
 	case msgTypeAppEntries:
-		m = raftpb.Message{
-			Type:    raftpb.MsgApp,
+		m = sdraftpb.Message{
+			Type:    sdraftpb.MsgApp,
 			From:    uint64(dec.remote),
 			To:      uint64(dec.local),
 			Term:    dec.term,
@@ -198,7 +198,7 @@ func (dec *msgAppV2Decoder) decode() (raftpb.Message, error) {
 			return m, err
 		}
 		l := binary.BigEndian.Uint64(dec.uint64buf)
-		m.Entries = make([]raftpb.Entry, int(l))
+		m.Entries = make([]sdraftpb.Entry, int(l))
 		for i := 0; i < int(l); i++ {
 			if _, err := io.ReadFull(dec.r, dec.uint64buf); err != nil {
 				return m, err

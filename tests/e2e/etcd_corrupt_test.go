@@ -23,8 +23,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 
 	bolt "github.com/coreos/bbolt"
 )
@@ -107,7 +107,7 @@ func corruptHash(fpath string) error {
 		c := b.Cursor()
 		for k, v := c.First(); k != nil; k, v = c.Next() {
 			keys = append(keys, k)
-			var kv mvccpb.KeyValue
+			var kv sdmvccpb.KeyValue
 			if uerr := kv.Unmarshal(v); uerr != nil {
 				return uerr
 			}

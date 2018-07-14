@@ -19,8 +19,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 
 	"go.uber.org/zap"
 )
@@ -40,7 +40,7 @@ func Repair(lg *zap.Logger, dirpath string) bool {
 		plog.Noticef("repairing %v", f.Name())
 	}
 
-	rec := &walpb.Record{}
+	rec := &sdwalpb.Record{}
 	decoder := newDecoder(f)
 	for {
 		lastOffset := decoder.lastOffset()

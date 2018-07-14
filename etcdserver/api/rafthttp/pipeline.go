@@ -22,11 +22,11 @@ import (
 	"sync"
 	"time"
 
-	stats "github.com/coreos/etcd/etcdserver/api/v2stats"
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
+	stats "github.com/scaledata/etcd/etcdserver/api/v2stats"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 
 	"go.uber.org/zap"
 )
@@ -53,7 +53,7 @@ type pipeline struct {
 	// deprecate when we depercate v2 API
 	followerStats *stats.FollowerStats
 
-	msgc chan raftpb.Message
+	msgc chan sdraftpb.Message
 	// wait for the handling routines
 	wg    sync.WaitGroup
 	stopc chan struct{}
@@ -61,7 +61,7 @@ type pipeline struct {
 
 func (p *pipeline) start() {
 	p.stopc = make(chan struct{})
-	p.msgc = make(chan raftpb.Message, pipelineBufSize)
+	p.msgc = make(chan sdraftpb.Message, pipelineBufSize)
 	p.wg.Add(connPerPipeline)
 	for i := 0; i < connPerPipeline; i++ {
 		go p.handle()
@@ -106,7 +106,7 @@ func (p *pipeline) handle() {
 			if err != nil {
 				p.status.deactivate(failureType{source: pipelineMsg, action: "write"}, err.Error())
 
-				if m.Type == raftpb.MsgApp && p.followerStats != nil {
+				if m.Type == sdraftpb.MsgApp && p.followerStats != nil {
 					p.followerStats.Fail()
 				}
 				p.raft.ReportUnreachable(m.To)
@@ -118,7 +118,7 @@ func (p *pipeline) handle() {
 			}
 
 			p.status.activate()
-			if m.Type == raftpb.MsgApp && p.followerStats != nil {
+			if m.Type == sdraftpb.MsgApp && p.followerStats != nil {
 				p.followerStats.Succ(end.Sub(start))
 			}
 			if isMsgSnap(m) {

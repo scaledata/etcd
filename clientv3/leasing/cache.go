@@ -20,9 +20,9 @@ import (
 	"sync"
 	"time"
 
-	v3 "github.com/coreos/etcd/clientv3"
-	v3pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	v3 "github.com/scaledata/etcd/clientv3"
+	v3pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 const revokeBackoff = 2 * time.Second
@@ -143,7 +143,7 @@ func (lc *leaseCache) Update(key, val []byte, respHeader *v3pb.ResponseHeader) {
 	}
 	cacheResp := li.response
 	if len(cacheResp.Kvs) == 0 {
-		kv := &mvccpb.KeyValue{
+		kv := &sdmvccpb.KeyValue{
 			Key:            key,
 			CreateRevision: respHeader.Revision,
 		}
@@ -234,7 +234,7 @@ func (lk *leaseKey) get(op v3.Op) *v3.GetResponse {
 			kv.Value = make([]byte, len(kv.Value))
 			copy(kv.Value, ret.Kvs[0].Value)
 		}
-		ret.Kvs = []*mvccpb.KeyValue{&kv}
+		ret.Kvs = []*sdmvccpb.KeyValue{&kv}
 	}
 	return &ret
 }

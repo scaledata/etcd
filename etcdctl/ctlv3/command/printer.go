@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"strings"
 
-	v3 "github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/clientv3/snapshot"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
+	v3 "github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/clientv3/snapshot"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
 
 	"github.com/dustin/go-humanize"
 )

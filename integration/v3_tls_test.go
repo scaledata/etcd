@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/pkg/testutil"
 
 	"google.golang.org/grpc"
 )

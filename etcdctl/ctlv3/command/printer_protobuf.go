@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"os"
 
-	v3 "github.com/coreos/etcd/clientv3"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	mvccpb "github.com/coreos/etcd/mvcc/mvccpb"
+	v3 "github.com/scaledata/etcd/clientv3"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	sdmvccpb "github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 type pbPrinter struct{ printer }
@@ -36,9 +36,9 @@ func newPBPrinter() printer {
 }
 
 func (p *pbPrinter) Watch(r v3.WatchResponse) {
-	evs := make([]*mvccpb.Event, len(r.Events))
+	evs := make([]*sdmvccpb.Event, len(r.Events))
 	for i, ev := range r.Events {
-		evs[i] = (*mvccpb.Event)(ev)
+		evs[i] = (*sdmvccpb.Event)(ev)
 	}
 	wr := pb.WatchResponse{
 		Header:          &r.Header,

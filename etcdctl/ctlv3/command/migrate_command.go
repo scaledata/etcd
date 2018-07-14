@@ -24,22 +24,22 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/coreos/etcd/client"
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/api"
-	"github.com/coreos/etcd/etcdserver/api/membership"
-	"github.com/coreos/etcd/etcdserver/api/snap"
-	"github.com/coreos/etcd/etcdserver/api/v2error"
-	"github.com/coreos/etcd/etcdserver/api/v2store"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/mvcc"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/wal"
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/client"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/api"
+	"github.com/scaledata/etcd/etcdserver/api/membership"
+	"github.com/scaledata/etcd/etcdserver/api/snap"
+	"github.com/scaledata/etcd/etcdserver/api/v2error"
+	"github.com/scaledata/etcd/etcdserver/api/v2store"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/mvcc"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/wal"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/spf13/cobra"
@@ -142,7 +142,7 @@ func rebuildStoreV2() (v2store.Store, uint64) {
 		ExitWithError(ExitError, err)
 	}
 
-	var walsnap walpb.Snapshot
+	var walsnap sdwalpb.Snapshot
 	if snapshot != nil {
 		walsnap.Index, walsnap.Term = snapshot.Metadata.Index, snapshot.Metadata.Term
 		index = snapshot.Metadata.Index
@@ -172,8 +172,8 @@ func rebuildStoreV2() (v2store.Store, uint64) {
 
 	applier := etcdserver.NewApplierV2(zap.NewExample(), st, cl)
 	for _, ent := range ents {
-		if ent.Type == raftpb.EntryConfChange {
-			var cc raftpb.ConfChange
+		if ent.Type == sdraftpb.EntryConfChange {
+			var cc sdraftpb.ConfChange
 			pbutil.MustUnmarshal(&cc, ent.Data)
 			applyConf(cc, cl)
 			continue
@@ -198,20 +198,20 @@ func rebuildStoreV2() (v2store.Store, uint64) {
 	return st, index
 }
 
-func applyConf(cc raftpb.ConfChange, cl *membership.RaftCluster) {
+func applyConf(cc sdraftpb.ConfChange, cl *membership.RaftCluster) {
 	if err := cl.ValidateConfigurationChange(cc); err != nil {
 		return
 	}
 	switch cc.Type {
-	case raftpb.ConfChangeAddNode:
+	case sdraftpb.ConfChangeAddNode:
 		m := new(membership.Member)
 		if err := json.Unmarshal(cc.Context, m); err != nil {
 			panic(err)
 		}
 		cl.AddMember(m)
-	case raftpb.ConfChangeRemoveNode:
+	case sdraftpb.ConfChangeRemoveNode:
 		cl.RemoveMember(types.ID(cc.NodeID))
-	case raftpb.ConfChangeUpdateNode:
+	case sdraftpb.ConfChangeUpdateNode:
 		m := new(membership.Member)
 		if err := json.Unmarshal(cc.Context, m); err != nil {
 			panic(err)
@@ -294,7 +294,7 @@ func readKeys(r io.Reader, be backend.Backend) error {
 			return err
 		}
 
-		var kv mvccpb.KeyValue
+		var kv sdmvccpb.KeyValue
 		err = proto.Unmarshal(buf, &kv)
 		if err != nil {
 			return err
@@ -388,12 +388,12 @@ func defaultTransformer() (io.WriteCloser, io.ReadCloser, chan error) {
 	return sw, dr, errc
 }
 
-func transform(n *client.Node) *mvccpb.KeyValue {
+func transform(n *client.Node) *sdmvccpb.KeyValue {
 	const unKnownVersion = 1
 	if n.Dir {
 		return nil
 	}
-	kv := &mvccpb.KeyValue{
+	kv := &sdmvccpb.KeyValue{
 		Key:            []byte(n.Key),
 		Value:          []byte(n.Value),
 		CreateRevision: int64(n.CreatedIndex),

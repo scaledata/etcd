@@ -19,9 +19,9 @@ import (
 	"encoding/json"
 	"path"
 
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/api/v2error"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/api/v2error"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
 
 	"go.uber.org/zap"
 )
@@ -34,7 +34,7 @@ func (s *store) ensureAuthDirectories() error {
 		ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 		defer cancel()
 		pe := false
-		rr := etcdserverpb.Request{
+		rr := sdetcdserverpb.Request{
 			Method:    "PUT",
 			Path:      res,
 			Dir:       true,
@@ -61,7 +61,7 @@ func (s *store) ensureAuthDirectories() error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 	pe := false
-	rr := etcdserverpb.Request{
+	rr := sdetcdserverpb.Request{
 		Method:    "PUT",
 		Path:      StorePermsPrefix + "/enabled",
 		Val:       "false",
@@ -136,7 +136,7 @@ func (s *store) requestResource(res string, quorum bool) (etcdserver.Response, e
 	if quorum {
 		method = "QGET"
 	}
-	rr := etcdserverpb.Request{
+	rr := sdetcdserverpb.Request{
 		Method: method,
 		Path:   p,
 		Dir:    false, // TODO: always false?
@@ -162,7 +162,7 @@ func (s *store) setResource(res string, value interface{}, prevexist bool) (etcd
 		return etcdserver.Response{}, err
 	}
 	p := path.Join(StorePermsPrefix, res)
-	rr := etcdserverpb.Request{
+	rr := sdetcdserverpb.Request{
 		Method:    "PUT",
 		Path:      p,
 		Val:       string(data),
@@ -180,7 +180,7 @@ func (s *store) deleteResource(res string) error {
 	defer cancel()
 	pex := true
 	p := path.Join(StorePermsPrefix, res)
-	_, err = s.server.Do(ctx, etcdserverpb.Request{
+	_, err = s.server.Do(ctx, sdetcdserverpb.Request{
 		Method:    "DELETE",
 		Path:      p,
 		PrevExist: &pex,

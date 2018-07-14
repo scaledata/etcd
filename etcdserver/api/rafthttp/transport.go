@@ -20,13 +20,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver/api/snap"
-	stats "github.com/coreos/etcd/etcdserver/api/v2stats"
-	"github.com/coreos/etcd/pkg/logutil"
-	"github.com/coreos/etcd/pkg/transport"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/etcdserver/api/snap"
+	stats "github.com/scaledata/etcd/etcdserver/api/v2stats"
+	"github.com/scaledata/etcd/pkg/logutil"
+	"github.com/scaledata/etcd/pkg/transport"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 
 	"github.com/coreos/pkg/capnslog"
 	"github.com/xiang90/probing"
@@ -34,10 +34,10 @@ import (
 	"golang.org/x/time/rate"
 )
 
-var plog = logutil.NewMergeLogger(capnslog.NewPackageLogger("github.com/coreos/etcd", "rafthttp"))
+var plog = logutil.NewMergeLogger(capnslog.NewPackageLogger("github.com/scaledata/etcd", "rafthttp"))
 
 type Raft interface {
-	Process(ctx context.Context, m raftpb.Message) error
+	Process(ctx context.Context, m sdraftpb.Message) error
 	IsIDRemoved(id uint64) bool
 	ReportUnreachable(id uint64)
 	ReportSnapshot(id uint64, status raft.SnapshotStatus)
@@ -58,7 +58,7 @@ type Transporter interface {
 	// to an existing peer in the transport.
 	// If the id cannot be found in the transport, the message
 	// will be ignored.
-	Send(m []raftpb.Message)
+	Send(m []sdraftpb.Message)
 	// SendSnapshot sends out the given snapshot message to a remote peer.
 	// The behavior of SendSnapshot is similar to Send.
 	SendSnapshot(m snap.Message)
@@ -174,7 +174,7 @@ func (t *Transport) Get(id types.ID) Peer {
 	return t.peers[id]
 }
 
-func (t *Transport) Send(msgs []raftpb.Message) {
+func (t *Transport) Send(msgs []sdraftpb.Message) {
 	for _, m := range msgs {
 		if m.To == 0 {
 			// ignore intentionally dropped message
@@ -188,7 +188,7 @@ func (t *Transport) Send(msgs []raftpb.Message) {
 		t.mu.RUnlock()
 
 		if pok {
-			if m.Type == raftpb.MsgApp {
+			if m.Type == sdraftpb.MsgApp {
 				t.ServerStats.SendAppendReq(m.Size())
 			}
 			p.send(m)

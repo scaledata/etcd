@@ -21,11 +21,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/auth/authpb"
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/auth/sdauthpb"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc/rpctypes"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/pkg/testutil"
 )
 
 // TestV3AuthEmptyUserGet ensures that a get with an empty user will return an empty user error.
@@ -308,8 +308,8 @@ func authSetupUsers(t *testing.T, auth pb.AuthClient, users []user) {
 			continue
 		}
 
-		perm := &authpb.Permission{
-			PermType: authpb.READWRITE,
+		perm := &sdauthpb.Permission{
+			PermType: sdauthpb.READWRITE,
 			Key:      []byte(user.key),
 			RangeEnd: []byte(user.end),
 		}

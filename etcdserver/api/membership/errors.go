@@ -17,7 +17,7 @@ package membership
 import (
 	"errors"
 
-	"github.com/coreos/etcd/etcdserver/api/v2error"
+	"github.com/scaledata/etcd/etcdserver/api/v2error"
 )
 
 var (

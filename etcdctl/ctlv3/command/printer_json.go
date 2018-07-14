@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/coreos/etcd/clientv3/snapshot"
+	"github.com/scaledata/etcd/clientv3/snapshot"
 )
 
 type jsonPrinter struct{ printer }

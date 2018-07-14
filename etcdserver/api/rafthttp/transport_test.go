@@ -20,10 +20,10 @@ import (
 	"testing"
 	"time"
 
-	stats "github.com/coreos/etcd/etcdserver/api/v2stats"
-	"github.com/coreos/etcd/pkg/testutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
+	stats "github.com/scaledata/etcd/etcdserver/api/v2stats"
+	"github.com/scaledata/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 
 	"github.com/xiang90/probing"
 )
@@ -37,21 +37,21 @@ func TestTransportSend(t *testing.T) {
 		ServerStats: stats.NewServerStats("", ""),
 		peers:       map[types.ID]Peer{types.ID(1): peer1, types.ID(2): peer2},
 	}
-	wmsgsIgnored := []raftpb.Message{
+	wmsgsIgnored := []sdraftpb.Message{
 		// bad local message
-		{Type: raftpb.MsgBeat},
+		{Type: sdraftpb.MsgBeat},
 		// bad remote message
-		{Type: raftpb.MsgProp, To: 3},
+		{Type: sdraftpb.MsgProp, To: 3},
 	}
-	wmsgsTo1 := []raftpb.Message{
+	wmsgsTo1 := []sdraftpb.Message{
 		// good message
-		{Type: raftpb.MsgProp, To: 1},
-		{Type: raftpb.MsgApp, To: 1},
+		{Type: sdraftpb.MsgProp, To: 1},
+		{Type: sdraftpb.MsgApp, To: 1},
 	}
-	wmsgsTo2 := []raftpb.Message{
+	wmsgsTo2 := []sdraftpb.Message{
 		// good message
-		{Type: raftpb.MsgProp, To: 2},
-		{Type: raftpb.MsgApp, To: 2},
+		{Type: sdraftpb.MsgProp, To: 2},
+		{Type: sdraftpb.MsgApp, To: 2},
 	}
 	tr.Send(wmsgsIgnored)
 	tr.Send(wmsgsTo1)
@@ -75,10 +75,10 @@ func TestTransportCutMend(t *testing.T) {
 
 	tr.CutPeer(types.ID(1))
 
-	wmsgsTo := []raftpb.Message{
+	wmsgsTo := []sdraftpb.Message{
 		// good message
-		{Type: raftpb.MsgProp, To: 1},
-		{Type: raftpb.MsgApp, To: 1},
+		{Type: sdraftpb.MsgProp, To: 1},
+		{Type: sdraftpb.MsgApp, To: 1},
 	}
 
 	tr.Send(wmsgsTo)
@@ -172,7 +172,7 @@ func TestTransportErrorc(t *testing.T) {
 		t.Fatalf("received unexpected from errorc")
 	case <-time.After(10 * time.Millisecond):
 	}
-	tr.peers[1].send(raftpb.Message{})
+	tr.peers[1].send(sdraftpb.Message{})
 
 	select {
 	case <-errorc:

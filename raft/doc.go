@@ -14,7 +14,7 @@
 
 /*
 Package raft sends and receives messages in the Protocol Buffer format
-defined in the raftpb package.
+defined in the sdraftpb package.
 
 Raft is a protocol with which a cluster of nodes can maintain a replicated state machine.
 The state machine is kept in sync through the use of a replicated log.
@@ -23,7 +23,7 @@ For more details on Raft, see "In Search of an Understandable Consensus Algorith
 
 A simple example application, _raftexample_, is also available to help illustrate
 how to use this package in practice:
-https://github.com/coreos/etcd/tree/master/contrib/raftexample
+https://github.com/scaledata/etcd/tree/master/contrib/raftexample
 
 Usage
 
@@ -109,7 +109,7 @@ restart), or you can supply your own disk-backed implementation.
 
 Third, when you receive a message from another node, pass it to Node.Step:
 
-	func recvRaftRPC(ctx context.Context, m raftpb.Message) {
+	func recvRaftRPC(ctx context.Context, m sdraftpb.Message) {
 		n.Step(ctx, m)
 	}
 
@@ -132,8 +132,8 @@ The total state machine handling loop will look something like this:
       }
       for _, entry := range rd.CommittedEntries {
         process(entry)
-        if entry.Type == raftpb.EntryConfChange {
-          var cc raftpb.ConfChange
+        if entry.Type == sdraftpb.EntryConfChange {
+          var cc sdraftpb.ConfChange
           cc.Unmarshal(entry.Data)
           s.Node.ApplyConfChange(cc)
         }
@@ -150,7 +150,7 @@ data, serialize it into a byte slice and call:
 	n.Propose(ctx, data)
 
 If the proposal is committed, data will appear in committed entries with type
-raftpb.EntryNormal. There is no guarantee that a proposed command will be
+sdraftpb.EntryNormal. There is no guarantee that a proposed command will be
 committed; you may have to re-propose after a timeout.
 
 To add or remove node in a cluster, build ConfChange struct 'cc' and call:
@@ -158,9 +158,9 @@ To add or remove node in a cluster, build ConfChange struct 'cc' and call:
 	n.ProposeConfChange(ctx, cc)
 
 After config change is committed, some committed entry with type
-raftpb.EntryConfChange will be returned. You must apply it to node through:
+sdraftpb.EntryConfChange will be returned. You must apply it to node through:
 
-	var cc raftpb.ConfChange
+	var cc sdraftpb.ConfChange
 	cc.Unmarshal(data)
 	n.ApplyConfChange(cc)
 
@@ -197,10 +197,10 @@ every cluster.
 MessageType
 
 Package raft sends and receives message in Protocol Buffer format (defined
-in raftpb package). Each state (follower, candidate, leader) implements its
+in sdraftpb package). Each state (follower, candidate, leader) implements its
 own 'step' method ('stepFollower', 'stepCandidate', 'stepLeader') when
-advancing with the given raftpb.Message. Each step is determined by its
-raftpb.MessageType. Note that every step is checked by one common method
+advancing with the given sdraftpb.Message. Each step is determined by its
+sdraftpb.MessageType. Note that every step is checked by one common method
 'Step' that safety-checks the terms of node and incoming message to prevent
 stale log entries:
 
@@ -217,7 +217,7 @@ stale log entries:
 
 	'MsgProp' proposes to append data to its log entries. This is a special
 	type to redirect proposals to leader. Therefore, send method overwrites
-	raftpb.Message's term with its HardState's term to avoid attaching its
+	sdraftpb.Message's term with its HardState's term to avoid attaching its
 	local term to 'MsgProp'. When 'MsgProp' is passed to the leader's 'Step'
 	method, the leader first calls the 'appendEntry' method to append entries
 	to its log, and then calls 'bcastAppend' method to send those entries to

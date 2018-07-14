@@ -20,10 +20,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver"
 
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/pkg/testutil"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/pkg/testutil"
 )
 
 // TestMetricDbSizeBoot checks that the db size metric is set on boot.

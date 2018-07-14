@@ -26,10 +26,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/api/v2error"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/pkg/types"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/api/v2error"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/pkg/types"
 
 	"github.com/coreos/pkg/capnslog"
 	"go.uber.org/zap"
@@ -48,7 +48,7 @@ const (
 )
 
 var (
-	plog = capnslog.NewPackageLogger("github.com/coreos/etcd", "etcdserver/auth")
+	plog = capnslog.NewPackageLogger("github.com/scaledata/etcd", "etcdserver/auth")
 )
 
 var rootRole = Role{
@@ -72,7 +72,7 @@ var guestRole = Role{
 }
 
 type doer interface {
-	Do(context.Context, etcdserverpb.Request) (etcdserver.Response, error)
+	Do(context.Context, sdetcdserverpb.Request) (etcdserver.Response, error)
 }
 
 type Store interface {

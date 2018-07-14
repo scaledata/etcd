@@ -21,12 +21,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/auth"
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/mvcc"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/auth"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc/rpctypes"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/mvcc"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 
 	"go.uber.org/zap"
 )
@@ -362,11 +362,11 @@ func (sws *serverWatchStream) sendLoop() {
 				return
 			}
 
-			// TODO: evs is []mvccpb.Event type
-			// either return []*mvccpb.Event from the mvcc package
-			// or define protocol buffer with []mvccpb.Event.
+			// TODO: evs is []sdmvccpb.Event type
+			// either return []*sdmvccpb.Event from the mvcc package
+			// or define protocol buffer with []sdmvccpb.Event.
 			evs := wresp.Events
-			events := make([]*mvccpb.Event, len(evs))
+			events := make([]*sdmvccpb.Event, len(evs))
 			sws.mu.RLock()
 			needPrevKV := sws.prevKV[wresp.WatchID]
 			sws.mu.RUnlock()
@@ -517,7 +517,7 @@ func sendFragments(
 	}
 
 	ow := *wr
-	ow.Events = make([]*mvccpb.Event, 0)
+	ow.Events = make([]*sdmvccpb.Event, 0)
 	ow.Fragment = true
 
 	var idx int
@@ -560,12 +560,12 @@ func (sws *serverWatchStream) newResponseHeader(rev int64) *pb.ResponseHeader {
 	}
 }
 
-func filterNoDelete(e mvccpb.Event) bool {
-	return e.Type == mvccpb.DELETE
+func filterNoDelete(e sdmvccpb.Event) bool {
+	return e.Type == sdmvccpb.DELETE
 }
 
-func filterNoPut(e mvccpb.Event) bool {
-	return e.Type == mvccpb.PUT
+func filterNoPut(e sdmvccpb.Event) bool {
+	return e.Type == sdmvccpb.PUT
 }
 
 // FiltersFromRequest returns "mvcc.FilterFunc" from a given watch create request.

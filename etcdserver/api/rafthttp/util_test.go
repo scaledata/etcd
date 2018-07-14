@@ -22,14 +22,14 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/version"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/version"
 
 	"github.com/coreos/go-semver/semver"
 )
 
 func TestEntry(t *testing.T) {
-	tests := []raftpb.Entry{
+	tests := []sdraftpb.Entry{
 		{},
 		{Term: 1, Index: 1},
 		{Term: 1, Index: 1, Data: []byte("some data")},
@@ -40,7 +40,7 @@ func TestEntry(t *testing.T) {
 			t.Errorf("#%d: unexpected write ents error: %v", i, err)
 			continue
 		}
-		var ent raftpb.Entry
+		var ent sdraftpb.Entry
 		if err := readEntryFrom(b, &ent); err != nil {
 			t.Errorf("#%d: unexpected read ents error: %v", i, err)
 			continue
@@ -195,7 +195,7 @@ func TestCheckVersionCompatibility(t *testing.T) {
 	}
 }
 
-func writeEntryTo(w io.Writer, ent *raftpb.Entry) error {
+func writeEntryTo(w io.Writer, ent *sdraftpb.Entry) error {
 	size := ent.Size()
 	if err := binary.Write(w, binary.BigEndian, uint64(size)); err != nil {
 		return err
@@ -208,7 +208,7 @@ func writeEntryTo(w io.Writer, ent *raftpb.Entry) error {
 	return err
 }
 
-func readEntryFrom(r io.Reader, ent *raftpb.Entry) error {
+func readEntryFrom(r io.Reader, ent *sdraftpb.Entry) error {
 	var l uint64
 	if err := binary.Read(r, binary.BigEndian, &l); err != nil {
 		return err

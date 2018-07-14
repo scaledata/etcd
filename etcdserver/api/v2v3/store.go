@@ -22,11 +22,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/clientv3/concurrency"
-	"github.com/coreos/etcd/etcdserver/api/v2error"
-	"github.com/coreos/etcd/etcdserver/api/v2store"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/clientv3/concurrency"
+	"github.com/scaledata/etcd/etcdserver/api/v2error"
+	"github.com/scaledata/etcd/etcdserver/api/v2store"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 // store implements the Store interface for V2 using
@@ -604,7 +604,7 @@ func mkV3Rev(v2Rev uint64) int64 {
 }
 
 // mkV2Node creates a V2 NodeExtern from a V3 KeyValue
-func (s *v2v3Store) mkV2Node(kv *mvccpb.KeyValue) *v2store.NodeExtern {
+func (s *v2v3Store) mkV2Node(kv *sdmvccpb.KeyValue) *v2store.NodeExtern {
 	if kv == nil {
 		return nil
 	}
@@ -623,7 +623,7 @@ func (s *v2v3Store) mkV2Node(kv *mvccpb.KeyValue) *v2store.NodeExtern {
 
 // prevKeyFromPuts gets the prev key that is being put; ignores
 // the put action response.
-func prevKeyFromPuts(resp *clientv3.TxnResponse) *mvccpb.KeyValue {
+func prevKeyFromPuts(resp *clientv3.TxnResponse) *sdmvccpb.KeyValue {
 	for _, r := range resp.Responses {
 		pkv := r.GetResponsePut().PrevKv
 		if pkv != nil && pkv.CreateRevision > 0 {

@@ -22,17 +22,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver/api/membership"
-	"github.com/coreos/etcd/etcdserver/api/rafthttp"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/pkg/contention"
-	"github.com/coreos/etcd/pkg/logutil"
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/wal"
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/etcdserver/api/membership"
+	"github.com/scaledata/etcd/etcdserver/api/rafthttp"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/pkg/contention"
+	"github.com/scaledata/etcd/pkg/logutil"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/wal"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 
 	"go.uber.org/zap"
 )
@@ -89,8 +89,8 @@ func init() {
 // to raft storage concurrently; the application must read
 // raftDone before assuming the raft messages are stable.
 type apply struct {
-	entries  []raftpb.Entry
-	snapshot raftpb.Snapshot
+	entries  []sdraftpb.Entry
+	snapshot sdraftpb.Snapshot
 	// notifyc synchronizes etcd server applies with the raft node
 	notifyc chan struct{}
 }
@@ -102,7 +102,7 @@ type raftNode struct {
 	raftNodeConfig
 
 	// a chan to send/receive snapshot
-	msgSnapC chan raftpb.Message
+	msgSnapC chan sdraftpb.Message
 
 	// a chan to send out apply
 	applyc chan apply
@@ -144,7 +144,7 @@ func newRaftNode(cfg raftNodeConfig) *raftNode {
 		// expect to send a heartbeat within 2 heartbeat intervals.
 		td:         contention.NewTimeoutDetector(2 * cfg.heartbeat),
 		readStateC: make(chan raft.ReadState, 1),
-		msgSnapC:   make(chan raftpb.Message, maxInFlightMsgSnap),
+		msgSnapC:   make(chan sdraftpb.Message, maxInFlightMsgSnap),
 		applyc:     make(chan apply),
 		stopped:    make(chan struct{}),
 		done:       make(chan struct{}),
@@ -291,7 +291,7 @@ func (r *raftNode) start(rh *raftReadyHandler) {
 					// We might improve this later on if it causes unnecessary long blocking issues.
 					waitApply := false
 					for _, ent := range rd.CommittedEntries {
-						if ent.Type == raftpb.EntryConfChange {
+						if ent.Type == sdraftpb.EntryConfChange {
 							waitApply = true
 							break
 						}
@@ -335,14 +335,14 @@ func updateCommittedIndex(ap *apply, rh *raftReadyHandler) {
 	}
 }
 
-func (r *raftNode) processMessages(ms []raftpb.Message) []raftpb.Message {
+func (r *raftNode) processMessages(ms []sdraftpb.Message) []sdraftpb.Message {
 	sentAppResp := false
 	for i := len(ms) - 1; i >= 0; i-- {
 		if r.isIDRemoved(ms[i].To) {
 			ms[i].To = 0
 		}
 
-		if ms[i].Type == raftpb.MsgAppResp {
+		if ms[i].Type == sdraftpb.MsgAppResp {
 			if sentAppResp {
 				ms[i].To = 0
 			} else {
@@ -350,7 +350,7 @@ func (r *raftNode) processMessages(ms []raftpb.Message) []raftpb.Message {
 			}
 		}
 
-		if ms[i].Type == raftpb.MsgSnap {
+		if ms[i].Type == sdraftpb.MsgSnap {
 			// There are two separate data store: the store for v2, and the KV for v3.
 			// The msgSnap only contains the most recent snapshot of store without KV.
 			// So we need to redirect the msgSnap to etcd server main loop for merging in the
@@ -362,7 +362,7 @@ func (r *raftNode) processMessages(ms []raftpb.Message) []raftpb.Message {
 			}
 			ms[i].To = 0
 		}
-		if ms[i].Type == raftpb.MsgHeartbeat {
+		if ms[i].Type == sdraftpb.MsgHeartbeat {
 			ok, exceed := r.td.Observe(ms[i].To)
 			if !ok {
 				// TODO: limit request rate.
@@ -497,8 +497,8 @@ func startNode(cfg ServerConfig, cl *membership.RaftCluster, ids []types.ID) (id
 	return id, n, s, w
 }
 
-func restartNode(cfg ServerConfig, snapshot *raftpb.Snapshot) (types.ID, *membership.RaftCluster, raft.Node, *raft.MemoryStorage, *wal.WAL) {
-	var walsnap walpb.Snapshot
+func restartNode(cfg ServerConfig, snapshot *sdraftpb.Snapshot) (types.ID, *membership.RaftCluster, raft.Node, *raft.MemoryStorage, *wal.WAL) {
+	var walsnap sdwalpb.Snapshot
 	if snapshot != nil {
 		walsnap.Index, walsnap.Term = snapshot.Metadata.Index, snapshot.Metadata.Term
 	}
@@ -552,8 +552,8 @@ func restartNode(cfg ServerConfig, snapshot *raftpb.Snapshot) (types.ID, *member
 	return id, cl, n, s, w
 }
 
-func restartAsStandaloneNode(cfg ServerConfig, snapshot *raftpb.Snapshot) (types.ID, *membership.RaftCluster, raft.Node, *raft.MemoryStorage, *wal.WAL) {
-	var walsnap walpb.Snapshot
+func restartAsStandaloneNode(cfg ServerConfig, snapshot *sdraftpb.Snapshot) (types.ID, *membership.RaftCluster, raft.Node, *raft.MemoryStorage, *wal.WAL) {
+	var walsnap sdwalpb.Snapshot
 	if snapshot != nil {
 		walsnap.Index, walsnap.Term = snapshot.Metadata.Index, snapshot.Metadata.Term
 	}
@@ -588,7 +588,7 @@ func restartAsStandaloneNode(cfg ServerConfig, snapshot *raftpb.Snapshot) (types
 	ents = append(ents, toAppEnts...)
 
 	// force commit newly appended entries
-	err := w.Save(raftpb.HardState{}, toAppEnts)
+	err := w.Save(sdraftpb.HardState{}, toAppEnts)
 	if err != nil {
 		if cfg.Logger != nil {
 			cfg.Logger.Fatal("failed to save hard state and entries", zap.Error(err))
@@ -651,7 +651,7 @@ func restartAsStandaloneNode(cfg ServerConfig, snapshot *raftpb.Snapshot) (types
 // ID-related entry:
 // - ConfChangeAddNode, in which case the contained ID will be added into the set.
 // - ConfChangeRemoveNode, in which case the contained ID will be removed from the set.
-func getIDs(lg *zap.Logger, snap *raftpb.Snapshot, ents []raftpb.Entry) []uint64 {
+func getIDs(lg *zap.Logger, snap *sdraftpb.Snapshot, ents []sdraftpb.Entry) []uint64 {
 	ids := make(map[uint64]bool)
 	if snap != nil {
 		for _, id := range snap.Metadata.ConfState.Nodes {
@@ -659,17 +659,17 @@ func getIDs(lg *zap.Logger, snap *raftpb.Snapshot, ents []raftpb.Entry) []uint64
 		}
 	}
 	for _, e := range ents {
-		if e.Type != raftpb.EntryConfChange {
+		if e.Type != sdraftpb.EntryConfChange {
 			continue
 		}
-		var cc raftpb.ConfChange
+		var cc sdraftpb.ConfChange
 		pbutil.MustUnmarshal(&cc, e.Data)
 		switch cc.Type {
-		case raftpb.ConfChangeAddNode:
+		case sdraftpb.ConfChangeAddNode:
 			ids[cc.NodeID] = true
-		case raftpb.ConfChangeRemoveNode:
+		case sdraftpb.ConfChangeRemoveNode:
 			delete(ids, cc.NodeID)
-		case raftpb.ConfChangeUpdateNode:
+		case sdraftpb.ConfChangeUpdateNode:
 			// do nothing
 		default:
 			if lg != nil {
@@ -692,8 +692,8 @@ func getIDs(lg *zap.Logger, snap *raftpb.Snapshot, ents []raftpb.Entry) []uint64
 // `self` is _not_ removed, even if present in the set.
 // If `self` is not inside the given ids, it creates a Raft entry to add a
 // default member with the given `self`.
-func createConfigChangeEnts(lg *zap.Logger, ids []uint64, self uint64, term, index uint64) []raftpb.Entry {
-	ents := make([]raftpb.Entry, 0)
+func createConfigChangeEnts(lg *zap.Logger, ids []uint64, self uint64, term, index uint64) []sdraftpb.Entry {
+	ents := make([]sdraftpb.Entry, 0)
 	next := index + 1
 	found := false
 	for _, id := range ids {
@@ -701,12 +701,12 @@ func createConfigChangeEnts(lg *zap.Logger, ids []uint64, self uint64, term, ind
 			found = true
 			continue
 		}
-		cc := &raftpb.ConfChange{
-			Type:   raftpb.ConfChangeRemoveNode,
+		cc := &sdraftpb.ConfChange{
+			Type:   sdraftpb.ConfChangeRemoveNode,
 			NodeID: id,
 		}
-		e := raftpb.Entry{
-			Type:  raftpb.EntryConfChange,
+		e := sdraftpb.Entry{
+			Type:  sdraftpb.EntryConfChange,
 			Data:  pbutil.MustMarshal(cc),
 			Term:  term,
 			Index: next,
@@ -727,13 +727,13 @@ func createConfigChangeEnts(lg *zap.Logger, ids []uint64, self uint64, term, ind
 				plog.Panicf("marshal member should never fail: %v", err)
 			}
 		}
-		cc := &raftpb.ConfChange{
-			Type:    raftpb.ConfChangeAddNode,
+		cc := &sdraftpb.ConfChange{
+			Type:    sdraftpb.ConfChangeAddNode,
 			NodeID:  self,
 			Context: ctx,
 		}
-		e := raftpb.Entry{
-			Type:  raftpb.EntryConfChange,
+		e := sdraftpb.Entry{
+			Type:  sdraftpb.EntryConfChange,
 			Data:  pbutil.MustMarshal(cc),
 			Term:  term,
 			Index: next,

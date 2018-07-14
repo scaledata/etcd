@@ -17,7 +17,7 @@ package clientv3
 import (
 	"testing"
 
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 func TestEvent(t *testing.T) {
@@ -28,7 +28,7 @@ func TestEvent(t *testing.T) {
 	}{{
 		ev: &Event{
 			Type: EventTypePut,
-			Kv: &mvccpb.KeyValue{
+			Kv: &sdmvccpb.KeyValue{
 				CreateRevision: 3,
 				ModRevision:    3,
 			},
@@ -37,7 +37,7 @@ func TestEvent(t *testing.T) {
 	}, {
 		ev: &Event{
 			Type: EventTypePut,
-			Kv: &mvccpb.KeyValue{
+			Kv: &sdmvccpb.KeyValue{
 				CreateRevision: 3,
 				ModRevision:    4,
 			},

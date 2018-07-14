@@ -20,17 +20,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/api/v2error"
-	"github.com/coreos/etcd/etcdserver/api/v2store"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/api/v2error"
+	"github.com/scaledata/etcd/etcdserver/api/v2store"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
 
 	"go.uber.org/zap"
 )
 
 type fakeDoer struct{}
 
-func (_ fakeDoer) Do(context.Context, etcdserverpb.Request) (etcdserver.Response, error) {
+func (_ fakeDoer) Do(context.Context, sdetcdserverpb.Request) (etcdserver.Response, error) {
 	return etcdserver.Response{}, nil
 }
 
@@ -162,7 +162,7 @@ type testDoer struct {
 	explicitlyEnabled bool
 }
 
-func (td *testDoer) Do(_ context.Context, req etcdserverpb.Request) (etcdserver.Response, error) {
+func (td *testDoer) Do(_ context.Context, req sdetcdserverpb.Request) (etcdserver.Response, error) {
 	if td.explicitlyEnabled && (req.Path == StorePermsPrefix+"/enabled") {
 		t := "true"
 		return etcdserver.Response{

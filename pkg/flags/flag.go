@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-var plog = capnslog.NewPackageLogger("github.com/coreos/etcd", "pkg/flags")
+var plog = capnslog.NewPackageLogger("github.com/scaledata/etcd", "pkg/flags")
 
 // SetFlagsFromEnv parses all registered flags in the given flagset,
 // and if they are not already set it attempts to set their values from

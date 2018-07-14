@@ -21,10 +21,10 @@ import (
 	"io"
 	"sync"
 
-	"github.com/coreos/etcd/pkg/crc"
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/pkg/crc"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 )
 
 const minSectorSize = 512
@@ -52,14 +52,14 @@ func newDecoder(r ...io.Reader) *decoder {
 	}
 }
 
-func (d *decoder) decode(rec *walpb.Record) error {
+func (d *decoder) decode(rec *sdwalpb.Record) error {
 	rec.Reset()
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	return d.decodeRecord(rec)
 }
 
-func (d *decoder) decodeRecord(rec *walpb.Record) error {
+func (d *decoder) decodeRecord(rec *sdwalpb.Record) error {
 	if len(d.brs) == 0 {
 		return io.EOF
 	}
@@ -169,14 +169,14 @@ func (d *decoder) lastCRC() uint32 {
 
 func (d *decoder) lastOffset() int64 { return d.lastValidOff }
 
-func mustUnmarshalEntry(d []byte) raftpb.Entry {
-	var e raftpb.Entry
+func mustUnmarshalEntry(d []byte) sdraftpb.Entry {
+	var e sdraftpb.Entry
 	pbutil.MustUnmarshal(&e, d)
 	return e
 }
 
-func mustUnmarshalState(d []byte) raftpb.HardState {
-	var s raftpb.HardState
+func mustUnmarshalState(d []byte) sdraftpb.HardState {
+	var s sdraftpb.HardState
 	pbutil.MustUnmarshal(&s, d)
 	return s
 }

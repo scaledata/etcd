@@ -21,10 +21,10 @@ import (
 	"testing"
 	"time"
 
-	stats "github.com/coreos/etcd/etcdserver/api/v2stats"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
+	stats "github.com/scaledata/etcd/etcdserver/api/v2stats"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 func BenchmarkSendingMsgApp(b *testing.B) {
@@ -67,13 +67,13 @@ func BenchmarkSendingMsgApp(b *testing.B) {
 	b.ResetTimer()
 	data := make([]byte, 64)
 	for i := 0; i < b.N; i++ {
-		tr.Send([]raftpb.Message{
+		tr.Send([]sdraftpb.Message{
 			{
-				Type:  raftpb.MsgApp,
+				Type:  sdraftpb.MsgApp,
 				From:  1,
 				To:    2,
 				Index: uint64(i),
-				Entries: []raftpb.Entry{
+				Entries: []sdraftpb.Entry{
 					{
 						Index: uint64(i + 1),
 						Data:  data,
@@ -94,7 +94,7 @@ type countRaft struct {
 	cnt int
 }
 
-func (r *countRaft) Process(ctx context.Context, m raftpb.Message) error {
+func (r *countRaft) Process(ctx context.Context, m sdraftpb.Message) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.cnt++

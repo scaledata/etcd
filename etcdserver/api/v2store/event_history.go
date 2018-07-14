@@ -20,7 +20,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/coreos/etcd/etcdserver/api/v2error"
+	"github.com/scaledata/etcd/etcdserver/api/v2error"
 )
 
 type EventHistory struct {

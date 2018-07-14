@@ -19,10 +19,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/coreos/etcd/lease/leasepb"
-	"github.com/coreos/etcd/mvcc"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/lease/leasepb"
+	"github.com/scaledata/etcd/mvcc"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 
 	bolt "github.com/coreos/bbolt"
 )
@@ -70,7 +70,7 @@ func bytesToRev(bytes []byte) revision {
 
 func keyDecoder(k, v []byte) {
 	rev := bytesToRev(k)
-	var kv mvccpb.KeyValue
+	var kv sdmvccpb.KeyValue
 	if err := kv.Unmarshal(v); err != nil {
 		panic(err)
 	}
@@ -111,7 +111,7 @@ func iterateBucket(dbPath, bucket string, limit uint64, decode bool) (err error)
 		// iterate in reverse order (use First() and Next() for ascending order)
 		for k, v := c.Last(); k != nil; k, v = c.Prev() {
 			// TODO: remove sensitive information
-			// (https://github.com/coreos/etcd/issues/7620)
+			// (https://github.com/scaledata/etcd/issues/7620)
 			if dec, ok := decoders[bucket]; decode && ok {
 				dec(k, v)
 			} else {

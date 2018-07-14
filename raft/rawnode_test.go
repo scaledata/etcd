@@ -19,19 +19,19 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 // TestRawNodeStep ensures that RawNode.Step ignore local message.
 func TestRawNodeStep(t *testing.T) {
-	for i, msgn := range raftpb.MessageType_name {
+	for i, msgn := range sdraftpb.MessageType_name {
 		s := NewMemoryStorage()
 		rawNode, err := NewRawNode(newTestConfig(1, nil, 10, 1, s), []Peer{{ID: 1}})
 		if err != nil {
 			t.Fatal(err)
 		}
-		msgt := raftpb.MessageType(i)
-		err = rawNode.Step(raftpb.Message{Type: msgt})
+		msgt := sdraftpb.MessageType(i)
+		err = rawNode.Step(sdraftpb.Message{Type: msgt})
 		// LocalMsg should be ignored.
 		if IsLocalMsg(msgt) {
 			if err != ErrStepLocalMsg {
@@ -70,7 +70,7 @@ func TestRawNodeProposeAndConfChange(t *testing.T) {
 		if !proposed && rd.SoftState.Lead == rawNode.raft.id {
 			rawNode.Propose([]byte("somedata"))
 
-			cc := raftpb.ConfChange{Type: raftpb.ConfChangeAddNode, NodeID: 1}
+			cc := sdraftpb.ConfChange{Type: sdraftpb.ConfChangeAddNode, NodeID: 1}
 			ccdata, err = cc.Marshal()
 			if err != nil {
 				t.Fatal(err)
@@ -102,8 +102,8 @@ func TestRawNodeProposeAndConfChange(t *testing.T) {
 	if !bytes.Equal(entries[0].Data, []byte("somedata")) {
 		t.Errorf("entries[0].Data = %v, want %v", entries[0].Data, []byte("somedata"))
 	}
-	if entries[1].Type != raftpb.EntryConfChange {
-		t.Fatalf("type = %v, want %v", entries[1].Type, raftpb.EntryConfChange)
+	if entries[1].Type != sdraftpb.EntryConfChange {
+		t.Fatalf("type = %v, want %v", entries[1].Type, sdraftpb.EntryConfChange)
 	}
 	if !bytes.Equal(entries[1].Data, ccdata) {
 		t.Errorf("data = %v, want %v", entries[1].Data, ccdata)
@@ -133,13 +133,13 @@ func TestRawNodeProposeAddDuplicateNode(t *testing.T) {
 		rawNode.Advance(rd)
 	}
 
-	proposeConfChangeAndApply := func(cc raftpb.ConfChange) {
+	proposeConfChangeAndApply := func(cc sdraftpb.ConfChange) {
 		rawNode.ProposeConfChange(cc)
 		rd = rawNode.Ready()
 		s.Append(rd.Entries)
 		for _, entry := range rd.CommittedEntries {
-			if entry.Type == raftpb.EntryConfChange {
-				var cc raftpb.ConfChange
+			if entry.Type == sdraftpb.EntryConfChange {
+				var cc sdraftpb.ConfChange
 				cc.Unmarshal(entry.Data)
 				rawNode.ApplyConfChange(cc)
 			}
@@ -147,7 +147,7 @@ func TestRawNodeProposeAddDuplicateNode(t *testing.T) {
 		rawNode.Advance(rd)
 	}
 
-	cc1 := raftpb.ConfChange{Type: raftpb.ConfChangeAddNode, NodeID: 1}
+	cc1 := sdraftpb.ConfChange{Type: sdraftpb.ConfChangeAddNode, NodeID: 1}
 	ccdata1, err := cc1.Marshal()
 	if err != nil {
 		t.Fatal(err)
@@ -158,7 +158,7 @@ func TestRawNodeProposeAddDuplicateNode(t *testing.T) {
 	proposeConfChangeAndApply(cc1)
 
 	// the new node join should be ok
-	cc2 := raftpb.ConfChange{Type: raftpb.ConfChangeAddNode, NodeID: 2}
+	cc2 := sdraftpb.ConfChange{Type: sdraftpb.ConfChangeAddNode, NodeID: 2}
 	ccdata2, err := cc2.Marshal()
 	if err != nil {
 		t.Fatal(err)
@@ -189,8 +189,8 @@ func TestRawNodeProposeAddDuplicateNode(t *testing.T) {
 // TestRawNodeReadIndex ensures that Rawnode.ReadIndex sends the MsgReadIndex message
 // to the underlying raft. It also ensures that ReadState can be read out.
 func TestRawNodeReadIndex(t *testing.T) {
-	msgs := []raftpb.Message{}
-	appendStep := func(r *raft, m raftpb.Message) error {
+	msgs := []sdraftpb.Message{}
+	appendStep := func(r *raft, m sdraftpb.Message) error {
 		msgs = append(msgs, m)
 		return nil
 	}
@@ -239,8 +239,8 @@ func TestRawNodeReadIndex(t *testing.T) {
 	if len(msgs) != 1 {
 		t.Fatalf("len(msgs) = %d, want %d", len(msgs), 1)
 	}
-	if msgs[0].Type != raftpb.MsgReadIndex {
-		t.Errorf("msg type = %d, want %d", msgs[0].Type, raftpb.MsgReadIndex)
+	if msgs[0].Type != sdraftpb.MsgReadIndex {
+		t.Errorf("msg type = %d, want %d", msgs[0].Type, sdraftpb.MsgReadIndex)
 	}
 	if !bytes.Equal(msgs[0].Entries[0].Data, wrequestCtx) {
 		t.Errorf("data = %v, want %v", msgs[0].Entries[0].Data, wrequestCtx)
@@ -260,26 +260,26 @@ func TestRawNodeReadIndex(t *testing.T) {
 // start with correct configuration change entries, and can accept and commit
 // proposals.
 func TestRawNodeStart(t *testing.T) {
-	cc := raftpb.ConfChange{Type: raftpb.ConfChangeAddNode, NodeID: 1}
+	cc := sdraftpb.ConfChange{Type: sdraftpb.ConfChangeAddNode, NodeID: 1}
 	ccdata, err := cc.Marshal()
 	if err != nil {
 		t.Fatalf("unexpected marshal error: %v", err)
 	}
 	wants := []Ready{
 		{
-			HardState: raftpb.HardState{Term: 1, Commit: 1, Vote: 0},
-			Entries: []raftpb.Entry{
-				{Type: raftpb.EntryConfChange, Term: 1, Index: 1, Data: ccdata},
+			HardState: sdraftpb.HardState{Term: 1, Commit: 1, Vote: 0},
+			Entries: []sdraftpb.Entry{
+				{Type: sdraftpb.EntryConfChange, Term: 1, Index: 1, Data: ccdata},
 			},
-			CommittedEntries: []raftpb.Entry{
-				{Type: raftpb.EntryConfChange, Term: 1, Index: 1, Data: ccdata},
+			CommittedEntries: []sdraftpb.Entry{
+				{Type: sdraftpb.EntryConfChange, Term: 1, Index: 1, Data: ccdata},
 			},
 			MustSync: true,
 		},
 		{
-			HardState:        raftpb.HardState{Term: 2, Commit: 3, Vote: 1},
-			Entries:          []raftpb.Entry{{Term: 2, Index: 3, Data: []byte("foo")}},
-			CommittedEntries: []raftpb.Entry{{Term: 2, Index: 3, Data: []byte("foo")}},
+			HardState:        sdraftpb.HardState{Term: 2, Commit: 3, Vote: 1},
+			Entries:          []sdraftpb.Entry{{Term: 2, Index: 3, Data: []byte("foo")}},
+			CommittedEntries: []sdraftpb.Entry{{Term: 2, Index: 3, Data: []byte("foo")}},
 			MustSync:         true,
 		},
 	}
@@ -319,11 +319,11 @@ func TestRawNodeStart(t *testing.T) {
 }
 
 func TestRawNodeRestart(t *testing.T) {
-	entries := []raftpb.Entry{
+	entries := []sdraftpb.Entry{
 		{Term: 1, Index: 1},
 		{Term: 1, Index: 2, Data: []byte("foo")},
 	}
-	st := raftpb.HardState{Term: 1, Commit: 1}
+	st := sdraftpb.HardState{Term: 1, Commit: 1}
 
 	want := Ready{
 		HardState: emptyState,
@@ -350,17 +350,17 @@ func TestRawNodeRestart(t *testing.T) {
 }
 
 func TestRawNodeRestartFromSnapshot(t *testing.T) {
-	snap := raftpb.Snapshot{
-		Metadata: raftpb.SnapshotMetadata{
-			ConfState: raftpb.ConfState{Nodes: []uint64{1, 2}},
+	snap := sdraftpb.Snapshot{
+		Metadata: sdraftpb.SnapshotMetadata{
+			ConfState: sdraftpb.ConfState{Nodes: []uint64{1, 2}},
 			Index:     2,
 			Term:      1,
 		},
 	}
-	entries := []raftpb.Entry{
+	entries := []sdraftpb.Entry{
 		{Term: 1, Index: 3, Data: []byte("foo")},
 	}
-	st := raftpb.HardState{Term: 1, Commit: 3}
+	st := sdraftpb.HardState{Term: 1, Commit: 3}
 
 	want := Ready{
 		HardState: emptyState,

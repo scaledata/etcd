@@ -23,7 +23,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/coreos/etcd/clientv3"
+	"github.com/scaledata/etcd/clientv3"
 
 	grpcprom "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -81,5 +81,5 @@ func ExampleClient_metrics() {
 		}
 	}
 	// Output:
-	//	grpc_client_started_total{grpc_method="Range",grpc_service="etcdserverpb.KV",grpc_type="unary"} 1
+	//	grpc_client_started_total{grpc_method="Range",grpc_service="sdetcdserverpb.KV",grpc_type="unary"} 1
 }

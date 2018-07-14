@@ -23,8 +23,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/lease/leasepb"
-	"github.com/coreos/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/lease/sdleasepb"
+	"github.com/scaledata/etcd/mvcc/backend"
 )
 
 // NoLease is a special LeaseID representing the absence of a lease.
@@ -588,7 +588,7 @@ func (le *lessor) initAndRecover() {
 	_, vs := tx.UnsafeRange(leaseBucketName, int64ToBytes(0), int64ToBytes(math.MaxInt64), 0)
 	// TODO: copy vs and do decoding outside tx lock if lock contention becomes an issue.
 	for i := range vs {
-		var lpb leasepb.Lease
+		var lpb sdleasepb.Lease
 		err := lpb.Unmarshal(vs[i])
 		if err != nil {
 			tx.Unlock()
@@ -635,7 +635,7 @@ func (l *Lease) expired() bool {
 func (l *Lease) persistTo(b backend.Backend) {
 	key := int64ToBytes(int64(l.ID))
 
-	lpb := leasepb.Lease{ID: int64(l.ID), TTL: l.ttl}
+	lpb := sdleasepb.Lease{ID: int64(l.ID), TTL: l.ttl}
 	val, err := lpb.Marshal()
 	if err != nil {
 		panic("failed to marshal lease proto item")

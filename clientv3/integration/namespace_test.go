@@ -19,11 +19,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/clientv3/namespace"
-	"github.com/coreos/etcd/integration"
-	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/coreos/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/clientv3/namespace"
+	"github.com/scaledata/etcd/integration"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
+	"github.com/scaledata/etcd/pkg/testutil"
 )
 
 func TestNamespacePutGet(t *testing.T) {
@@ -70,13 +70,13 @@ func TestNamespaceWatch(t *testing.T) {
 	}
 
 	nsWch := nsWatcher.Watch(context.TODO(), "abc", clientv3.WithRev(1))
-	wkv := &mvccpb.KeyValue{Key: []byte("abc"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1}
+	wkv := &sdmvccpb.KeyValue{Key: []byte("abc"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1}
 	if wr := <-nsWch; len(wr.Events) != 1 || !reflect.DeepEqual(wr.Events[0].Kv, wkv) {
 		t.Errorf("expected namespaced event %+v, got %+v", wkv, wr.Events[0].Kv)
 	}
 
 	wch := c.Watch(context.TODO(), "foo/abc", clientv3.WithRev(1))
-	wkv = &mvccpb.KeyValue{Key: []byte("foo/abc"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1}
+	wkv = &sdmvccpb.KeyValue{Key: []byte("foo/abc"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1}
 	if wr := <-wch; len(wr.Events) != 1 || !reflect.DeepEqual(wr.Events[0].Kv, wkv) {
 		t.Errorf("expected unnamespaced event %+v, got %+v", wkv, wr)
 	}

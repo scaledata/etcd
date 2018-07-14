@@ -4,7 +4,7 @@
 This is a generated documentation. Please read the proto files for more.
 
 
-##### service `Lock` (etcdserver/api/v3lock/v3lockpb/v3lock.proto)
+##### service `Lock` (etcdserver/api/v3lock/sdv3lockpb/v3lock.proto)
 
 The lock service exposes client-side locking facilities as a gRPC interface.
 
@@ -15,7 +15,7 @@ The lock service exposes client-side locking facilities as a gRPC interface.
 
 
 
-##### message `LockRequest` (etcdserver/api/v3lock/v3lockpb/v3lock.proto)
+##### message `LockRequest` (etcdserver/api/v3lock/sdv3lockpb/v3lock.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
@@ -24,16 +24,16 @@ The lock service exposes client-side locking facilities as a gRPC interface.
 
 
 
-##### message `LockResponse` (etcdserver/api/v3lock/v3lockpb/v3lock.proto)
+##### message `LockResponse` (etcdserver/api/v3lock/sdv3lockpb/v3lock.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
-| header |  | etcdserverpb.ResponseHeader |
+| header |  | sdetcdserverpb.ResponseHeader |
 | key | key is a key that will exist on etcd for the duration that the Lock caller owns the lock. Users should not modify this key or the lock may exhibit undefined behavior. | bytes |
 
 
 
-##### message `UnlockRequest` (etcdserver/api/v3lock/v3lockpb/v3lock.proto)
+##### message `UnlockRequest` (etcdserver/api/v3lock/sdv3lockpb/v3lock.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
@@ -41,15 +41,15 @@ The lock service exposes client-side locking facilities as a gRPC interface.
 
 
 
-##### message `UnlockResponse` (etcdserver/api/v3lock/v3lockpb/v3lock.proto)
+##### message `UnlockResponse` (etcdserver/api/v3lock/sdv3lockpb/v3lock.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
-| header |  | etcdserverpb.ResponseHeader |
+| header |  | sdetcdserverpb.ResponseHeader |
 
 
 
-##### service `Election` (etcdserver/api/v3election/v3electionpb/v3election.proto)
+##### service `Election` (etcdserver/api/v3election/sdv3electionpb/v3election.proto)
 
 The election service exposes client-side election facilities as a gRPC interface.
 
@@ -63,7 +63,7 @@ The election service exposes client-side election facilities as a gRPC interface
 
 
 
-##### message `CampaignRequest` (etcdserver/api/v3election/v3electionpb/v3election.proto)
+##### message `CampaignRequest` (etcdserver/api/v3election/sdv3electionpb/v3election.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
@@ -73,16 +73,16 @@ The election service exposes client-side election facilities as a gRPC interface
 
 
 
-##### message `CampaignResponse` (etcdserver/api/v3election/v3electionpb/v3election.proto)
+##### message `CampaignResponse` (etcdserver/api/v3election/sdv3electionpb/v3election.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
-| header |  | etcdserverpb.ResponseHeader |
+| header |  | sdetcdserverpb.ResponseHeader |
 | leader | leader describes the resources used for holding leadereship of the election. | LeaderKey |
 
 
 
-##### message `LeaderKey` (etcdserver/api/v3election/v3electionpb/v3election.proto)
+##### message `LeaderKey` (etcdserver/api/v3election/sdv3electionpb/v3election.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
@@ -93,7 +93,7 @@ The election service exposes client-side election facilities as a gRPC interface
 
 
 
-##### message `LeaderRequest` (etcdserver/api/v3election/v3electionpb/v3election.proto)
+##### message `LeaderRequest` (etcdserver/api/v3election/sdv3electionpb/v3election.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
@@ -101,16 +101,16 @@ The election service exposes client-side election facilities as a gRPC interface
 
 
 
-##### message `LeaderResponse` (etcdserver/api/v3election/v3electionpb/v3election.proto)
+##### message `LeaderResponse` (etcdserver/api/v3election/sdv3electionpb/v3election.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
-| header |  | etcdserverpb.ResponseHeader |
-| kv | kv is the key-value pair representing the latest leader update. | mvccpb.KeyValue |
+| header |  | sdetcdserverpb.ResponseHeader |
+| kv | kv is the key-value pair representing the latest leader update. | sdmvccpb.KeyValue |
 
 
 
-##### message `ProclaimRequest` (etcdserver/api/v3election/v3electionpb/v3election.proto)
+##### message `ProclaimRequest` (etcdserver/api/v3election/sdv3electionpb/v3election.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
@@ -119,15 +119,15 @@ The election service exposes client-side election facilities as a gRPC interface
 
 
 
-##### message `ProclaimResponse` (etcdserver/api/v3election/v3electionpb/v3election.proto)
+##### message `ProclaimResponse` (etcdserver/api/v3election/sdv3electionpb/v3election.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
-| header |  | etcdserverpb.ResponseHeader |
+| header |  | sdetcdserverpb.ResponseHeader |
 
 
 
-##### message `ResignRequest` (etcdserver/api/v3election/v3electionpb/v3election.proto)
+##### message `ResignRequest` (etcdserver/api/v3election/sdv3electionpb/v3election.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
@@ -135,15 +135,15 @@ The election service exposes client-side election facilities as a gRPC interface
 
 
 
-##### message `ResignResponse` (etcdserver/api/v3election/v3electionpb/v3election.proto)
+##### message `ResignResponse` (etcdserver/api/v3election/sdv3electionpb/v3election.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
-| header |  | etcdserverpb.ResponseHeader |
+| header |  | sdetcdserverpb.ResponseHeader |
 
 
 
-##### message `Event` (mvcc/mvccpb/kv.proto)
+##### message `Event` (mvcc/sdmvccpb/kv.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |
@@ -153,7 +153,7 @@ The election service exposes client-side election facilities as a gRPC interface
 
 
 
-##### message `KeyValue` (mvcc/mvccpb/kv.proto)
+##### message `KeyValue` (mvcc/sdmvccpb/kv.proto)
 
 | Field | Description | Type |
 | ----- | ----------- | ---- |

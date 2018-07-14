@@ -19,11 +19,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver/api/snap"
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/mvcc"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/etcdserver/api/snap"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/mvcc"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 
 	"go.uber.org/zap"
 )
@@ -40,7 +40,7 @@ func newBackend(cfg ServerConfig) backend.Backend {
 }
 
 // openSnapshotBackend renames a snapshot db to the current etcd db and opens it.
-func openSnapshotBackend(cfg ServerConfig, ss *snap.Snapshotter, snapshot raftpb.Snapshot) (backend.Backend, error) {
+func openSnapshotBackend(cfg ServerConfig, ss *snap.Snapshotter, snapshot sdraftpb.Snapshot) (backend.Backend, error) {
 	snapPath, err := ss.DBFilePath(snapshot.Metadata.Index)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find database snapshot file (%v)", err)
@@ -87,7 +87,7 @@ func openBackend(cfg ServerConfig) backend.Backend {
 // before updating the backend db after persisting raft snapshot to disk,
 // violating the invariant snapshot.Metadata.Index < db.consistentIndex. In this
 // case, replace the db with the snapshot db sent by the leader.
-func recoverSnapshotBackend(cfg ServerConfig, oldbe backend.Backend, snapshot raftpb.Snapshot) (backend.Backend, error) {
+func recoverSnapshotBackend(cfg ServerConfig, oldbe backend.Backend, snapshot sdraftpb.Snapshot) (backend.Backend, error) {
 	var cIndex consistentIndex
 	kv := mvcc.New(cfg.Logger, oldbe, &lease.FakeLessor{}, &cIndex)
 	defer kv.Close()

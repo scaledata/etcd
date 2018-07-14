@@ -23,15 +23,15 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 
 	"go.uber.org/zap"
 )
 
-var testSnap = &raftpb.Snapshot{
+var testSnap = &sdraftpb.Snapshot{
 	Data: []byte("some snapshot"),
-	Metadata: raftpb.SnapshotMetadata{
-		ConfState: raftpb.ConfState{
+	Metadata: sdraftpb.SnapshotMetadata{
+		ConfState: sdraftpb.ConfState{
 			Nodes: []uint64{1, 2, 3},
 		},
 		Index: 1,

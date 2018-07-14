@@ -17,20 +17,20 @@ package v3lock
 import (
 	"context"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/clientv3/concurrency"
-	"github.com/coreos/etcd/etcdserver/api/v3lock/v3lockpb"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/clientv3/concurrency"
+	"github.com/scaledata/etcd/etcdserver/api/v3lock/sdv3lockpb"
 )
 
 type lockServer struct {
 	c *clientv3.Client
 }
 
-func NewLockServer(c *clientv3.Client) v3lockpb.LockServer {
+func NewLockServer(c *clientv3.Client) sdv3lockpb.LockServer {
 	return &lockServer{c}
 }
 
-func (ls *lockServer) Lock(ctx context.Context, req *v3lockpb.LockRequest) (*v3lockpb.LockResponse, error) {
+func (ls *lockServer) Lock(ctx context.Context, req *sdv3lockpb.LockRequest) (*sdv3lockpb.LockResponse, error) {
 	s, err := concurrency.NewSession(
 		ls.c,
 		concurrency.WithLease(clientv3.LeaseID(req.Lease)),
@@ -44,13 +44,13 @@ func (ls *lockServer) Lock(ctx context.Context, req *v3lockpb.LockRequest) (*v3l
 	if err = m.Lock(ctx); err != nil {
 		return nil, err
 	}
-	return &v3lockpb.LockResponse{Header: m.Header(), Key: []byte(m.Key())}, nil
+	return &sdv3lockpb.LockResponse{Header: m.Header(), Key: []byte(m.Key())}, nil
 }
 
-func (ls *lockServer) Unlock(ctx context.Context, req *v3lockpb.UnlockRequest) (*v3lockpb.UnlockResponse, error) {
+func (ls *lockServer) Unlock(ctx context.Context, req *sdv3lockpb.UnlockRequest) (*sdv3lockpb.UnlockResponse, error) {
 	resp, err := ls.c.Delete(ctx, string(req.Key))
 	if err != nil {
 		return nil, err
 	}
-	return &v3lockpb.UnlockResponse{Header: resp.Header}, nil
+	return &sdv3lockpb.UnlockResponse{Header: resp.Header}, nil
 }

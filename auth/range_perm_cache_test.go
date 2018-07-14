@@ -17,8 +17,8 @@ package auth
 import (
 	"testing"
 
-	"github.com/coreos/etcd/auth/authpb"
-	"github.com/coreos/etcd/pkg/adt"
+	"github.com/scaledata/etcd/auth/sdauthpb"
+	"github.com/scaledata/etcd/pkg/adt"
 
 	"go.uber.org/zap"
 )
@@ -53,7 +53,7 @@ func TestRangePermission(t *testing.T) {
 			readPerms.Insert(p, struct{}{})
 		}
 
-		result := checkKeyInterval(zap.NewExample(), &unifiedRangePermissions{readPerms: readPerms}, tt.begin, tt.end, authpb.READ)
+		result := checkKeyInterval(zap.NewExample(), &unifiedRangePermissions{readPerms: readPerms}, tt.begin, tt.end, sdauthpb.READ)
 		if result != tt.want {
 			t.Errorf("#%d: result=%t, want=%t", i, result, tt.want)
 		}

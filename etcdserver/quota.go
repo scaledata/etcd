@@ -17,7 +17,7 @@ package etcdserver
 import (
 	"sync"
 
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
 
 	humanize "github.com/dustin/go-humanize"
 	"go.uber.org/zap"

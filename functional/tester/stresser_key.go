@@ -23,11 +23,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	"github.com/coreos/etcd/functional/rpcpb"
-	"github.com/coreos/etcd/raft"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc/rpctypes"
+	"github.com/scaledata/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/raft"
 
 	"go.uber.org/zap"
 	"golang.org/x/time/rate"
@@ -150,7 +150,7 @@ func (s *keyStresser) run() {
 		case rpctypes.ErrTooManyRequests.Error():
 			// hitting the recovering member.
 		case raft.ErrProposalDropped.Error():
-			// removed member, or leadership has changed (old leader got raftpb.MsgProp)
+			// removed member, or leadership has changed (old leader got sdraftpb.MsgProp)
 		case context.Canceled.Error():
 			// from stresser.Cancel method:
 			return

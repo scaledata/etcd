@@ -17,9 +17,9 @@ package recipe
 import (
 	"context"
 
-	v3 "github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/clientv3/concurrency"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	v3 "github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/clientv3/concurrency"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 type RWMutex struct {
@@ -81,7 +81,7 @@ func (rwm *RWMutex) waitOnLastRev(pfx string) (bool, error) {
 		client,
 		string(lastKey.Kvs[0].Key),
 		rwm.myKey.Revision(),
-		[]mvccpb.Event_EventType{mvccpb.DELETE})
+		[]sdmvccpb.Event_EventType{sdmvccpb.DELETE})
 	return false, err
 }
 

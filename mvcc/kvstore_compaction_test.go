@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/mvcc/backend"
 	"go.uber.org/zap"
 )
 

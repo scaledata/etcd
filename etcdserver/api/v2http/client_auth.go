@@ -20,9 +20,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/coreos/etcd/etcdserver/api"
-	"github.com/coreos/etcd/etcdserver/api/v2auth"
-	"github.com/coreos/etcd/etcdserver/api/v2http/httptypes"
+	"github.com/scaledata/etcd/etcdserver/api"
+	"github.com/scaledata/etcd/etcdserver/api/v2auth"
+	"github.com/scaledata/etcd/etcdserver/api/v2http/httptypes"
 
 	"go.uber.org/zap"
 )

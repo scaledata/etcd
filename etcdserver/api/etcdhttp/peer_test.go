@@ -25,10 +25,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/coreos/etcd/etcdserver/api/membership"
-	"github.com/coreos/etcd/etcdserver/api/rafthttp"
-	"github.com/coreos/etcd/pkg/testutil"
-	"github.com/coreos/etcd/pkg/types"
+	"github.com/scaledata/etcd/etcdserver/api/membership"
+	"github.com/scaledata/etcd/etcdserver/api/rafthttp"
+	"github.com/scaledata/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/pkg/types"
 	"github.com/coreos/go-semver/semver"
 )
 

@@ -17,8 +17,8 @@ package snap
 import (
 	"io"
 
-	"github.com/coreos/etcd/pkg/ioutil"
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/pkg/ioutil"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 // Message is a struct that contains a raft Message and a ReadCloser. The type
@@ -30,13 +30,13 @@ import (
 //
 // User of Message should close the Message after sending it.
 type Message struct {
-	raftpb.Message
+	sdraftpb.Message
 	ReadCloser io.ReadCloser
 	TotalSize  int64
 	closeC     chan bool
 }
 
-func NewMessage(rs raftpb.Message, rc io.ReadCloser, rcSize int64) *Message {
+func NewMessage(rs sdraftpb.Message, rc io.ReadCloser, rcSize int64) *Message {
 	return &Message{
 		Message:    rs,
 		ReadCloser: ioutil.NewExactReadCloser(rc, rcSize),

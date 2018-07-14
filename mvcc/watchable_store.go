@@ -18,9 +18,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 	"go.uber.org/zap"
 )
 
@@ -348,7 +348,7 @@ func (s *watchableStore) syncWatchers() int {
 	tx := s.store.b.ReadTx()
 	tx.Lock()
 	revs, vs := tx.UnsafeRange(keyBucketName, minBytes, maxBytes, 0)
-	var evs []mvccpb.Event
+	var evs []sdmvccpb.Event
 	if s.store != nil && s.store.lg != nil {
 		evs = kvsToEvents(s.store.lg, wg, revs, vs)
 	} else {
@@ -406,12 +406,12 @@ func (s *watchableStore) syncWatchers() int {
 }
 
 // kvsToEvents gets all events for the watchers from all key-value pairs
-func kvsToEvents(lg *zap.Logger, wg *watcherGroup, revs, vals [][]byte) (evs []mvccpb.Event) {
+func kvsToEvents(lg *zap.Logger, wg *watcherGroup, revs, vals [][]byte) (evs []sdmvccpb.Event) {
 	for i, v := range vals {
-		var kv mvccpb.KeyValue
+		var kv sdmvccpb.KeyValue
 		if err := kv.Unmarshal(v); err != nil {
 			if lg != nil {
-				lg.Panic("failed to unmarshal mvccpb.KeyValue", zap.Error(err))
+				lg.Panic("failed to unmarshal sdmvccpb.KeyValue", zap.Error(err))
 			} else {
 				plog.Panicf("cannot unmarshal event: %v", err)
 			}
@@ -421,20 +421,20 @@ func kvsToEvents(lg *zap.Logger, wg *watcherGroup, revs, vals [][]byte) (evs []m
 			continue
 		}
 
-		ty := mvccpb.PUT
+		ty := sdmvccpb.PUT
 		if isTombstone(revs[i]) {
-			ty = mvccpb.DELETE
+			ty = sdmvccpb.DELETE
 			// patch in mod revision so watchers won't skip
 			kv.ModRevision = bytesToRev(revs[i]).main
 		}
-		evs = append(evs, mvccpb.Event{Kv: &kv, Type: ty})
+		evs = append(evs, sdmvccpb.Event{Kv: &kv, Type: ty})
 	}
 	return evs
 }
 
 // notify notifies the fact that given event at the given rev just happened to
 // watchers that watch on the key of the event.
-func (s *watchableStore) notify(rev int64, evs []mvccpb.Event) {
+func (s *watchableStore) notify(rev int64, evs []sdmvccpb.Event) {
 	var victim watcherBatch
 	for w, eb := range newWatcherBatch(&s.synced, evs) {
 		if eb.revs != 1 {
@@ -523,7 +523,7 @@ func (w *watcher) send(wr WatchResponse) bool {
 	progressEvent := len(wr.Events) == 0
 
 	if len(w.fcs) != 0 {
-		ne := make([]mvccpb.Event, 0, len(wr.Events))
+		ne := make([]sdmvccpb.Event, 0, len(wr.Events))
 		for i := range wr.Events {
 			filtered := false
 			for _, filter := range w.fcs {

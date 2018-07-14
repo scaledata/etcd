@@ -17,7 +17,7 @@ package clientv3
 import (
 	"context"
 
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
 
 	"google.golang.org/grpc"
 )

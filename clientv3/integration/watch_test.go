@@ -23,12 +23,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	"github.com/coreos/etcd/integration"
-	mvccpb "github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/coreos/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc/rpctypes"
+	"github.com/scaledata/etcd/integration"
+	sdmvccpb "github.com/scaledata/etcd/mvcc/sdmvccpb"
+	"github.com/scaledata/etcd/pkg/testutil"
 
 	"google.golang.org/grpc/metadata"
 )
@@ -570,7 +570,7 @@ func testWatchWithProgressNotify(t *testing.T, watchOnPut bool) {
 		}
 		if watchOnPut { // wait for put if watch on the put key
 			ev := []*clientv3.Event{{Type: clientv3.EventTypePut,
-				Kv: &mvccpb.KeyValue{Key: []byte("foox"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1}}}
+				Kv: &sdmvccpb.KeyValue{Key: []byte("foox"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1}}}
 			if !reflect.DeepEqual(ev, resp.Events) {
 				t.Fatalf("expected %+v, got %+v", ev, resp.Events)
 			}
@@ -680,7 +680,7 @@ func TestWatchEventType(t *testing.T) {
 	}
 
 	tests := []struct {
-		et       mvccpb.Event_EventType
+		et       sdmvccpb.Event_EventType
 		isCreate bool
 		isModify bool
 	}{{

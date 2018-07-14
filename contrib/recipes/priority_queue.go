@@ -18,8 +18,8 @@ import (
 	"context"
 	"fmt"
 
-	v3 "github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	v3 "github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 // PriorityQueue implements a multi-reader, multi-writer distributed queue.
@@ -65,7 +65,7 @@ func (q *PriorityQueue) Dequeue() (string, error) {
 		q.client,
 		q.key,
 		resp.Header.Revision,
-		[]mvccpb.Event_EventType{mvccpb.PUT})
+		[]sdmvccpb.Event_EventType{sdmvccpb.PUT})
 	if err != nil {
 		return "", err
 	}

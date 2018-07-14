@@ -23,10 +23,10 @@ import (
 	"net/http"
 	"time"
 
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/lease/leasepb"
-	"github.com/coreos/etcd/pkg/httputil"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/lease/sdleasepb"
+	"github.com/scaledata/etcd/pkg/httputil"
 )
 
 var (
@@ -91,7 +91,7 @@ func (h *leaseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case LeaseInternalPrefix:
-		lreq := leasepb.LeaseInternalRequest{}
+		lreq := sdleasepb.LeaseInternalRequest{}
 		if lerr := lreq.Unmarshal(b); lerr != nil {
 			http.Error(w, "error unmarshalling request", http.StatusBadRequest)
 			return
@@ -108,7 +108,7 @@ func (h *leaseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		// TODO: fill out ResponseHeader
-		resp := &leasepb.LeaseInternalResponse{
+		resp := &sdleasepb.LeaseInternalResponse{
 			LeaseTimeToLiveResponse: &pb.LeaseTimeToLiveResponse{
 				Header:     &pb.ResponseHeader{},
 				ID:         lreq.LeaseTimeToLiveRequest.ID,
@@ -189,9 +189,9 @@ func RenewHTTP(ctx context.Context, id lease.LeaseID, url string, rt http.RoundT
 }
 
 // TimeToLiveHTTP retrieves lease information of the given lease ID.
-func TimeToLiveHTTP(ctx context.Context, id lease.LeaseID, keys bool, url string, rt http.RoundTripper) (*leasepb.LeaseInternalResponse, error) {
+func TimeToLiveHTTP(ctx context.Context, id lease.LeaseID, keys bool, url string, rt http.RoundTripper) (*sdleasepb.LeaseInternalResponse, error) {
 	// will post lreq protobuf to leader
-	lreq, err := (&leasepb.LeaseInternalRequest{
+	lreq, err := (&sdleasepb.LeaseInternalRequest{
 		LeaseTimeToLiveRequest: &pb.LeaseTimeToLiveRequest{
 			ID:   int64(id),
 			Keys: keys,
@@ -230,7 +230,7 @@ func TimeToLiveHTTP(ctx context.Context, id lease.LeaseID, keys bool, url string
 		return nil, fmt.Errorf("lease: unknown error(%s)", string(b))
 	}
 
-	lresp := &leasepb.LeaseInternalResponse{}
+	lresp := &sdleasepb.LeaseInternalResponse{}
 	if err := lresp.Unmarshal(b); err != nil {
 		return nil, fmt.Errorf(`lease: %v. data = "%s"`, err, string(b))
 	}

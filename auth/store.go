@@ -24,10 +24,10 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/coreos/etcd/auth/authpb"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/auth/sdauthpb"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc/rpctypes"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/mvcc/backend"
 
 	"github.com/coreos/pkg/capnslog"
 	"go.uber.org/zap"
@@ -48,7 +48,7 @@ var (
 	authUsersBucketName = []byte("authUsers")
 	authRolesBucketName = []byte("authRoles")
 
-	plog = capnslog.NewPackageLogger("github.com/coreos/etcd", "auth")
+	plog = capnslog.NewPackageLogger("github.com/scaledata/etcd", "auth")
 
 	ErrRootUserNotExist     = errors.New("auth: root user does not exist")
 	ErrRootRoleNotExist     = errors.New("auth: root user does not have root role")
@@ -399,7 +399,7 @@ func (as *authStore) UserAdd(r *pb.AuthUserAddRequest) (*pb.AuthUserAddResponse,
 		return nil, ErrUserAlreadyExist
 	}
 
-	newUser := &authpb.User{
+	newUser := &sdauthpb.User{
 		Name:     []byte(r.Name),
 		Password: hashed,
 	}
@@ -480,7 +480,7 @@ func (as *authStore) UserChangePassword(r *pb.AuthUserChangePasswordRequest) (*p
 		return nil, ErrUserNotFound
 	}
 
-	updatedUser := &authpb.User{
+	updatedUser := &sdauthpb.User{
 		Name:     []byte(r.Name),
 		Roles:    user.Roles,
 		Password: hashed,
@@ -610,7 +610,7 @@ func (as *authStore) UserRevokeRole(r *pb.AuthUserRevokeRoleRequest) (*pb.AuthUs
 		return nil, ErrUserNotFound
 	}
 
-	updatedUser := &authpb.User{
+	updatedUser := &sdauthpb.User{
 		Name:     user.Name,
 		Password: user.Password,
 	}
@@ -683,7 +683,7 @@ func (as *authStore) RoleRevokePermission(r *pb.AuthRoleRevokePermissionRequest)
 		return nil, ErrRoleNotFound
 	}
 
-	updatedRole := &authpb.Role{
+	updatedRole := &sdauthpb.Role{
 		Name: role.Name,
 	}
 
@@ -741,7 +741,7 @@ func (as *authStore) RoleDelete(r *pb.AuthRoleDeleteRequest) (*pb.AuthRoleDelete
 
 	users := getAllUsers(as.lg, tx)
 	for _, user := range users {
-		updatedUser := &authpb.User{
+		updatedUser := &sdauthpb.User{
 			Name:     user.Name,
 			Password: user.Password,
 		}
@@ -781,7 +781,7 @@ func (as *authStore) RoleAdd(r *pb.AuthRoleAddRequest) (*pb.AuthRoleAddResponse,
 		return nil, ErrRoleAlreadyExist
 	}
 
-	newRole := &authpb.Role{
+	newRole := &sdauthpb.Role{
 		Name: []byte(r.Name),
 	}
 
@@ -801,7 +801,7 @@ func (as *authStore) authInfoFromToken(ctx context.Context, token string) (*Auth
 	return as.tokenProvider.info(ctx, token, as.Revision())
 }
 
-type permSlice []*authpb.Permission
+type permSlice []*sdauthpb.Permission
 
 func (perms permSlice) Len() int {
 	return len(perms)
@@ -834,7 +834,7 @@ func (as *authStore) RoleGrantPermission(r *pb.AuthRoleGrantPermissionRequest) (
 		role.KeyPermission[idx].PermType = r.Perm.PermType
 	} else {
 		// append new permission to the role
-		newPerm := &authpb.Permission{
+		newPerm := &sdauthpb.Permission{
 			Key:      r.Perm.Key,
 			RangeEnd: r.Perm.RangeEnd,
 			PermType: r.Perm.PermType,
@@ -856,15 +856,15 @@ func (as *authStore) RoleGrantPermission(r *pb.AuthRoleGrantPermissionRequest) (
 		as.lg.Info(
 			"granted/updated a permission to a user",
 			zap.String("user-name", r.Name),
-			zap.String("permission-name", authpb.Permission_Type_name[int32(r.Perm.PermType)]),
+			zap.String("permission-name", sdauthpb.Permission_Type_name[int32(r.Perm.PermType)]),
 		)
 	} else {
-		plog.Noticef("role %s's permission of key %s is updated as %s", r.Name, r.Perm.Key, authpb.Permission_Type_name[int32(r.Perm.PermType)])
+		plog.Noticef("role %s's permission of key %s is updated as %s", r.Name, r.Perm.Key, sdauthpb.Permission_Type_name[int32(r.Perm.PermType)])
 	}
 	return &pb.AuthRoleGrantPermissionResponse{}, nil
 }
 
-func (as *authStore) isOpPermitted(userName string, revision uint64, key, rangeEnd []byte, permTyp authpb.Permission_Type) error {
+func (as *authStore) isOpPermitted(userName string, revision uint64, key, rangeEnd []byte, permTyp sdauthpb.Permission_Type) error {
 	// TODO(mitake): this function would be costly so we need a caching mechanism
 	if !as.IsAuthEnabled() {
 		return nil
@@ -906,15 +906,15 @@ func (as *authStore) isOpPermitted(userName string, revision uint64, key, rangeE
 }
 
 func (as *authStore) IsPutPermitted(authInfo *AuthInfo, key []byte) error {
-	return as.isOpPermitted(authInfo.Username, authInfo.Revision, key, nil, authpb.WRITE)
+	return as.isOpPermitted(authInfo.Username, authInfo.Revision, key, nil, sdauthpb.WRITE)
 }
 
 func (as *authStore) IsRangePermitted(authInfo *AuthInfo, key, rangeEnd []byte) error {
-	return as.isOpPermitted(authInfo.Username, authInfo.Revision, key, rangeEnd, authpb.READ)
+	return as.isOpPermitted(authInfo.Username, authInfo.Revision, key, rangeEnd, sdauthpb.READ)
 }
 
 func (as *authStore) IsDeleteRangePermitted(authInfo *AuthInfo, key, rangeEnd []byte) error {
-	return as.isOpPermitted(authInfo.Username, authInfo.Revision, key, rangeEnd, authpb.WRITE)
+	return as.isOpPermitted(authInfo.Username, authInfo.Revision, key, rangeEnd, sdauthpb.WRITE)
 }
 
 func (as *authStore) IsAdminPermitted(authInfo *AuthInfo) error {
@@ -941,18 +941,18 @@ func (as *authStore) IsAdminPermitted(authInfo *AuthInfo) error {
 	return nil
 }
 
-func getUser(lg *zap.Logger, tx backend.BatchTx, username string) *authpb.User {
+func getUser(lg *zap.Logger, tx backend.BatchTx, username string) *sdauthpb.User {
 	_, vs := tx.UnsafeRange(authUsersBucketName, []byte(username), nil, 0)
 	if len(vs) == 0 {
 		return nil
 	}
 
-	user := &authpb.User{}
+	user := &sdauthpb.User{}
 	err := user.Unmarshal(vs[0])
 	if err != nil {
 		if lg != nil {
 			lg.Panic(
-				"failed to unmarshal 'authpb.User'",
+				"failed to unmarshal 'sdauthpb.User'",
 				zap.String("user-name", username),
 				zap.Error(err),
 			)
@@ -963,19 +963,19 @@ func getUser(lg *zap.Logger, tx backend.BatchTx, username string) *authpb.User {
 	return user
 }
 
-func getAllUsers(lg *zap.Logger, tx backend.BatchTx) []*authpb.User {
+func getAllUsers(lg *zap.Logger, tx backend.BatchTx) []*sdauthpb.User {
 	_, vs := tx.UnsafeRange(authUsersBucketName, []byte{0}, []byte{0xff}, -1)
 	if len(vs) == 0 {
 		return nil
 	}
 
-	users := make([]*authpb.User, len(vs))
+	users := make([]*sdauthpb.User, len(vs))
 	for i := range vs {
-		user := &authpb.User{}
+		user := &sdauthpb.User{}
 		err := user.Unmarshal(vs[i])
 		if err != nil {
 			if lg != nil {
-				lg.Panic("failed to unmarshal 'authpb.User'", zap.Error(err))
+				lg.Panic("failed to unmarshal 'sdauthpb.User'", zap.Error(err))
 			} else {
 				plog.Panicf("failed to unmarshal user struct: %s", err)
 			}
@@ -985,11 +985,11 @@ func getAllUsers(lg *zap.Logger, tx backend.BatchTx) []*authpb.User {
 	return users
 }
 
-func putUser(lg *zap.Logger, tx backend.BatchTx, user *authpb.User) {
+func putUser(lg *zap.Logger, tx backend.BatchTx, user *sdauthpb.User) {
 	b, err := user.Marshal()
 	if err != nil {
 		if lg != nil {
-			lg.Panic("failed to unmarshal 'authpb.User'", zap.Error(err))
+			lg.Panic("failed to unmarshal 'sdauthpb.User'", zap.Error(err))
 		} else {
 			plog.Panicf("failed to marshal user struct (name: %s): %s", user.Name, err)
 		}
@@ -1001,13 +1001,13 @@ func delUser(tx backend.BatchTx, username string) {
 	tx.UnsafeDelete(authUsersBucketName, []byte(username))
 }
 
-func getRole(tx backend.BatchTx, rolename string) *authpb.Role {
+func getRole(tx backend.BatchTx, rolename string) *sdauthpb.Role {
 	_, vs := tx.UnsafeRange(authRolesBucketName, []byte(rolename), nil, 0)
 	if len(vs) == 0 {
 		return nil
 	}
 
-	role := &authpb.Role{}
+	role := &sdauthpb.Role{}
 	err := role.Unmarshal(vs[0])
 	if err != nil {
 		plog.Panicf("failed to unmarshal role struct (name: %s): %s", rolename, err)
@@ -1015,19 +1015,19 @@ func getRole(tx backend.BatchTx, rolename string) *authpb.Role {
 	return role
 }
 
-func getAllRoles(lg *zap.Logger, tx backend.BatchTx) []*authpb.Role {
+func getAllRoles(lg *zap.Logger, tx backend.BatchTx) []*sdauthpb.Role {
 	_, vs := tx.UnsafeRange(authRolesBucketName, []byte{0}, []byte{0xff}, -1)
 	if len(vs) == 0 {
 		return nil
 	}
 
-	roles := make([]*authpb.Role, len(vs))
+	roles := make([]*sdauthpb.Role, len(vs))
 	for i := range vs {
-		role := &authpb.Role{}
+		role := &sdauthpb.Role{}
 		err := role.Unmarshal(vs[i])
 		if err != nil {
 			if lg != nil {
-				lg.Panic("failed to unmarshal 'authpb.Role'", zap.Error(err))
+				lg.Panic("failed to unmarshal 'sdauthpb.Role'", zap.Error(err))
 			} else {
 				plog.Panicf("failed to unmarshal role struct: %s", err)
 			}
@@ -1037,12 +1037,12 @@ func getAllRoles(lg *zap.Logger, tx backend.BatchTx) []*authpb.Role {
 	return roles
 }
 
-func putRole(lg *zap.Logger, tx backend.BatchTx, role *authpb.Role) {
+func putRole(lg *zap.Logger, tx backend.BatchTx, role *sdauthpb.Role) {
 	b, err := role.Marshal()
 	if err != nil {
 		if lg != nil {
 			lg.Panic(
-				"failed to marshal 'authpb.Role'",
+				"failed to marshal 'sdauthpb.Role'",
 				zap.String("role-name", string(role.Name)),
 				zap.Error(err),
 			)
@@ -1121,7 +1121,7 @@ func NewAuthStore(lg *zap.Logger, be backend.Backend, tp TokenProvider, bcryptCo
 	return as
 }
 
-func hasRootRole(u *authpb.User) bool {
+func hasRootRole(u *sdauthpb.User) bool {
 	// u.Roles is sorted in UserGrantRole(), so we can use binary search.
 	idx := sort.SearchStrings(u.Roles, rootRole)
 	return idx != len(u.Roles) && u.Roles[idx] == rootRole

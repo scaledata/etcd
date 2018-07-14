@@ -25,11 +25,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver/api/snap/snappb"
-	pioutil "github.com/coreos/etcd/pkg/ioutil"
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/etcdserver/api/snap/sdsnappb"
+	pioutil "github.com/scaledata/etcd/pkg/ioutil"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 
 	"github.com/coreos/pkg/capnslog"
 	"go.uber.org/zap"
@@ -38,7 +38,7 @@ import (
 const snapSuffix = ".snap"
 
 var (
-	plog = capnslog.NewPackageLogger("github.com/coreos/etcd", "snap")
+	plog = capnslog.NewPackageLogger("github.com/scaledata/etcd", "snap")
 
 	ErrNoSnapshot    = errors.New("snap: no available snapshot")
 	ErrEmptySnapshot = errors.New("snap: empty snapshot")
@@ -63,20 +63,20 @@ func New(lg *zap.Logger, dir string) *Snapshotter {
 	}
 }
 
-func (s *Snapshotter) SaveSnap(snapshot raftpb.Snapshot) error {
+func (s *Snapshotter) SaveSnap(snapshot sdraftpb.Snapshot) error {
 	if raft.IsEmptySnap(snapshot) {
 		return nil
 	}
 	return s.save(&snapshot)
 }
 
-func (s *Snapshotter) save(snapshot *raftpb.Snapshot) error {
+func (s *Snapshotter) save(snapshot *sdraftpb.Snapshot) error {
 	start := time.Now()
 
 	fname := fmt.Sprintf("%016x-%016x%s", snapshot.Metadata.Term, snapshot.Metadata.Index, snapSuffix)
 	b := pbutil.MustMarshal(snapshot)
 	crc := crc32.Update(0, crcTable, b)
-	snap := snappb.Snapshot{Crc: crc, Data: b}
+	snap := sdsnappb.Snapshot{Crc: crc, Data: b}
 	d, err := snap.Marshal()
 	if err != nil {
 		return err
@@ -108,12 +108,12 @@ func (s *Snapshotter) save(snapshot *raftpb.Snapshot) error {
 	return nil
 }
 
-func (s *Snapshotter) Load() (*raftpb.Snapshot, error) {
+func (s *Snapshotter) Load() (*sdraftpb.Snapshot, error) {
 	names, err := s.snapNames()
 	if err != nil {
 		return nil, err
 	}
-	var snap *raftpb.Snapshot
+	var snap *sdraftpb.Snapshot
 	for _, name := range names {
 		if snap, err = loadSnap(s.lg, s.dir, name); err == nil {
 			break
@@ -125,7 +125,7 @@ func (s *Snapshotter) Load() (*raftpb.Snapshot, error) {
 	return snap, nil
 }
 
-func loadSnap(lg *zap.Logger, dir, name string) (*raftpb.Snapshot, error) {
+func loadSnap(lg *zap.Logger, dir, name string) (*sdraftpb.Snapshot, error) {
 	fpath := filepath.Join(dir, name)
 	snap, err := Read(lg, fpath)
 	if err != nil {
@@ -149,7 +149,7 @@ func loadSnap(lg *zap.Logger, dir, name string) (*raftpb.Snapshot, error) {
 }
 
 // Read reads the snapshot named by snapname and returns the snapshot.
-func Read(lg *zap.Logger, snapname string) (*raftpb.Snapshot, error) {
+func Read(lg *zap.Logger, snapname string) (*sdraftpb.Snapshot, error) {
 	b, err := ioutil.ReadFile(snapname)
 	if err != nil {
 		if lg != nil {
@@ -169,10 +169,10 @@ func Read(lg *zap.Logger, snapname string) (*raftpb.Snapshot, error) {
 		return nil, ErrEmptySnapshot
 	}
 
-	var serializedSnap snappb.Snapshot
+	var serializedSnap sdsnappb.Snapshot
 	if err = serializedSnap.Unmarshal(b); err != nil {
 		if lg != nil {
-			lg.Warn("failed to unmarshal snappb.Snapshot", zap.String("path", snapname), zap.Error(err))
+			lg.Warn("failed to unmarshal sdsnappb.Snapshot", zap.String("path", snapname), zap.Error(err))
 		} else {
 			plog.Errorf("corrupted snapshot file %v: %v", snapname, err)
 		}
@@ -202,10 +202,10 @@ func Read(lg *zap.Logger, snapname string) (*raftpb.Snapshot, error) {
 		return nil, ErrCRCMismatch
 	}
 
-	var snap raftpb.Snapshot
+	var snap sdraftpb.Snapshot
 	if err = snap.Unmarshal(serializedSnap.Data); err != nil {
 		if lg != nil {
-			lg.Warn("failed to unmarshal raftpb.Snapshot", zap.String("path", snapname), zap.Error(err))
+			lg.Warn("failed to unmarshal sdraftpb.Snapshot", zap.String("path", snapname), zap.Error(err))
 		} else {
 			plog.Errorf("corrupted snapshot file %v: %v", snapname, err)
 		}

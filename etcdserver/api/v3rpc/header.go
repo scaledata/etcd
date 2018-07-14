@@ -15,8 +15,8 @@
 package v3rpc
 
 import (
-	"github.com/coreos/etcd/etcdserver"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
+	"github.com/scaledata/etcd/etcdserver"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
 )
 
 type header struct {

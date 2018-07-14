@@ -17,13 +17,13 @@ package etcdserver
 import (
 	"io"
 
-	"github.com/coreos/etcd/etcdserver/api/snap"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/wal"
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/etcdserver/api/snap"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/wal"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 
 	"go.uber.org/zap"
 )
@@ -31,9 +31,9 @@ import (
 type Storage interface {
 	// Save function saves ents and state to the underlying stable storage.
 	// Save MUST block until st and ents are on stable storage.
-	Save(st raftpb.HardState, ents []raftpb.Entry) error
+	Save(st sdraftpb.HardState, ents []sdraftpb.Entry) error
 	// SaveSnap function saves snapshot to the underlying stable storage.
-	SaveSnap(snap raftpb.Snapshot) error
+	SaveSnap(snap sdraftpb.Snapshot) error
 	// Close closes the Storage and performs finalization.
 	Close() error
 }
@@ -49,8 +49,8 @@ func NewStorage(w *wal.WAL, s *snap.Snapshotter) Storage {
 
 // SaveSnap saves the snapshot to disk and release the locked
 // wal files since they will not be used.
-func (st *storage) SaveSnap(snap raftpb.Snapshot) error {
-	walsnap := walpb.Snapshot{
+func (st *storage) SaveSnap(snap sdraftpb.Snapshot) error {
+	walsnap := sdwalpb.Snapshot{
 		Index: snap.Metadata.Index,
 		Term:  snap.Metadata.Term,
 	}
@@ -65,7 +65,7 @@ func (st *storage) SaveSnap(snap raftpb.Snapshot) error {
 	return st.WAL.ReleaseLockTo(snap.Metadata.Index)
 }
 
-func readWAL(lg *zap.Logger, waldir string, snap walpb.Snapshot) (w *wal.WAL, id, cid types.ID, st raftpb.HardState, ents []raftpb.Entry) {
+func readWAL(lg *zap.Logger, waldir string, snap sdwalpb.Snapshot) (w *wal.WAL, id, cid types.ID, st sdraftpb.HardState, ents []sdraftpb.Entry) {
 	var (
 		err       error
 		wmetadata []byte
