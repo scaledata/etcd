@@ -22,10 +22,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/clientv3/mirror"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/clientv3/mirror"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc/rpctypes"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 
 	"github.com/spf13/cobra"
 )
@@ -150,10 +150,10 @@ func makeMirror(ctx context.Context, c *clientv3.Client, dc *clientv3.Client) er
 			}
 			lastRev = nextRev
 			switch ev.Type {
-			case mvccpb.PUT:
+			case sdmvccpb.PUT:
 				ops = append(ops, clientv3.OpPut(modifyPrefix(string(ev.Kv.Key)), string(ev.Kv.Value)))
 				atomic.AddInt64(&total, 1)
-			case mvccpb.DELETE:
+			case sdmvccpb.DELETE:
 				ops = append(ops, clientv3.OpDelete(modifyPrefix(string(ev.Kv.Key))))
 				atomic.AddInt64(&total, 1)
 			default:

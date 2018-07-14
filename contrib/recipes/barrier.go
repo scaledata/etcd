@@ -17,8 +17,8 @@ package recipe
 import (
 	"context"
 
-	v3 "github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	v3 "github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 // Barrier creates a key in etcd to block processes, then deletes the key to
@@ -61,6 +61,6 @@ func (b *Barrier) Wait() error {
 		b.client,
 		b.key,
 		resp.Header.Revision,
-		[]mvccpb.Event_EventType{mvccpb.PUT, mvccpb.DELETE})
+		[]sdmvccpb.Event_EventType{sdmvccpb.PUT, sdmvccpb.DELETE})
 	return err
 }

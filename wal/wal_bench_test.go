@@ -19,7 +19,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 func BenchmarkWrite100EntryWithoutBatch(b *testing.B) { benchmarkWriteEntry(b, 100, 0) }
@@ -49,7 +49,7 @@ func benchmarkWriteEntry(b *testing.B, size int, batch int) {
 	for i := 0; i < size; i++ {
 		data[i] = byte(i)
 	}
-	e := &raftpb.Entry{Data: data}
+	e := &sdraftpb.Entry{Data: data}
 
 	b.ResetTimer()
 	n := 0

@@ -29,33 +29,33 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/coreos/etcd/alarm"
-	"github.com/coreos/etcd/auth"
-	"github.com/coreos/etcd/compactor"
-	"github.com/coreos/etcd/discovery"
-	"github.com/coreos/etcd/etcdserver/api"
-	"github.com/coreos/etcd/etcdserver/api/v2http/httptypes"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/etcdserver/membership"
-	"github.com/coreos/etcd/etcdserver/stats"
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/lease/leasehttp"
-	"github.com/coreos/etcd/mvcc"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/coreos/etcd/pkg/idutil"
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/pkg/runtime"
-	"github.com/coreos/etcd/pkg/schedule"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/pkg/wait"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/rafthttp"
-	"github.com/coreos/etcd/snap"
-	"github.com/coreos/etcd/store"
-	"github.com/coreos/etcd/version"
-	"github.com/coreos/etcd/wal"
+	"github.com/scaledata/etcd/alarm"
+	"github.com/scaledata/etcd/auth"
+	"github.com/scaledata/etcd/compactor"
+	"github.com/scaledata/etcd/discovery"
+	"github.com/scaledata/etcd/etcdserver/api"
+	"github.com/scaledata/etcd/etcdserver/api/v2http/httptypes"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/etcdserver/membership"
+	"github.com/scaledata/etcd/etcdserver/stats"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/lease/leasehttp"
+	"github.com/scaledata/etcd/mvcc"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/pkg/idutil"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/pkg/runtime"
+	"github.com/scaledata/etcd/pkg/schedule"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/pkg/wait"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/rafthttp"
+	"github.com/scaledata/etcd/snap"
+	"github.com/scaledata/etcd/store"
+	"github.com/scaledata/etcd/version"
+	"github.com/scaledata/etcd/wal"
 
 	"github.com/coreos/go-semver/semver"
 	"github.com/coreos/pkg/capnslog"
@@ -90,7 +90,7 @@ const (
 )
 
 var (
-	plog = capnslog.NewPackageLogger("github.com/coreos/etcd", "etcdserver")
+	plog = capnslog.NewPackageLogger("github.com/scaledata/etcd", "etcdserver")
 
 	storeMemberAttributeRegexp = regexp.MustCompile(path.Join(membership.StoreMembersPrefix, "[[:xdigit:]]{1,16}", "attributes"))
 )
@@ -297,7 +297,7 @@ func NewServer(cfg ServerConfig) (srv *EtcdServer, err error) {
 	}
 	var (
 		remotes  []*membership.Member
-		snapshot *raftpb.Snapshot
+		snapshot *sdraftpb.Snapshot
 	)
 
 	switch {
@@ -649,12 +649,12 @@ func (s *EtcdServer) RaftHandler() http.Handler { return s.r.transport.Handler()
 
 // Process takes a raft message and applies it to the server's raft state
 // machine, respecting any timeout of the given context.
-func (s *EtcdServer) Process(ctx context.Context, m raftpb.Message) error {
+func (s *EtcdServer) Process(ctx context.Context, m sdraftpb.Message) error {
 	if s.cluster.IsIDRemoved(types.ID(m.From)) {
 		plog.Warningf("reject message from removed member %s", types.ID(m.From).String())
 		return httptypes.NewHTTPError(http.StatusForbidden, "cannot process message from removed member")
 	}
-	if m.Type == raftpb.MsgApp {
+	if m.Type == sdraftpb.MsgApp {
 		s.stats.RecvAppendReq(types.ID(m.From).String(), m.Size())
 	}
 	return s.r.Step(ctx, m)
@@ -671,7 +671,7 @@ func (s *EtcdServer) ReportSnapshot(id uint64, status raft.SnapshotStatus) {
 }
 
 type etcdProgress struct {
-	confState raftpb.ConfState
+	confState sdraftpb.ConfState
 	snapi     uint64
 	appliedt  uint64
 	appliedi  uint64
@@ -966,7 +966,7 @@ func (s *EtcdServer) applyEntries(ep *etcdProgress, apply *apply) {
 	if firsti > ep.appliedi+1 {
 		plog.Panicf("first index of committed entry[%d] should <= appliedi[%d] + 1", firsti, ep.appliedi)
 	}
-	var ents []raftpb.Entry
+	var ents []sdraftpb.Entry
 	if ep.appliedi+1-firsti < uint64(len(apply.entries)) {
 		ents = apply.entries[ep.appliedi+1-firsti:]
 	}
@@ -1139,8 +1139,8 @@ func (s *EtcdServer) AddMember(ctx context.Context, memb membership.Member) ([]*
 	if err != nil {
 		return nil, err
 	}
-	cc := raftpb.ConfChange{
-		Type:    raftpb.ConfChangeAddNode,
+	cc := sdraftpb.ConfChange{
+		Type:    sdraftpb.ConfChangeAddNode,
 		NodeID:  uint64(memb.ID),
 		Context: b,
 	}
@@ -1157,8 +1157,8 @@ func (s *EtcdServer) RemoveMember(ctx context.Context, id uint64) ([]*membership
 		return nil, err
 	}
 
-	cc := raftpb.ConfChange{
-		Type:   raftpb.ConfChangeRemoveNode,
+	cc := sdraftpb.ConfChange{
+		Type:   sdraftpb.ConfChangeRemoveNode,
 		NodeID: id,
 	}
 	return s.configure(ctx, cc)
@@ -1199,8 +1199,8 @@ func (s *EtcdServer) UpdateMember(ctx context.Context, memb membership.Member) (
 	if err := s.checkMembershipOperationPermission(ctx); err != nil {
 		return nil, err
 	}
-	cc := raftpb.ConfChange{
-		Type:    raftpb.ConfChangeUpdateNode,
+	cc := sdraftpb.ConfChange{
+		Type:    sdraftpb.ConfChangeUpdateNode,
 		NodeID:  uint64(memb.ID),
 		Context: b,
 	}
@@ -1228,7 +1228,7 @@ type confChangeResponse struct {
 // configure sends a configuration change through consensus and
 // then waits for it to be applied to the server. It
 // will block until the change is performed or there is an error.
-func (s *EtcdServer) configure(ctx context.Context, cc raftpb.ConfChange) ([]*membership.Member, error) {
+func (s *EtcdServer) configure(ctx context.Context, cc sdraftpb.ConfChange) ([]*membership.Member, error) {
 	cc.ID = s.reqIDGen.Next()
 	ch := s.w.Register(cc.ID)
 	start := time.Now()
@@ -1332,18 +1332,18 @@ func (s *EtcdServer) sendMergedSnap(merged snap.Message) {
 // apply takes entries received from Raft (after it has been committed) and
 // applies them to the current state of the EtcdServer.
 // The given entries should not be empty.
-func (s *EtcdServer) apply(es []raftpb.Entry, confState *raftpb.ConfState) (appliedt uint64, appliedi uint64, shouldStop bool) {
+func (s *EtcdServer) apply(es []sdraftpb.Entry, confState *sdraftpb.ConfState) (appliedt uint64, appliedi uint64, shouldStop bool) {
 	for i := range es {
 		e := es[i]
 		switch e.Type {
-		case raftpb.EntryNormal:
+		case sdraftpb.EntryNormal:
 			s.applyEntryNormal(&e)
-		case raftpb.EntryConfChange:
+		case sdraftpb.EntryConfChange:
 			// set the consistent index of current executing entry
 			if e.Index > s.consistIndex.ConsistentIndex() {
 				s.consistIndex.setConsistentIndex(e.Index)
 			}
-			var cc raftpb.ConfChange
+			var cc sdraftpb.ConfChange
 			pbutil.MustUnmarshal(&cc, e.Data)
 			removedSelf, err := s.applyConfChange(cc, confState)
 			s.setAppliedIndex(e.Index)
@@ -1360,8 +1360,8 @@ func (s *EtcdServer) apply(es []raftpb.Entry, confState *raftpb.ConfState) (appl
 	return appliedt, appliedi, shouldStop
 }
 
-// applyEntryNormal apples an EntryNormal type raftpb request to the EtcdServer
-func (s *EtcdServer) applyEntryNormal(e *raftpb.Entry) {
+// applyEntryNormal apples an EntryNormal type sdraftpb request to the EtcdServer
+func (s *EtcdServer) applyEntryNormal(e *sdraftpb.Entry) {
 	shouldApplyV3 := false
 	if e.Index > s.consistIndex.ConsistentIndex() {
 		// set the consistent index of current executing entry
@@ -1441,7 +1441,7 @@ func (s *EtcdServer) applyEntryNormal(e *raftpb.Entry) {
 
 // applyConfChange applies a ConfChange to the server. It is only
 // invoked with a ConfChange that has already passed through Raft
-func (s *EtcdServer) applyConfChange(cc raftpb.ConfChange, confState *raftpb.ConfState) (bool, error) {
+func (s *EtcdServer) applyConfChange(cc sdraftpb.ConfChange, confState *sdraftpb.ConfState) (bool, error) {
 	if err := s.cluster.ValidateConfigurationChange(cc); err != nil {
 		cc.NodeID = raft.None
 		s.r.ApplyConfChange(cc)
@@ -1449,7 +1449,7 @@ func (s *EtcdServer) applyConfChange(cc raftpb.ConfChange, confState *raftpb.Con
 	}
 	*confState = *s.r.ApplyConfChange(cc)
 	switch cc.Type {
-	case raftpb.ConfChangeAddNode:
+	case sdraftpb.ConfChangeAddNode:
 		m := new(membership.Member)
 		if err := json.Unmarshal(cc.Context, m); err != nil {
 			plog.Panicf("unmarshal member should never fail: %v", err)
@@ -1461,14 +1461,14 @@ func (s *EtcdServer) applyConfChange(cc raftpb.ConfChange, confState *raftpb.Con
 		if m.ID != s.id {
 			s.r.transport.AddPeer(m.ID, m.PeerURLs)
 		}
-	case raftpb.ConfChangeRemoveNode:
+	case sdraftpb.ConfChangeRemoveNode:
 		id := types.ID(cc.NodeID)
 		s.cluster.RemoveMember(id)
 		if id == s.id {
 			return true, nil
 		}
 		s.r.transport.RemovePeer(id)
-	case raftpb.ConfChangeUpdateNode:
+	case sdraftpb.ConfChangeUpdateNode:
 		m := new(membership.Member)
 		if err := json.Unmarshal(cc.Context, m); err != nil {
 			plog.Panicf("unmarshal member should never fail: %v", err)
@@ -1485,7 +1485,7 @@ func (s *EtcdServer) applyConfChange(cc raftpb.ConfChange, confState *raftpb.Con
 }
 
 // TODO: non-blocking snapshot
-func (s *EtcdServer) snapshot(snapi uint64, confState raftpb.ConfState) {
+func (s *EtcdServer) snapshot(snapi uint64, confState sdraftpb.ConfState) {
 	clone := s.store.Clone()
 	// commit kv to write metadata (for example: consistent index) to disk.
 	// KV().commit() updates the consistent index in backend.

@@ -20,9 +20,9 @@ import (
 	"sync"
 	"time"
 
-	v3rpc "github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	mvccpb "github.com/coreos/etcd/mvcc/mvccpb"
+	v3rpc "github.com/scaledata/etcd/etcdserver/api/v3rpc/rpctypes"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	sdmvccpb "github.com/scaledata/etcd/mvcc/sdmvccpb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -31,13 +31,13 @@ import (
 )
 
 const (
-	EventTypeDelete = mvccpb.DELETE
-	EventTypePut    = mvccpb.PUT
+	EventTypeDelete = sdmvccpb.DELETE
+	EventTypePut    = sdmvccpb.PUT
 
 	closeSendErrTimeout = 250 * time.Millisecond
 )
 
-type Event mvccpb.Event
+type Event sdmvccpb.Event
 
 type WatchChan <-chan WatchResponse
 

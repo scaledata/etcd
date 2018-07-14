@@ -27,12 +27,12 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"github.com/coreos/etcd/etcdserver/stats"
-	"github.com/coreos/etcd/pkg/httputil"
-	"github.com/coreos/etcd/pkg/transport"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/version"
+	"github.com/scaledata/etcd/etcdserver/stats"
+	"github.com/scaledata/etcd/pkg/httputil"
+	"github.com/scaledata/etcd/pkg/transport"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/version"
 	"github.com/coreos/go-semver/semver"
 )
 
@@ -88,11 +88,11 @@ var (
 	// linkHeartbeatMessage is a special message used as heartbeat message in
 	// link layer. It never conflicts with messages from raft because raft
 	// doesn't send out messages without From and To fields.
-	linkHeartbeatMessage = raftpb.Message{Type: raftpb.MsgHeartbeat}
+	linkHeartbeatMessage = sdraftpb.Message{Type: sdraftpb.MsgHeartbeat}
 )
 
-func isLinkHeartbeatMessage(m *raftpb.Message) bool {
-	return m.Type == raftpb.MsgHeartbeat && m.From == 0 && m.To == 0
+func isLinkHeartbeatMessage(m *sdraftpb.Message) bool {
+	return m.Type == sdraftpb.MsgHeartbeat && m.From == 0 && m.To == 0
 }
 
 type outgoingConn struct {
@@ -113,7 +113,7 @@ type streamWriter struct {
 	closer  io.Closer
 	working bool
 
-	msgc  chan raftpb.Message
+	msgc  chan sdraftpb.Message
 	connc chan *outgoingConn
 	stopc chan struct{}
 	done  chan struct{}
@@ -127,7 +127,7 @@ func startStreamWriter(id types.ID, status *peerStatus, fs *stats.FollowerStats,
 		status: status,
 		fs:     fs,
 		r:      r,
-		msgc:   make(chan raftpb.Message, streamBufSize),
+		msgc:   make(chan sdraftpb.Message, streamBufSize),
 		connc:  make(chan *outgoingConn),
 		stopc:  make(chan struct{}),
 		done:   make(chan struct{}),
@@ -138,7 +138,7 @@ func startStreamWriter(id types.ID, status *peerStatus, fs *stats.FollowerStats,
 
 func (cw *streamWriter) run() {
 	var (
-		msgc       chan raftpb.Message
+		msgc       chan sdraftpb.Message
 		heartbeatc <-chan time.Time
 		t          streamType
 		enc        encoder
@@ -230,7 +230,7 @@ func (cw *streamWriter) run() {
 	}
 }
 
-func (cw *streamWriter) writec() (chan<- raftpb.Message, bool) {
+func (cw *streamWriter) writec() (chan<- sdraftpb.Message, bool) {
 	cw.mu.Lock()
 	defer cw.mu.Unlock()
 	return cw.msgc, cw.working
@@ -252,7 +252,7 @@ func (cw *streamWriter) closeUnlocked() bool {
 	if len(cw.msgc) > 0 {
 		cw.r.ReportUnreachable(uint64(cw.peerID))
 	}
-	cw.msgc = make(chan raftpb.Message, streamBufSize)
+	cw.msgc = make(chan sdraftpb.Message, streamBufSize)
 	cw.working = false
 	return true
 }
@@ -280,8 +280,8 @@ type streamReader struct {
 	tr     *Transport
 	picker *urlPicker
 	status *peerStatus
-	recvc  chan<- raftpb.Message
-	propc  chan<- raftpb.Message
+	recvc  chan<- sdraftpb.Message
+	propc  chan<- sdraftpb.Message
 
 	rl *rate.Limiter // alters the frequency of dial retrial attempts
 
@@ -393,7 +393,7 @@ func (cr *streamReader) decodeLoop(rc io.ReadCloser, t streamType) error {
 		}
 
 		recvc := cr.recvc
-		if m.Type == raftpb.MsgProp {
+		if m.Type == sdraftpb.MsgProp {
 			recvc = cr.propc
 		}
 

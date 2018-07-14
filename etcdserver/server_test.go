@@ -26,25 +26,25 @@ import (
 	"testing"
 	"time"
 
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/etcdserver/membership"
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/mvcc"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/coreos/etcd/pkg/idutil"
-	"github.com/coreos/etcd/pkg/mock/mockstorage"
-	"github.com/coreos/etcd/pkg/mock/mockstore"
-	"github.com/coreos/etcd/pkg/mock/mockwait"
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/pkg/testutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/pkg/wait"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/rafthttp"
-	"github.com/coreos/etcd/snap"
-	"github.com/coreos/etcd/store"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/etcdserver/membership"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/mvcc"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/pkg/idutil"
+	"github.com/scaledata/etcd/pkg/mock/mockstorage"
+	"github.com/scaledata/etcd/pkg/mock/mockstore"
+	"github.com/scaledata/etcd/pkg/mock/mockwait"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/pkg/wait"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/rafthttp"
+	"github.com/scaledata/etcd/snap"
+	"github.com/scaledata/etcd/store"
 )
 
 // TestDoLocalAction tests requests which do not need to go through raft to be applied,
@@ -186,16 +186,16 @@ func TestApplyRepeat(t *testing.T) {
 	s.applyV2 = &applierV2store{store: s.store, cluster: s.cluster}
 	s.start()
 	req := &pb.Request{Method: "QGET", ID: uint64(1)}
-	ents := []raftpb.Entry{{Index: 1, Data: pbutil.MustMarshal(req)}}
+	ents := []sdraftpb.Entry{{Index: 1, Data: pbutil.MustMarshal(req)}}
 	n.readyc <- raft.Ready{CommittedEntries: ents}
 	// dup msg
 	n.readyc <- raft.Ready{CommittedEntries: ents}
 
 	// use a conf change to block until dup msgs are all processed
-	cc := &raftpb.ConfChange{Type: raftpb.ConfChangeRemoveNode, NodeID: 2}
-	ents = []raftpb.Entry{{
+	cc := &sdraftpb.ConfChange{Type: sdraftpb.ConfChangeRemoveNode, NodeID: 2}
+	ents = []sdraftpb.Entry{{
 		Index: 2,
-		Type:  raftpb.EntryConfChange,
+		Type:  sdraftpb.EntryConfChange,
 		Data:  pbutil.MustMarshal(cc),
 	}}
 	n.readyc <- raft.Ready{CommittedEntries: ents}
@@ -492,33 +492,33 @@ func TestApplyConfChangeError(t *testing.T) {
 	cl.RemoveMember(4)
 
 	tests := []struct {
-		cc   raftpb.ConfChange
+		cc   sdraftpb.ConfChange
 		werr error
 	}{
 		{
-			raftpb.ConfChange{
-				Type:   raftpb.ConfChangeAddNode,
+			sdraftpb.ConfChange{
+				Type:   sdraftpb.ConfChangeAddNode,
 				NodeID: 4,
 			},
 			membership.ErrIDRemoved,
 		},
 		{
-			raftpb.ConfChange{
-				Type:   raftpb.ConfChangeUpdateNode,
+			sdraftpb.ConfChange{
+				Type:   sdraftpb.ConfChangeUpdateNode,
 				NodeID: 4,
 			},
 			membership.ErrIDRemoved,
 		},
 		{
-			raftpb.ConfChange{
-				Type:   raftpb.ConfChangeAddNode,
+			sdraftpb.ConfChange{
+				Type:   sdraftpb.ConfChangeAddNode,
 				NodeID: 1,
 			},
 			membership.ErrIDExists,
 		},
 		{
-			raftpb.ConfChange{
-				Type:   raftpb.ConfChangeRemoveNode,
+			sdraftpb.ConfChange{
+				Type:   sdraftpb.ConfChangeRemoveNode,
 				NodeID: 5,
 			},
 			membership.ErrIDNotFound,
@@ -534,7 +534,7 @@ func TestApplyConfChangeError(t *testing.T) {
 		if err != tt.werr {
 			t.Errorf("#%d: applyConfChange error = %v, want %v", i, err, tt.werr)
 		}
-		cc := raftpb.ConfChange{Type: tt.cc.Type, NodeID: raft.None}
+		cc := sdraftpb.ConfChange{Type: tt.cc.Type, NodeID: raft.None}
 		w := []testutil.Action{
 			{
 				Name:   "ApplyConfChange",
@@ -562,12 +562,12 @@ func TestApplyConfChangeShouldStop(t *testing.T) {
 		r:       *r,
 		cluster: cl,
 	}
-	cc := raftpb.ConfChange{
-		Type:   raftpb.ConfChangeRemoveNode,
+	cc := sdraftpb.ConfChange{
+		Type:   sdraftpb.ConfChangeRemoveNode,
 		NodeID: 2,
 	}
 	// remove non-local member
-	shouldStop, err := srv.applyConfChange(cc, &raftpb.ConfState{})
+	shouldStop, err := srv.applyConfChange(cc, &sdraftpb.ConfState{})
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
@@ -577,7 +577,7 @@ func TestApplyConfChangeShouldStop(t *testing.T) {
 
 	// remove local member
 	cc.NodeID = 1
-	shouldStop, err = srv.applyConfChange(cc, &raftpb.ConfState{})
+	shouldStop, err = srv.applyConfChange(cc, &sdraftpb.ConfState{})
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
@@ -615,14 +615,14 @@ func TestApplyConfigChangeUpdatesConsistIndex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cc := &raftpb.ConfChange{Type: raftpb.ConfChangeAddNode, NodeID: 2, Context: b}
-	ents := []raftpb.Entry{{
+	cc := &sdraftpb.ConfChange{Type: sdraftpb.ConfChangeAddNode, NodeID: 2, Context: b}
+	ents := []sdraftpb.Entry{{
 		Index: 2,
-		Type:  raftpb.EntryConfChange,
+		Type:  sdraftpb.EntryConfChange,
 		Data:  pbutil.MustMarshal(cc),
 	}}
 
-	_, appliedi, _ := srv.apply(ents, &raftpb.ConfState{})
+	_, appliedi, _ := srv.apply(ents, &sdraftpb.ConfState{})
 	consistIndex := srv.consistIndex.ConsistentIndex()
 	if consistIndex != appliedi {
 		t.Fatalf("consistIndex = %v, want %v", consistIndex, appliedi)
@@ -647,21 +647,21 @@ func TestApplyMultiConfChangeShouldStop(t *testing.T) {
 		cluster: cl,
 		w:       wait.New(),
 	}
-	ents := []raftpb.Entry{}
+	ents := []sdraftpb.Entry{}
 	for i := 1; i <= 4; i++ {
-		ent := raftpb.Entry{
+		ent := sdraftpb.Entry{
 			Term:  1,
 			Index: uint64(i),
-			Type:  raftpb.EntryConfChange,
+			Type:  sdraftpb.EntryConfChange,
 			Data: pbutil.MustMarshal(
-				&raftpb.ConfChange{
-					Type:   raftpb.ConfChangeRemoveNode,
+				&sdraftpb.ConfChange{
+					Type:   sdraftpb.ConfChangeRemoveNode,
 					NodeID: uint64(i)}),
 		}
 		ents = append(ents, ent)
 	}
 
-	_, _, shouldStop := srv.apply(ents, &raftpb.ConfState{})
+	_, _, shouldStop := srv.apply(ents, &sdraftpb.ConfState{})
 	if !shouldStop {
 		t.Errorf("shouldStop = %t, want %t", shouldStop, true)
 	}
@@ -904,7 +904,7 @@ func TestSnapshot(t *testing.T) {
 	}()
 
 	s := raft.NewMemoryStorage()
-	s.Append([]raftpb.Entry{{Index: 1}})
+	s.Append([]sdraftpb.Entry{{Index: 1}})
 	st := mockstore.NewRecorderStream()
 	p := mockstorage.NewStorageRecorderStream("")
 	r := newRaftNode(raftNodeConfig{
@@ -948,7 +948,7 @@ func TestSnapshot(t *testing.T) {
 		}
 	}()
 
-	srv.snapshot(1, raftpb.ConfState{Nodes: []uint64{1}})
+	srv.snapshot(1, sdraftpb.ConfState{Nodes: []uint64{1}})
 	<-ch
 	<-ch
 }
@@ -1000,7 +1000,7 @@ func TestSnapshotOrdering(t *testing.T) {
 	s.start()
 	defer s.Stop()
 
-	n.readyc <- raft.Ready{Messages: []raftpb.Message{{Type: raftpb.MsgSnap}}}
+	n.readyc <- raft.Ready{Messages: []sdraftpb.Message{{Type: sdraftpb.MsgSnap}}}
 	go func() {
 		// get the snapshot sent by the transport
 		snapMsg := <-snapDoneC
@@ -1135,11 +1135,11 @@ func TestConcurrentApplyAndSnapshotV3(t *testing.T) {
 		idx++
 		ch := s.w.Register(uint64(idx))
 		req := &pb.Request{Method: "QGET", ID: uint64(idx)}
-		ent := raftpb.Entry{Index: uint64(idx), Data: pbutil.MustMarshal(req)}
-		ready := raft.Ready{Entries: []raftpb.Entry{ent}}
+		ent := sdraftpb.Entry{Index: uint64(idx), Data: pbutil.MustMarshal(req)}
+		ready := raft.Ready{Entries: []sdraftpb.Entry{ent}}
 		n.readyc <- ready
 
-		ready = raft.Ready{CommittedEntries: []raftpb.Entry{ent}}
+		ready = raft.Ready{CommittedEntries: []sdraftpb.Entry{ent}}
 		n.readyc <- ready
 
 		// "idx" applied
@@ -1150,7 +1150,7 @@ func TestConcurrentApplyAndSnapshotV3(t *testing.T) {
 			continue
 		}
 
-		n.readyc <- raft.Ready{Messages: []raftpb.Message{{Type: raftpb.MsgSnap}}}
+		n.readyc <- raft.Ready{Messages: []sdraftpb.Message{{Type: sdraftpb.MsgSnap}}}
 		// get the snapshot sent by the transport
 		snapMsg := <-snapDoneC
 		// If the snapshot trails applied records, recovery will panic
@@ -1534,11 +1534,11 @@ func (n *nodeRecorder) Propose(ctx context.Context, data []byte) error {
 	n.Record(testutil.Action{Name: "Propose", Params: []interface{}{data}})
 	return nil
 }
-func (n *nodeRecorder) ProposeConfChange(ctx context.Context, conf raftpb.ConfChange) error {
+func (n *nodeRecorder) ProposeConfChange(ctx context.Context, conf sdraftpb.ConfChange) error {
 	n.Record(testutil.Action{Name: "ProposeConfChange"})
 	return nil
 }
-func (n *nodeRecorder) Step(ctx context.Context, msg raftpb.Message) error {
+func (n *nodeRecorder) Step(ctx context.Context, msg sdraftpb.Message) error {
 	n.Record(testutil.Action{Name: "Step"})
 	return nil
 }
@@ -1547,9 +1547,9 @@ func (n *nodeRecorder) Ready() <-chan raft.Ready                                
 func (n *nodeRecorder) TransferLeadership(ctx context.Context, lead, transferee uint64) {}
 func (n *nodeRecorder) ReadIndex(ctx context.Context, rctx []byte) error                { return nil }
 func (n *nodeRecorder) Advance()                                                        {}
-func (n *nodeRecorder) ApplyConfChange(conf raftpb.ConfChange) *raftpb.ConfState {
+func (n *nodeRecorder) ApplyConfChange(conf sdraftpb.ConfChange) *sdraftpb.ConfState {
 	n.Record(testutil.Action{Name: "ApplyConfChange", Params: []interface{}{conf}})
-	return &raftpb.ConfState{}
+	return &sdraftpb.ConfState{}
 }
 
 func (n *nodeRecorder) Stop() {
@@ -1608,22 +1608,22 @@ func newNodeConfChangeCommitterStream() *nodeConfChangeCommitterRecorder {
 	return &nodeConfChangeCommitterRecorder{*newReadyNode(), 0}
 }
 
-func (n *nodeConfChangeCommitterRecorder) ProposeConfChange(ctx context.Context, conf raftpb.ConfChange) error {
+func (n *nodeConfChangeCommitterRecorder) ProposeConfChange(ctx context.Context, conf sdraftpb.ConfChange) error {
 	data, err := conf.Marshal()
 	if err != nil {
 		return err
 	}
 	n.index++
 	n.Record(testutil.Action{Name: "ProposeConfChange:" + conf.Type.String()})
-	n.readyc <- raft.Ready{CommittedEntries: []raftpb.Entry{{Index: n.index, Type: raftpb.EntryConfChange, Data: data}}}
+	n.readyc <- raft.Ready{CommittedEntries: []sdraftpb.Entry{{Index: n.index, Type: sdraftpb.EntryConfChange, Data: data}}}
 	return nil
 }
 func (n *nodeConfChangeCommitterRecorder) Ready() <-chan raft.Ready {
 	return n.readyc
 }
-func (n *nodeConfChangeCommitterRecorder) ApplyConfChange(conf raftpb.ConfChange) *raftpb.ConfState {
+func (n *nodeConfChangeCommitterRecorder) ApplyConfChange(conf sdraftpb.ConfChange) *sdraftpb.ConfState {
 	n.Record(testutil.Action{Name: "ApplyConfChange:" + conf.Type.String()})
-	return &raftpb.ConfState{}
+	return &sdraftpb.ConfState{}
 }
 
 // nodeCommitter commits proposed data immediately.
@@ -1637,7 +1637,7 @@ func newNodeCommitter() raft.Node {
 }
 func (n *nodeCommitter) Propose(ctx context.Context, data []byte) error {
 	n.index++
-	ents := []raftpb.Entry{{Index: n.index, Data: data}}
+	ents := []sdraftpb.Entry{{Index: n.index, Data: data}}
 	n.readyc <- raft.Ready{
 		Entries:          ents,
 		CommittedEntries: ents,

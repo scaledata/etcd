@@ -29,8 +29,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/pkg/testutil"
-	"github.com/coreos/etcd/version"
+	"github.com/scaledata/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/version"
 )
 
 type actionAssertingHTTPClient struct {

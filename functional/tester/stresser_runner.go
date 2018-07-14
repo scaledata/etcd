@@ -20,14 +20,14 @@ import (
 	"os/exec"
 	"syscall"
 
-	"github.com/coreos/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
 
 	"go.uber.org/zap"
 	"golang.org/x/time/rate"
 )
 
 type runnerStresser struct {
-	stype              rpcpb.Stresser
+	stype              sdrpcpb.Stresser
 	etcdClientEndpoint string
 	lg                 *zap.Logger
 
@@ -42,7 +42,7 @@ type runnerStresser struct {
 }
 
 func newRunnerStresser(
-	stype rpcpb.Stresser,
+	stype sdrpcpb.Stresser,
 	ep string,
 	lg *zap.Logger,
 	cmdStr string,

@@ -23,10 +23,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	"github.com/coreos/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc/rpctypes"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
 
 	"go.uber.org/zap"
 	"golang.org/x/time/rate"
@@ -35,10 +35,10 @@ import (
 )
 
 type keyStresser struct {
-	stype rpcpb.Stresser
+	stype sdrpcpb.Stresser
 	lg    *zap.Logger
 
-	m *rpcpb.Member
+	m *sdrpcpb.Member
 
 	keySize           int
 	keyLargeSize      int

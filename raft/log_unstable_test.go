@@ -18,7 +18,7 @@ import (
 	"reflect"
 	"testing"
 
-	pb "github.com/coreos/etcd/raft/raftpb"
+	pb "github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 func TestUnstableMaybeFirstIndex(t *testing.T) {

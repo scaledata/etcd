@@ -17,8 +17,8 @@ package recipe
 import (
 	"context"
 
-	v3 "github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	v3 "github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 // Queue implements a multi-reader, multi-writer distributed queue.
@@ -62,7 +62,7 @@ func (q *Queue) Dequeue() (string, error) {
 		q.client,
 		q.keyPrefix,
 		resp.Header.Revision,
-		[]mvccpb.Event_EventType{mvccpb.PUT})
+		[]sdmvccpb.Event_EventType{sdmvccpb.PUT})
 	if err != nil {
 		return "", err
 	}

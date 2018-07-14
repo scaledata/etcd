@@ -17,10 +17,10 @@ package grpcproxy
 import (
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/mvcc"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/clientv3"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/mvcc"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 type watchRange struct {
@@ -64,11 +64,11 @@ func (w *watcher) send(wr clientv3.WatchResponse) {
 		w.nextrev = wr.Header.Revision + 1
 	}
 
-	events := make([]*mvccpb.Event, 0, len(wr.Events))
+	events := make([]*sdmvccpb.Event, 0, len(wr.Events))
 
 	var lastRev int64
 	for i := range wr.Events {
-		ev := (*mvccpb.Event)(wr.Events[i])
+		ev := (*sdmvccpb.Event)(wr.Events[i])
 		if ev.Kv.ModRevision < w.nextrev {
 			continue
 		} else {

@@ -28,7 +28,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/pkg/transport"
+	"github.com/scaledata/etcd/pkg/transport"
 
 	"go.uber.org/zap"
 )

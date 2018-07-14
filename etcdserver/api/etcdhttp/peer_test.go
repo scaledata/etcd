@@ -23,10 +23,10 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/coreos/etcd/etcdserver/membership"
-	"github.com/coreos/etcd/pkg/testutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/rafthttp"
+	"github.com/scaledata/etcd/etcdserver/membership"
+	"github.com/scaledata/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/rafthttp"
 	"github.com/coreos/go-semver/semver"
 )
 

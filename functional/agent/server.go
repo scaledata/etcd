@@ -21,14 +21,14 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/coreos/etcd/functional/rpcpb"
-	"github.com/coreos/etcd/pkg/proxy"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
+	"github.com/scaledata/etcd/pkg/proxy"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
-// Server implements "rpcpb.TransportServer"
+// Server implements "sdrpcpb.TransportServer"
 // and other etcd operations as an agent
 // no need to lock fields since request operations are
 // serialized in tester-side
@@ -40,11 +40,11 @@ type Server struct {
 	address string
 	ln      net.Listener
 
-	rpcpb.TransportServer
-	last rpcpb.Operation
+	sdrpcpb.TransportServer
+	last sdrpcpb.Operation
 
-	*rpcpb.Member
-	*rpcpb.Tester
+	*sdrpcpb.Member
+	*sdrpcpb.Tester
 
 	etcdCmd     *exec.Cmd
 	etcdLogFile *os.File
@@ -64,7 +64,7 @@ func NewServer(
 		lg:      lg,
 		network: network,
 		address: address,
-		last:    rpcpb.Operation_NOT_STARTED,
+		last:    sdrpcpb.Operation_NOT_STARTED,
 		advertiseClientPortToProxy: make(map[int]proxy.Server),
 		advertisePeerPortToProxy:   make(map[int]proxy.Server),
 	}
@@ -91,7 +91,7 @@ func (srv *Server) StartServe() error {
 	opts = append(opts, grpc.MaxConcurrentStreams(maxStreams))
 	srv.grpcServer = grpc.NewServer(opts...)
 
-	rpcpb.RegisterTransportServer(srv.grpcServer, srv)
+	sdrpcpb.RegisterTransportServer(srv.grpcServer, srv)
 
 	srv.lg.Info(
 		"gRPC server started",
@@ -123,11 +123,11 @@ func (srv *Server) Stop() {
 }
 
 // Transport communicates with etcd tester.
-func (srv *Server) Transport(stream rpcpb.Transport_TransportServer) (err error) {
+func (srv *Server) Transport(stream sdrpcpb.Transport_TransportServer) (err error) {
 	errc := make(chan error)
 	go func() {
 		for {
-			var req *rpcpb.Request
+			var req *sdrpcpb.Request
 			req, err = stream.Recv()
 			if err != nil {
 				errc <- err
@@ -141,7 +141,7 @@ func (srv *Server) Transport(stream rpcpb.Transport_TransportServer) (err error)
 				srv.Tester = req.Tester
 			}
 
-			var resp *rpcpb.Response
+			var resp *sdrpcpb.Response
 			resp, err = srv.handleTesterRequest(req)
 			if err != nil {
 				errc <- err

@@ -20,7 +20,7 @@ import (
 	"strings"
 
 	"github.com/bgentry/speakeasy"
-	"github.com/coreos/etcd/client"
+	"github.com/scaledata/etcd/client"
 	"github.com/urfave/cli"
 )
 

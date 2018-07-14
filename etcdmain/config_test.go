@@ -23,7 +23,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coreos/etcd/embed"
+	"github.com/scaledata/etcd/embed"
 	"github.com/ghodss/yaml"
 )
 

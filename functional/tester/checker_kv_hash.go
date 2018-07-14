@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/coreos/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
 
 	"go.uber.org/zap"
 )
@@ -26,13 +26,13 @@ import (
 const retries = 7
 
 type kvHashChecker struct {
-	ctype rpcpb.Checker
+	ctype sdrpcpb.Checker
 	clus  *Cluster
 }
 
 func newKVHashChecker(clus *Cluster) Checker {
 	return &kvHashChecker{
-		ctype: rpcpb.Checker_KV_HASH,
+		ctype: sdrpcpb.Checker_KV_HASH,
 		clus:  clus,
 	}
 }
@@ -76,7 +76,7 @@ func (hc *kvHashChecker) checkRevAndHashes() (err error) {
 	return fmt.Errorf("etcd cluster is not stable: [revisions: %v] and [hashes: %v]", revs, hashes)
 }
 
-func (hc *kvHashChecker) Type() rpcpb.Checker {
+func (hc *kvHashChecker) Type() sdrpcpb.Checker {
 	return hc.ctype
 }
 

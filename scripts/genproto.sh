@@ -16,7 +16,7 @@ if [[ $(protoc --version | cut -f2 -d' ') != "3.5.0" ]]; then
 fi
 
 # directories containing protos to be built
-DIRS="./wal/walpb ./etcdserver/etcdserverpb ./snap/snappb ./raft/raftpb ./mvcc/mvccpb ./lease/leasepb ./auth/authpb ./etcdserver/api/v3lock/v3lockpb ./etcdserver/api/v3election/v3electionpb"
+DIRS="./wal/sdwalpb ./etcdserver/sdetcdserverpb ./snap/sdsnappb ./raft/sdraftpb ./mvcc/sdmvccpb ./lease/sdleasepb ./auth/sdauthpb ./etcdserver/api/v3lock/sdv3lockpb ./etcdserver/api/v3election/sdv3electionpb"
 
 # exact version of packages to build
 GOGO_PROTO_SHA="41168f6614b7bb144818ec8967b8c702705df564"
@@ -72,7 +72,7 @@ done
 
 # remove old swagger files so it's obvious whether the files fail to generate
 rm -rf Documentation/dev-guide/apispec/swagger/*json
-for pb in etcdserverpb/rpc api/v3lock/v3lockpb/v3lock api/v3election/v3electionpb/v3election; do
+for pb in sdetcdserverpb/rpc api/v3lock/sdv3lockpb/v3lock api/v3election/sdv3electionpb/v3election; do
 	protobase="etcdserver/${pb}"
 	protoc -I. \
 	    -I"${GRPC_GATEWAY_ROOT}"/third_party/googleapis \
@@ -128,13 +128,13 @@ if [ "$1" = "-g" ]; then
 		echo "protodoc is updated"
 	popd
 
-	protodoc --directories="etcdserver/etcdserverpb=service_message,mvcc/mvccpb=service_message,lease/leasepb=service_message,auth/authpb=service_message" \
+	protodoc --directories="etcdserver/sdetcdserverpb=service_message,mvcc/sdmvccpb=service_message,lease/sdleasepb=service_message,auth/sdauthpb=service_message" \
 		--title="etcd API Reference" \
 		--output="Documentation/dev-guide/api_reference_v3.md" \
-		--message-only-from-this-file="etcdserver/etcdserverpb/rpc.proto" \
+		--message-only-from-this-file="etcdserver/sdetcdserverpb/rpc.proto" \
 		--disclaimer="This is a generated documentation. Please read the proto files for more."
 
-	protodoc --directories="etcdserver/api/v3lock/v3lockpb=service_message,etcdserver/api/v3election/v3electionpb=service_message,mvcc/mvccpb=service_message" \
+	protodoc --directories="etcdserver/api/v3lock/sdv3lockpb=service_message,etcdserver/api/v3election/sdv3electionpb=service_message,mvcc/sdmvccpb=service_message" \
 		--title="etcd concurrency API Reference" \
 		--output="Documentation/dev-guide/api_concurrency_reference_v3.md" \
 		--disclaimer="This is a generated documentation. Please read the proto files for more."

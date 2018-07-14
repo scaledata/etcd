@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 )
 
 var (
@@ -37,19 +37,19 @@ func TestReadRecord(t *testing.T) {
 
 	tests := []struct {
 		data []byte
-		wr   *walpb.Record
+		wr   *sdwalpb.Record
 		we   error
 	}{
-		{infoRecord, &walpb.Record{Type: 1, Crc: crc32.Checksum(infoData, crcTable), Data: infoData}, nil},
-		{[]byte(""), &walpb.Record{}, io.EOF},
-		{infoRecord[:8], &walpb.Record{}, io.ErrUnexpectedEOF},
-		{infoRecord[:len(infoRecord)-len(infoData)-8], &walpb.Record{}, io.ErrUnexpectedEOF},
-		{infoRecord[:len(infoRecord)-len(infoData)], &walpb.Record{}, io.ErrUnexpectedEOF},
-		{infoRecord[:len(infoRecord)-8], &walpb.Record{}, io.ErrUnexpectedEOF},
-		{badInfoRecord, &walpb.Record{}, walpb.ErrCRCMismatch},
+		{infoRecord, &sdwalpb.Record{Type: 1, Crc: crc32.Checksum(infoData, crcTable), Data: infoData}, nil},
+		{[]byte(""), &sdwalpb.Record{}, io.EOF},
+		{infoRecord[:8], &sdwalpb.Record{}, io.ErrUnexpectedEOF},
+		{infoRecord[:len(infoRecord)-len(infoData)-8], &sdwalpb.Record{}, io.ErrUnexpectedEOF},
+		{infoRecord[:len(infoRecord)-len(infoData)], &sdwalpb.Record{}, io.ErrUnexpectedEOF},
+		{infoRecord[:len(infoRecord)-8], &sdwalpb.Record{}, io.ErrUnexpectedEOF},
+		{badInfoRecord, &sdwalpb.Record{}, sdwalpb.ErrCRCMismatch},
 	}
 
-	rec := &walpb.Record{}
+	rec := &sdwalpb.Record{}
 	for i, tt := range tests {
 		buf := bytes.NewBuffer(tt.data)
 		decoder := newDecoder(ioutil.NopCloser(buf))
@@ -60,17 +60,17 @@ func TestReadRecord(t *testing.T) {
 		if !reflect.DeepEqual(e, tt.we) {
 			t.Errorf("#%d: err = %v, want %v", i, e, tt.we)
 		}
-		rec = &walpb.Record{}
+		rec = &sdwalpb.Record{}
 	}
 }
 
 func TestWriteRecord(t *testing.T) {
-	b := &walpb.Record{}
+	b := &sdwalpb.Record{}
 	typ := int64(0xABCD)
 	d := []byte("Hello world!")
 	buf := new(bytes.Buffer)
 	e := newEncoder(buf, 0, 0)
-	e.encode(&walpb.Record{Type: typ, Data: d})
+	e.encode(&sdwalpb.Record{Type: typ, Data: d})
 	e.flush()
 	decoder := newDecoder(ioutil.NopCloser(buf))
 	err := decoder.decode(b)

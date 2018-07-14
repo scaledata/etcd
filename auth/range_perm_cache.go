@@ -15,9 +15,9 @@
 package auth
 
 import (
-	"github.com/coreos/etcd/auth/authpb"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/pkg/adt"
+	"github.com/scaledata/etcd/auth/sdauthpb"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/pkg/adt"
 )
 
 func getMergedPerms(tx backend.BatchTx, userName string) *unifiedRangePermissions {
@@ -51,14 +51,14 @@ func getMergedPerms(tx backend.BatchTx, userName string) *unifiedRangePermission
 			}
 
 			switch perm.PermType {
-			case authpb.READWRITE:
+			case sdauthpb.READWRITE:
 				readPerms.Insert(ivl, struct{}{})
 				writePerms.Insert(ivl, struct{}{})
 
-			case authpb.READ:
+			case sdauthpb.READ:
 				readPerms.Insert(ivl, struct{}{})
 
-			case authpb.WRITE:
+			case sdauthpb.WRITE:
 				writePerms.Insert(ivl, struct{}{})
 			}
 		}
@@ -70,16 +70,16 @@ func getMergedPerms(tx backend.BatchTx, userName string) *unifiedRangePermission
 	}
 }
 
-func checkKeyInterval(cachedPerms *unifiedRangePermissions, key, rangeEnd []byte, permtyp authpb.Permission_Type) bool {
+func checkKeyInterval(cachedPerms *unifiedRangePermissions, key, rangeEnd []byte, permtyp sdauthpb.Permission_Type) bool {
 	if len(rangeEnd) == 1 && rangeEnd[0] == 0 {
 		rangeEnd = nil
 	}
 
 	ivl := adt.NewBytesAffineInterval(key, rangeEnd)
 	switch permtyp {
-	case authpb.READ:
+	case sdauthpb.READ:
 		return cachedPerms.readPerms.Contains(ivl)
-	case authpb.WRITE:
+	case sdauthpb.WRITE:
 		return cachedPerms.writePerms.Contains(ivl)
 	default:
 		plog.Panicf("unknown auth type: %v", permtyp)
@@ -87,12 +87,12 @@ func checkKeyInterval(cachedPerms *unifiedRangePermissions, key, rangeEnd []byte
 	return false
 }
 
-func checkKeyPoint(cachedPerms *unifiedRangePermissions, key []byte, permtyp authpb.Permission_Type) bool {
+func checkKeyPoint(cachedPerms *unifiedRangePermissions, key []byte, permtyp sdauthpb.Permission_Type) bool {
 	pt := adt.NewBytesAffinePoint(key)
 	switch permtyp {
-	case authpb.READ:
+	case sdauthpb.READ:
 		return cachedPerms.readPerms.Intersects(pt)
-	case authpb.WRITE:
+	case sdauthpb.WRITE:
 		return cachedPerms.writePerms.Intersects(pt)
 	default:
 		plog.Panicf("unknown auth type: %v", permtyp)
@@ -100,7 +100,7 @@ func checkKeyPoint(cachedPerms *unifiedRangePermissions, key []byte, permtyp aut
 	return false
 }
 
-func (as *authStore) isRangeOpPermitted(tx backend.BatchTx, userName string, key, rangeEnd []byte, permtyp authpb.Permission_Type) bool {
+func (as *authStore) isRangeOpPermitted(tx backend.BatchTx, userName string, key, rangeEnd []byte, permtyp sdauthpb.Permission_Type) bool {
 	// assumption: tx is Lock()ed
 	_, ok := as.rangePermCache[userName]
 	if !ok {

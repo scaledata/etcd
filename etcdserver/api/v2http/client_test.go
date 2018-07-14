@@ -29,16 +29,16 @@ import (
 	"testing"
 	"time"
 
-	etcdErr "github.com/coreos/etcd/error"
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/api"
-	"github.com/coreos/etcd/etcdserver/api/v2http/httptypes"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/etcdserver/membership"
-	"github.com/coreos/etcd/pkg/testutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/store"
+	etcdErr "github.com/scaledata/etcd/error"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/api"
+	"github.com/scaledata/etcd/etcdserver/api/v2http/httptypes"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/etcdserver/membership"
+	"github.com/scaledata/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/store"
 
 	"github.com/coreos/go-semver/semver"
 	"github.com/jonboulle/clockwork"
@@ -95,11 +95,11 @@ type fakeServer struct {
 }
 
 func (s *fakeServer) Leader() types.ID                    { return types.ID(1) }
-func (s *fakeServer) Alarms() []*etcdserverpb.AlarmMember { return nil }
+func (s *fakeServer) Alarms() []*sdetcdserverpb.AlarmMember { return nil }
 func (s *fakeServer) Cluster() api.Cluster                { return nil }
 func (s *fakeServer) ClusterVersion() *semver.Version     { return nil }
 func (s *fakeServer) RaftHandler() http.Handler           { return nil }
-func (s *fakeServer) Do(ctx context.Context, r etcdserverpb.Request) (rr etcdserver.Response, err error) {
+func (s *fakeServer) Do(ctx context.Context, r sdetcdserverpb.Request) (rr etcdserver.Response, err error) {
 	return
 }
 func (s *fakeServer) ClientCertAuthEnabled() bool { return false }
@@ -109,11 +109,11 @@ type serverRecorder struct {
 	actions []action
 }
 
-func (s *serverRecorder) Do(_ context.Context, r etcdserverpb.Request) (etcdserver.Response, error) {
+func (s *serverRecorder) Do(_ context.Context, r sdetcdserverpb.Request) (etcdserver.Response, error) {
 	s.actions = append(s.actions, action{name: "Do", params: []interface{}{r}})
 	return etcdserver.Response{}, nil
 }
-func (s *serverRecorder) Process(_ context.Context, m raftpb.Message) error {
+func (s *serverRecorder) Process(_ context.Context, m sdraftpb.Message) error {
 	s.actions = append(s.actions, action{name: "Process", params: []interface{}{m}})
 	return nil
 }
@@ -154,10 +154,10 @@ type resServer struct {
 	res etcdserver.Response
 }
 
-func (rs *resServer) Do(_ context.Context, _ etcdserverpb.Request) (etcdserver.Response, error) {
+func (rs *resServer) Do(_ context.Context, _ sdetcdserverpb.Request) (etcdserver.Response, error) {
 	return rs.res, nil
 }
-func (rs *resServer) Process(_ context.Context, _ raftpb.Message) error { return nil }
+func (rs *resServer) Process(_ context.Context, _ sdraftpb.Message) error { return nil }
 func (rs *resServer) AddMember(_ context.Context, _ membership.Member) ([]*membership.Member, error) {
 	return nil, nil
 }
@@ -223,7 +223,7 @@ func TestBadRefreshRequest(t *testing.T) {
 			t.Errorf("#%d: code=%d, want %v", i, ee.ErrorCode, tt.wcode)
 			t.Logf("cause: %#v", ee.Cause)
 		}
-		if !reflect.DeepEqual(got, etcdserverpb.Request{}) {
+		if !reflect.DeepEqual(got, sdetcdserverpb.Request{}) {
 			t.Errorf("#%d: unexpected non-empty Request: %#v", i, got)
 		}
 	}
@@ -387,7 +387,7 @@ func TestBadParseRequest(t *testing.T) {
 			t.Errorf("#%d: code=%d, want %v", i, ee.ErrorCode, tt.wcode)
 			t.Logf("cause: %#v", ee.Cause)
 		}
-		if !reflect.DeepEqual(got, etcdserverpb.Request{}) {
+		if !reflect.DeepEqual(got, sdetcdserverpb.Request{}) {
 			t.Errorf("#%d: unexpected non-empty Request: %#v", i, got)
 		}
 	}
@@ -398,13 +398,13 @@ func TestGoodParseRequest(t *testing.T) {
 	fc.Advance(1111)
 	tests := []struct {
 		in      *http.Request
-		w       etcdserverpb.Request
+		w       sdetcdserverpb.Request
 		noValue bool
 	}{
 		{
 			// good prefix, all other values default
 			mustNewRequest(t, "foo"),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method: "GET",
 				Path:   path.Join(etcdserver.StoreKeysPrefix, "/foo"),
 			},
@@ -417,7 +417,7 @@ func TestGoodParseRequest(t *testing.T) {
 				"foo",
 				url.Values{"value": []string{"some_value"}},
 			),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method: "PUT",
 				Val:    "some_value",
 				Path:   path.Join(etcdserver.StoreKeysPrefix, "/foo"),
@@ -431,7 +431,7 @@ func TestGoodParseRequest(t *testing.T) {
 				"foo",
 				url.Values{"prevIndex": []string{"98765"}},
 			),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method:    "PUT",
 				PrevIndex: 98765,
 				Path:      path.Join(etcdserver.StoreKeysPrefix, "/foo"),
@@ -445,7 +445,7 @@ func TestGoodParseRequest(t *testing.T) {
 				"foo",
 				url.Values{"recursive": []string{"true"}},
 			),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method:    "PUT",
 				Recursive: true,
 				Path:      path.Join(etcdserver.StoreKeysPrefix, "/foo"),
@@ -459,7 +459,7 @@ func TestGoodParseRequest(t *testing.T) {
 				"foo",
 				url.Values{"sorted": []string{"true"}},
 			),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method: "PUT",
 				Sorted: true,
 				Path:   path.Join(etcdserver.StoreKeysPrefix, "/foo"),
@@ -473,7 +473,7 @@ func TestGoodParseRequest(t *testing.T) {
 				"foo",
 				url.Values{"quorum": []string{"true"}},
 			),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method: "PUT",
 				Quorum: true,
 				Path:   path.Join(etcdserver.StoreKeysPrefix, "/foo"),
@@ -483,7 +483,7 @@ func TestGoodParseRequest(t *testing.T) {
 		{
 			// wait specified
 			mustNewRequest(t, "foo?wait=true"),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method: "GET",
 				Wait:   true,
 				Path:   path.Join(etcdserver.StoreKeysPrefix, "/foo"),
@@ -493,7 +493,7 @@ func TestGoodParseRequest(t *testing.T) {
 		{
 			// empty TTL specified
 			mustNewRequest(t, "foo?ttl="),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method:     "GET",
 				Path:       path.Join(etcdserver.StoreKeysPrefix, "/foo"),
 				Expiration: 0,
@@ -503,7 +503,7 @@ func TestGoodParseRequest(t *testing.T) {
 		{
 			// non-empty TTL specified
 			mustNewRequest(t, "foo?ttl=5678"),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method:     "GET",
 				Path:       path.Join(etcdserver.StoreKeysPrefix, "/foo"),
 				Expiration: fc.Now().Add(5678 * time.Second).UnixNano(),
@@ -513,7 +513,7 @@ func TestGoodParseRequest(t *testing.T) {
 		{
 			// zero TTL specified
 			mustNewRequest(t, "foo?ttl=0"),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method:     "GET",
 				Path:       path.Join(etcdserver.StoreKeysPrefix, "/foo"),
 				Expiration: fc.Now().UnixNano(),
@@ -523,7 +523,7 @@ func TestGoodParseRequest(t *testing.T) {
 		{
 			// dir specified
 			mustNewRequest(t, "foo?dir=true"),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method: "GET",
 				Dir:    true,
 				Path:   path.Join(etcdserver.StoreKeysPrefix, "/foo"),
@@ -533,7 +533,7 @@ func TestGoodParseRequest(t *testing.T) {
 		{
 			// dir specified negatively
 			mustNewRequest(t, "foo?dir=false"),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method: "GET",
 				Dir:    false,
 				Path:   path.Join(etcdserver.StoreKeysPrefix, "/foo"),
@@ -547,7 +547,7 @@ func TestGoodParseRequest(t *testing.T) {
 				"foo",
 				url.Values{"prevExist": []string{"true"}},
 			),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method:    "PUT",
 				PrevExist: boolp(true),
 				Path:      path.Join(etcdserver.StoreKeysPrefix, "/foo"),
@@ -561,7 +561,7 @@ func TestGoodParseRequest(t *testing.T) {
 				"foo",
 				url.Values{"prevExist": []string{"false"}},
 			),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method:    "PUT",
 				PrevExist: boolp(false),
 				Path:      path.Join(etcdserver.StoreKeysPrefix, "/foo"),
@@ -579,7 +579,7 @@ func TestGoodParseRequest(t *testing.T) {
 					"prevValue": []string{"previous value"},
 				},
 			),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method:    "PUT",
 				PrevExist: boolp(true),
 				PrevValue: "previous value",
@@ -595,7 +595,7 @@ func TestGoodParseRequest(t *testing.T) {
 				"foo?prevValue=woof",
 				url.Values{},
 			),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method:    "PUT",
 				PrevValue: "woof",
 				Path:      path.Join(etcdserver.StoreKeysPrefix, "/foo"),
@@ -611,7 +611,7 @@ func TestGoodParseRequest(t *testing.T) {
 					"prevValue": []string{"miaow"},
 				},
 			),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method:    "PUT",
 				PrevValue: "miaow",
 				Path:      path.Join(etcdserver.StoreKeysPrefix, "/foo"),
@@ -625,7 +625,7 @@ func TestGoodParseRequest(t *testing.T) {
 				"foo",
 				url.Values{"noValueOnSuccess": []string{"true"}},
 			),
-			etcdserverpb.Request{
+			sdetcdserverpb.Request{
 				Method: "PUT",
 				Path:   path.Join(etcdserver.StoreKeysPrefix, "/foo"),
 			},

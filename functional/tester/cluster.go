@@ -28,9 +28,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/functional/rpcpb"
-	"github.com/coreos/etcd/pkg/debugutil"
-	"github.com/coreos/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
+	"github.com/scaledata/etcd/pkg/debugutil"
+	"github.com/scaledata/etcd/pkg/fileutil"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
@@ -43,14 +43,14 @@ type Cluster struct {
 	lg *zap.Logger
 
 	agentConns    []*grpc.ClientConn
-	agentClients  []rpcpb.TransportClient
-	agentStreams  []rpcpb.Transport_TransportClient
-	agentRequests []*rpcpb.Request
+	agentClients  []sdrpcpb.TransportClient
+	agentStreams  []sdrpcpb.Transport_TransportClient
+	agentRequests []*sdrpcpb.Request
 
 	testerHTTPServer *http.Server
 
-	Members []*rpcpb.Member `yaml:"agent-configs"`
-	Tester  *rpcpb.Tester   `yaml:"tester-config"`
+	Members []*sdrpcpb.Member `yaml:"agent-configs"`
+	Tester  *sdrpcpb.Tester   `yaml:"tester-config"`
 
 	cases []Case
 
@@ -77,9 +77,9 @@ func NewCluster(lg *zap.Logger, fpath string) (*Cluster, error) {
 	}
 
 	clus.agentConns = make([]*grpc.ClientConn, len(clus.Members))
-	clus.agentClients = make([]rpcpb.TransportClient, len(clus.Members))
-	clus.agentStreams = make([]rpcpb.Transport_TransportClient, len(clus.Members))
-	clus.agentRequests = make([]*rpcpb.Request, len(clus.Members))
+	clus.agentClients = make([]sdrpcpb.TransportClient, len(clus.Members))
+	clus.agentStreams = make([]sdrpcpb.Transport_TransportClient, len(clus.Members))
+	clus.agentRequests = make([]*sdrpcpb.Request, len(clus.Members))
 	clus.cases = make([]Case, 0)
 
 	for i, ap := range clus.Members {
@@ -88,7 +88,7 @@ func NewCluster(lg *zap.Logger, fpath string) (*Cluster, error) {
 		if err != nil {
 			return nil, err
 		}
-		clus.agentClients[i] = rpcpb.NewTransportClient(clus.agentConns[i])
+		clus.agentClients[i] = sdrpcpb.NewTransportClient(clus.agentConns[i])
 		clus.lg.Info("connected", zap.String("agent-address", ap.AgentAddr))
 
 		clus.agentStreams[i], err = clus.agentClients[i].Transport(context.Background())
@@ -325,7 +325,7 @@ func (clus *Cluster) setStresserChecker() {
 	clus.lg.Info("updated stressers")
 }
 
-func (clus *Cluster) runCheckers(exceptions ...rpcpb.Checker) (err error) {
+func (clus *Cluster) runCheckers(exceptions ...sdrpcpb.Checker) (err error) {
 	defer func() {
 		if err != nil {
 			return
@@ -339,7 +339,7 @@ func (clus *Cluster) runCheckers(exceptions ...rpcpb.Checker) (err error) {
 		}
 	}()
 
-	exs := make(map[rpcpb.Checker]struct{})
+	exs := make(map[sdrpcpb.Checker]struct{})
 	for _, e := range exceptions {
 		exs[e] = struct{}{}
 	}
@@ -376,26 +376,26 @@ func (clus *Cluster) runCheckers(exceptions ...rpcpb.Checker) (err error) {
 // After this, just continue to call kill/restart.
 func (clus *Cluster) Send_INITIAL_START_ETCD() error {
 	// this is the only time that creates request from scratch
-	return clus.broadcast(rpcpb.Operation_INITIAL_START_ETCD)
+	return clus.broadcast(sdrpcpb.Operation_INITIAL_START_ETCD)
 }
 
 // send_SIGQUIT_ETCD_AND_ARCHIVE_DATA sends "send_SIGQUIT_ETCD_AND_ARCHIVE_DATA" operation.
 func (clus *Cluster) send_SIGQUIT_ETCD_AND_ARCHIVE_DATA() error {
-	return clus.broadcast(rpcpb.Operation_SIGQUIT_ETCD_AND_ARCHIVE_DATA)
+	return clus.broadcast(sdrpcpb.Operation_SIGQUIT_ETCD_AND_ARCHIVE_DATA)
 }
 
 // send_RESTART_ETCD sends restart operation.
 func (clus *Cluster) send_RESTART_ETCD() error {
-	return clus.broadcast(rpcpb.Operation_RESTART_ETCD)
+	return clus.broadcast(sdrpcpb.Operation_RESTART_ETCD)
 }
 
-func (clus *Cluster) broadcast(op rpcpb.Operation) error {
+func (clus *Cluster) broadcast(op sdrpcpb.Operation) error {
 	var wg sync.WaitGroup
 	wg.Add(len(clus.agentStreams))
 
 	errc := make(chan error, len(clus.agentStreams))
 	for i := range clus.agentStreams {
-		go func(idx int, o rpcpb.Operation) {
+		go func(idx int, o sdrpcpb.Operation) {
 			defer wg.Done()
 			errc <- clus.sendOp(idx, o)
 		}(i, op)
@@ -411,7 +411,7 @@ func (clus *Cluster) broadcast(op rpcpb.Operation) error {
 
 		if err != nil {
 			destroyed := false
-			if op == rpcpb.Operation_SIGQUIT_ETCD_AND_REMOVE_DATA_AND_STOP_AGENT {
+			if op == sdrpcpb.Operation_SIGQUIT_ETCD_AND_REMOVE_DATA_AND_STOP_AGENT {
 				if err == io.EOF {
 					destroyed = true
 				}
@@ -438,15 +438,15 @@ func (clus *Cluster) broadcast(op rpcpb.Operation) error {
 	return errors.New(strings.Join(errs, ", "))
 }
 
-func (clus *Cluster) sendOp(idx int, op rpcpb.Operation) error {
+func (clus *Cluster) sendOp(idx int, op sdrpcpb.Operation) error {
 	_, err := clus.sendOpWithResp(idx, op)
 	return err
 }
 
-func (clus *Cluster) sendOpWithResp(idx int, op rpcpb.Operation) (*rpcpb.Response, error) {
+func (clus *Cluster) sendOpWithResp(idx int, op sdrpcpb.Operation) (*sdrpcpb.Response, error) {
 	// maintain the initial member object
 	// throughout the test time
-	clus.agentRequests[idx] = &rpcpb.Request{
+	clus.agentRequests[idx] = &sdrpcpb.Request{
 		Operation: op,
 		Member:    clus.Members[idx],
 		Tester:    clus.Tester,
@@ -501,7 +501,7 @@ func (clus *Cluster) sendOpWithResp(idx int, op rpcpb.Operation) (*rpcpb.Respons
 	}
 
 	// store TLS assets from agents/servers onto disk
-	if secure && (op == rpcpb.Operation_INITIAL_START_ETCD || op == rpcpb.Operation_RESTART_ETCD) {
+	if secure && (op == sdrpcpb.Operation_INITIAL_START_ETCD || op == sdrpcpb.Operation_RESTART_ETCD) {
 		dirClient := filepath.Join(
 			clus.Tester.DataDir,
 			clus.Members[idx].Etcd.Name,
@@ -564,7 +564,7 @@ func (clus *Cluster) sendOpWithResp(idx int, op rpcpb.Operation) (*rpcpb.Respons
 
 // Send_SIGQUIT_ETCD_AND_REMOVE_DATA_AND_STOP_AGENT terminates all tester connections to agents and etcd servers.
 func (clus *Cluster) Send_SIGQUIT_ETCD_AND_REMOVE_DATA_AND_STOP_AGENT() {
-	err := clus.broadcast(rpcpb.Operation_SIGQUIT_ETCD_AND_REMOVE_DATA_AND_STOP_AGENT)
+	err := clus.broadcast(sdrpcpb.Operation_SIGQUIT_ETCD_AND_REMOVE_DATA_AND_STOP_AGENT)
 	if err != nil {
 		clus.lg.Warn("destroying etcd/agents FAIL", zap.Error(err))
 	} else {
@@ -591,7 +591,7 @@ func (clus *Cluster) WaitHealth() error {
 	// wait 60s to check cluster health.
 	// TODO: set it to a reasonable value. It is set that high because
 	// follower may use long time to catch up the leader when reboot under
-	// reasonable workload (https://github.com/coreos/etcd/issues/2698)
+	// reasonable workload (https://github.com/scaledata/etcd/issues/2698)
 	for i := 0; i < 60; i++ {
 		for _, m := range clus.Members {
 			if err = m.WriteHealthKey(); err != nil {
@@ -635,7 +635,7 @@ func (clus *Cluster) maxRev() (rev int64, err error) {
 	defer cancel()
 	revc, errc := make(chan int64, len(clus.Members)), make(chan error, len(clus.Members))
 	for i := range clus.Members {
-		go func(m *rpcpb.Member) {
+		go func(m *sdrpcpb.Member) {
 			mrev, merr := m.Rev(ctx)
 			revc <- mrev
 			errc <- merr

@@ -22,9 +22,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 // TestWatcherWatchID tests that each watcher provides unique watchID,
@@ -196,10 +196,10 @@ func TestWatchDeleteRange(t *testing.T) {
 
 	s.DeleteRange(from, to)
 
-	we := []mvccpb.Event{
-		{Type: mvccpb.DELETE, Kv: &mvccpb.KeyValue{Key: []byte("foo_0"), ModRevision: 5}},
-		{Type: mvccpb.DELETE, Kv: &mvccpb.KeyValue{Key: []byte("foo_1"), ModRevision: 5}},
-		{Type: mvccpb.DELETE, Kv: &mvccpb.KeyValue{Key: []byte("foo_2"), ModRevision: 5}},
+	we := []sdmvccpb.Event{
+		{Type: sdmvccpb.DELETE, Kv: &sdmvccpb.KeyValue{Key: []byte("foo_0"), ModRevision: 5}},
+		{Type: sdmvccpb.DELETE, Kv: &sdmvccpb.KeyValue{Key: []byte("foo_1"), ModRevision: 5}},
+		{Type: sdmvccpb.DELETE, Kv: &sdmvccpb.KeyValue{Key: []byte("foo_2"), ModRevision: 5}},
 	}
 
 	select {
@@ -314,8 +314,8 @@ func TestWatcherWatchWithFilter(t *testing.T) {
 	w := s.NewWatchStream()
 	defer w.Close()
 
-	filterPut := func(e mvccpb.Event) bool {
-		return e.Type == mvccpb.PUT
+	filterPut := func(e sdmvccpb.Event) bool {
+		return e.Type == sdmvccpb.PUT
 	}
 
 	w.Watch([]byte("foo"), nil, 0, filterPut)

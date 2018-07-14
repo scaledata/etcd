@@ -28,20 +28,20 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/etcdserver/membership"
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/mvcc"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/snap"
-	"github.com/coreos/etcd/store"
-	"github.com/coreos/etcd/wal"
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/etcdserver/membership"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/mvcc"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/snap"
+	"github.com/scaledata/etcd/store"
+	"github.com/scaledata/etcd/wal"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 
 	bolt "github.com/coreos/bbolt"
 	"github.com/spf13/cobra"
@@ -225,7 +225,7 @@ func makeWALAndSnap(waldir, snapdir string, cl *membership.RaftCluster) {
 	}
 
 	m := cl.MemberByName(restoreName)
-	md := &etcdserverpb.Metadata{NodeID: uint64(m.ID), ClusterID: uint64(cl.ID())}
+	md := &sdetcdserverpb.Metadata{NodeID: uint64(m.ID), ClusterID: uint64(cl.ID())}
 	metadata, merr := md.Marshal()
 	if merr != nil {
 		ExitWithError(ExitInvalidInput, merr)
@@ -246,20 +246,20 @@ func makeWALAndSnap(waldir, snapdir string, cl *membership.RaftCluster) {
 		peers[i] = raft.Peer{ID: uint64(id), Context: ctx}
 	}
 
-	ents := make([]raftpb.Entry, len(peers))
+	ents := make([]sdraftpb.Entry, len(peers))
 	nodeIDs := make([]uint64, len(peers))
 	for i, p := range peers {
 		nodeIDs[i] = p.ID
-		cc := raftpb.ConfChange{
-			Type:    raftpb.ConfChangeAddNode,
+		cc := sdraftpb.ConfChange{
+			Type:    sdraftpb.ConfChangeAddNode,
 			NodeID:  p.ID,
 			Context: p.Context}
 		d, err := cc.Marshal()
 		if err != nil {
 			ExitWithError(ExitInvalidInput, err)
 		}
-		e := raftpb.Entry{
-			Type:  raftpb.EntryConfChange,
+		e := sdraftpb.Entry{
+			Type:  sdraftpb.EntryConfChange,
 			Term:  1,
 			Index: uint64(i + 1),
 			Data:  d,
@@ -269,7 +269,7 @@ func makeWALAndSnap(waldir, snapdir string, cl *membership.RaftCluster) {
 
 	commit, term := uint64(len(ents)), uint64(1)
 
-	if err := w.Save(raftpb.HardState{
+	if err := w.Save(sdraftpb.HardState{
 		Term:   term,
 		Vote:   peers[0].ID,
 		Commit: commit}, ents); err != nil {
@@ -281,12 +281,12 @@ func makeWALAndSnap(waldir, snapdir string, cl *membership.RaftCluster) {
 		ExitWithError(ExitError, berr)
 	}
 
-	raftSnap := raftpb.Snapshot{
+	raftSnap := sdraftpb.Snapshot{
 		Data: b,
-		Metadata: raftpb.SnapshotMetadata{
+		Metadata: sdraftpb.SnapshotMetadata{
 			Index: commit,
 			Term:  term,
-			ConfState: raftpb.ConfState{
+			ConfState: sdraftpb.ConfState{
 				Nodes: nodeIDs,
 			},
 		},
@@ -296,7 +296,7 @@ func makeWALAndSnap(waldir, snapdir string, cl *membership.RaftCluster) {
 		panic(err)
 	}
 
-	if err := w.SaveSnapshot(walpb.Snapshot{Index: commit, Term: term}); err != nil {
+	if err := w.SaveSnapshot(sdwalpb.Snapshot{Index: commit, Term: term}); err != nil {
 		ExitWithError(ExitIO, err)
 	}
 }

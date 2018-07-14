@@ -26,7 +26,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/client"
+	"github.com/scaledata/etcd/client"
 
 	"github.com/jonboulle/clockwork"
 )

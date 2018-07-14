@@ -19,13 +19,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 // a network interface
 type iface interface {
-	send(m raftpb.Message)
-	recv() chan raftpb.Message
+	send(m sdraftpb.Message)
+	recv() chan sdraftpb.Message
 	disconnect()
 	connect()
 }
@@ -48,7 +48,7 @@ type raftNetwork struct {
 	disconnected map[uint64]bool
 	dropmap      map[conn]float64
 	delaymap     map[conn]delay
-	recvQueues   map[uint64]chan raftpb.Message
+	recvQueues   map[uint64]chan sdraftpb.Message
 }
 
 type conn struct {
@@ -62,14 +62,14 @@ type delay struct {
 
 func newRaftNetwork(nodes ...uint64) *raftNetwork {
 	pn := &raftNetwork{
-		recvQueues:   make(map[uint64]chan raftpb.Message),
+		recvQueues:   make(map[uint64]chan sdraftpb.Message),
 		dropmap:      make(map[conn]float64),
 		delaymap:     make(map[conn]delay),
 		disconnected: make(map[uint64]bool),
 	}
 
 	for _, n := range nodes {
-		pn.recvQueues[n] = make(chan raftpb.Message, 1024)
+		pn.recvQueues[n] = make(chan sdraftpb.Message, 1024)
 	}
 	return pn
 }
@@ -78,7 +78,7 @@ func (rn *raftNetwork) nodeNetwork(id uint64) iface {
 	return &nodeNetwork{id: id, raftNetwork: rn}
 }
 
-func (rn *raftNetwork) send(m raftpb.Message) {
+func (rn *raftNetwork) send(m sdraftpb.Message) {
 	rn.mu.Lock()
 	to := rn.recvQueues[m.To]
 	if rn.disconnected[m.To] {
@@ -106,7 +106,7 @@ func (rn *raftNetwork) send(m raftpb.Message) {
 		panic(err)
 	}
 
-	var cm raftpb.Message
+	var cm sdraftpb.Message
 	err = cm.Unmarshal(b)
 	if err != nil {
 		panic(err)
@@ -119,7 +119,7 @@ func (rn *raftNetwork) send(m raftpb.Message) {
 	}
 }
 
-func (rn *raftNetwork) recvFrom(from uint64) chan raftpb.Message {
+func (rn *raftNetwork) recvFrom(from uint64) chan sdraftpb.Message {
 	rn.mu.Lock()
 	fromc := rn.recvQueues[from]
 	if rn.disconnected[from] {
@@ -174,10 +174,10 @@ func (nt *nodeNetwork) disconnect() {
 	nt.raftNetwork.disconnect(nt.id)
 }
 
-func (nt *nodeNetwork) send(m raftpb.Message) {
+func (nt *nodeNetwork) send(m sdraftpb.Message) {
 	nt.raftNetwork.send(m)
 }
 
-func (nt *nodeNetwork) recv() chan raftpb.Message {
+func (nt *nodeNetwork) recv() chan sdraftpb.Message {
 	return nt.recvFrom(nt.id)
 }

@@ -20,8 +20,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/pkg/transport"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/pkg/transport"
 
 	"google.golang.org/grpc/grpclog"
 )

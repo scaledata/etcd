@@ -26,11 +26,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/pkg/pbutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/snap"
-	"github.com/coreos/etcd/version"
+	"github.com/scaledata/etcd/pkg/pbutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/snap"
+	"github.com/scaledata/etcd/version"
 )
 
 func TestServeRaftPrefix(t *testing.T) {
@@ -46,7 +46,7 @@ func TestServeRaftPrefix(t *testing.T) {
 			// bad method
 			"GET",
 			bytes.NewReader(
-				pbutil.MustMarshal(&raftpb.Message{}),
+				pbutil.MustMarshal(&sdraftpb.Message{}),
 			),
 			&fakeRaft{},
 			"0",
@@ -56,7 +56,7 @@ func TestServeRaftPrefix(t *testing.T) {
 			// bad method
 			"PUT",
 			bytes.NewReader(
-				pbutil.MustMarshal(&raftpb.Message{}),
+				pbutil.MustMarshal(&sdraftpb.Message{}),
 			),
 			&fakeRaft{},
 			"0",
@@ -66,7 +66,7 @@ func TestServeRaftPrefix(t *testing.T) {
 			// bad method
 			"DELETE",
 			bytes.NewReader(
-				pbutil.MustMarshal(&raftpb.Message{}),
+				pbutil.MustMarshal(&sdraftpb.Message{}),
 			),
 			&fakeRaft{},
 			"0",
@@ -92,7 +92,7 @@ func TestServeRaftPrefix(t *testing.T) {
 			// good request, wrong cluster ID
 			"POST",
 			bytes.NewReader(
-				pbutil.MustMarshal(&raftpb.Message{}),
+				pbutil.MustMarshal(&sdraftpb.Message{}),
 			),
 			&fakeRaft{},
 			"1",
@@ -102,7 +102,7 @@ func TestServeRaftPrefix(t *testing.T) {
 			// good request, Processor failure
 			"POST",
 			bytes.NewReader(
-				pbutil.MustMarshal(&raftpb.Message{}),
+				pbutil.MustMarshal(&sdraftpb.Message{}),
 			),
 			&fakeRaft{
 				err: &resWriterToError{code: http.StatusForbidden},
@@ -114,7 +114,7 @@ func TestServeRaftPrefix(t *testing.T) {
 			// good request, Processor failure
 			"POST",
 			bytes.NewReader(
-				pbutil.MustMarshal(&raftpb.Message{}),
+				pbutil.MustMarshal(&sdraftpb.Message{}),
 			),
 			&fakeRaft{
 				err: &resWriterToError{code: http.StatusInternalServerError},
@@ -126,7 +126,7 @@ func TestServeRaftPrefix(t *testing.T) {
 			// good request, Processor failure
 			"POST",
 			bytes.NewReader(
-				pbutil.MustMarshal(&raftpb.Message{}),
+				pbutil.MustMarshal(&sdraftpb.Message{}),
 			),
 			&fakeRaft{err: errors.New("blah")},
 			"0",
@@ -136,7 +136,7 @@ func TestServeRaftPrefix(t *testing.T) {
 			// good request
 			"POST",
 			bytes.NewReader(
-				pbutil.MustMarshal(&raftpb.Message{}),
+				pbutil.MustMarshal(&sdraftpb.Message{}),
 			),
 			&fakeRaft{},
 			"0",
@@ -355,7 +355,7 @@ type fakePeerGetter struct {
 func (pg *fakePeerGetter) Get(id types.ID) Peer { return pg.peers[id] }
 
 type fakePeer struct {
-	msgs     []raftpb.Message
+	msgs     []sdraftpb.Message
 	snapMsgs []snap.Message
 	peerURLs types.URLs
 	connc    chan *outgoingConn
@@ -370,7 +370,7 @@ func newFakePeer() *fakePeer {
 	}
 }
 
-func (pr *fakePeer) send(m raftpb.Message) {
+func (pr *fakePeer) send(m sdraftpb.Message) {
 	if pr.paused {
 		return
 	}

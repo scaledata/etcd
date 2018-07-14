@@ -22,18 +22,18 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/api/v3client"
-	"github.com/coreos/etcd/etcdserver/api/v3election"
-	"github.com/coreos/etcd/etcdserver/api/v3election/v3electionpb"
-	v3electiongw "github.com/coreos/etcd/etcdserver/api/v3election/v3electionpb/gw"
-	"github.com/coreos/etcd/etcdserver/api/v3lock"
-	"github.com/coreos/etcd/etcdserver/api/v3lock/v3lockpb"
-	v3lockgw "github.com/coreos/etcd/etcdserver/api/v3lock/v3lockpb/gw"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc"
-	etcdservergw "github.com/coreos/etcd/etcdserver/etcdserverpb/gw"
-	"github.com/coreos/etcd/pkg/debugutil"
-	"github.com/coreos/etcd/pkg/transport"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/api/v3client"
+	"github.com/scaledata/etcd/etcdserver/api/v3election"
+	"github.com/scaledata/etcd/etcdserver/api/v3election/sdv3electionpb"
+	v3electiongw "github.com/scaledata/etcd/etcdserver/api/v3election/sdv3electionpb/gw"
+	"github.com/scaledata/etcd/etcdserver/api/v3lock"
+	"github.com/scaledata/etcd/etcdserver/api/v3lock/sdv3lockpb"
+	v3lockgw "github.com/scaledata/etcd/etcdserver/api/v3lock/sdv3lockpb/gw"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc"
+	etcdservergw "github.com/scaledata/etcd/etcdserver/sdetcdserverpb/gw"
+	"github.com/scaledata/etcd/pkg/debugutil"
+	"github.com/scaledata/etcd/pkg/transport"
 
 	gw "github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/soheilhy/cmux"
@@ -97,8 +97,8 @@ func (sctx *serveCtx) serve(
 
 	if sctx.insecure {
 		gs = v3rpc.Server(s, nil, gopts...)
-		v3electionpb.RegisterElectionServer(gs, servElection)
-		v3lockpb.RegisterLockServer(gs, servLock)
+		sdv3electionpb.RegisterElectionServer(gs, servElection)
+		sdv3lockpb.RegisterLockServer(gs, servLock)
 		if sctx.serviceRegister != nil {
 			sctx.serviceRegister(gs)
 		}
@@ -130,8 +130,8 @@ func (sctx *serveCtx) serve(
 			return tlsErr
 		}
 		gs = v3rpc.Server(s, tlscfg, gopts...)
-		v3electionpb.RegisterElectionServer(gs, servElection)
-		v3lockpb.RegisterLockServer(gs, servLock)
+		sdv3electionpb.RegisterElectionServer(gs, servElection)
+		sdv3lockpb.RegisterLockServer(gs, servLock)
 		if sctx.serviceRegister != nil {
 			sctx.serviceRegister(gs)
 		}

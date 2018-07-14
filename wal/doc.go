@@ -28,7 +28,7 @@ to it with the Save method:
 After saving a raft snapshot to disk, SaveSnapshot method should be called to
 record it. So WAL can match with the saved snapshot when restarting.
 
-	err := w.SaveSnapshot(walpb.Snapshot{Index: 10, Term: 2})
+	err := w.SaveSnapshot(sdwalpb.Snapshot{Index: 10, Term: 2})
 
 When a user has finished using a WAL it must be closed:
 
@@ -58,7 +58,7 @@ If a second cut issues 0x10 entries with incremental index later then the file w
 At a later time a WAL can be opened at a particular snapshot. If there is no
 snapshot, an empty snapshot should be passed in.
 
-	w, err := wal.Open("/var/lib/etcd", walpb.Snapshot{Index: 10, Term: 2})
+	w, err := wal.Open("/var/lib/etcd", sdwalpb.Snapshot{Index: 10, Term: 2})
 	...
 
 The snapshot must have been written to the WAL.

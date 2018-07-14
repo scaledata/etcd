@@ -17,34 +17,34 @@ package adapter
 import (
 	"context"
 
-	"github.com/coreos/etcd/etcdserver/api/v3election/v3electionpb"
+	"github.com/scaledata/etcd/etcdserver/api/v3election/sdv3electionpb"
 
 	"google.golang.org/grpc"
 )
 
-type es2ec struct{ es v3electionpb.ElectionServer }
+type es2ec struct{ es sdv3electionpb.ElectionServer }
 
-func ElectionServerToElectionClient(es v3electionpb.ElectionServer) v3electionpb.ElectionClient {
+func ElectionServerToElectionClient(es sdv3electionpb.ElectionServer) sdv3electionpb.ElectionClient {
 	return &es2ec{es}
 }
 
-func (s *es2ec) Campaign(ctx context.Context, r *v3electionpb.CampaignRequest, opts ...grpc.CallOption) (*v3electionpb.CampaignResponse, error) {
+func (s *es2ec) Campaign(ctx context.Context, r *sdv3electionpb.CampaignRequest, opts ...grpc.CallOption) (*sdv3electionpb.CampaignResponse, error) {
 	return s.es.Campaign(ctx, r)
 }
 
-func (s *es2ec) Proclaim(ctx context.Context, r *v3electionpb.ProclaimRequest, opts ...grpc.CallOption) (*v3electionpb.ProclaimResponse, error) {
+func (s *es2ec) Proclaim(ctx context.Context, r *sdv3electionpb.ProclaimRequest, opts ...grpc.CallOption) (*sdv3electionpb.ProclaimResponse, error) {
 	return s.es.Proclaim(ctx, r)
 }
 
-func (s *es2ec) Leader(ctx context.Context, r *v3electionpb.LeaderRequest, opts ...grpc.CallOption) (*v3electionpb.LeaderResponse, error) {
+func (s *es2ec) Leader(ctx context.Context, r *sdv3electionpb.LeaderRequest, opts ...grpc.CallOption) (*sdv3electionpb.LeaderResponse, error) {
 	return s.es.Leader(ctx, r)
 }
 
-func (s *es2ec) Resign(ctx context.Context, r *v3electionpb.ResignRequest, opts ...grpc.CallOption) (*v3electionpb.ResignResponse, error) {
+func (s *es2ec) Resign(ctx context.Context, r *sdv3electionpb.ResignRequest, opts ...grpc.CallOption) (*sdv3electionpb.ResignResponse, error) {
 	return s.es.Resign(ctx, r)
 }
 
-func (s *es2ec) Observe(ctx context.Context, in *v3electionpb.LeaderRequest, opts ...grpc.CallOption) (v3electionpb.Election_ObserveClient, error) {
+func (s *es2ec) Observe(ctx context.Context, in *sdv3electionpb.LeaderRequest, opts ...grpc.CallOption) (sdv3electionpb.Election_ObserveClient, error) {
 	cs := newPipeStream(ctx, func(ss chanServerStream) error {
 		return s.es.Observe(in, &es2ecServerStream{ss})
 	})
@@ -57,24 +57,24 @@ type es2ecClientStream struct{ chanClientStream }
 // es2ecServerStream implements Election_ObserveServer
 type es2ecServerStream struct{ chanServerStream }
 
-func (s *es2ecClientStream) Send(rr *v3electionpb.LeaderRequest) error {
+func (s *es2ecClientStream) Send(rr *sdv3electionpb.LeaderRequest) error {
 	return s.SendMsg(rr)
 }
-func (s *es2ecClientStream) Recv() (*v3electionpb.LeaderResponse, error) {
+func (s *es2ecClientStream) Recv() (*sdv3electionpb.LeaderResponse, error) {
 	var v interface{}
 	if err := s.RecvMsg(&v); err != nil {
 		return nil, err
 	}
-	return v.(*v3electionpb.LeaderResponse), nil
+	return v.(*sdv3electionpb.LeaderResponse), nil
 }
 
-func (s *es2ecServerStream) Send(rr *v3electionpb.LeaderResponse) error {
+func (s *es2ecServerStream) Send(rr *sdv3electionpb.LeaderResponse) error {
 	return s.SendMsg(rr)
 }
-func (s *es2ecServerStream) Recv() (*v3electionpb.LeaderRequest, error) {
+func (s *es2ecServerStream) Recv() (*sdv3electionpb.LeaderRequest, error) {
 	var v interface{}
 	if err := s.RecvMsg(&v); err != nil {
 		return nil, err
 	}
-	return v.(*v3electionpb.LeaderRequest), nil
+	return v.(*sdv3electionpb.LeaderRequest), nil
 }

@@ -18,14 +18,14 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/coreos/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
 )
 
 type caseExternal struct {
 	Case
 
 	desc      string
-	rpcpbCase rpcpb.Case
+	sdrpcpbCase sdrpcpb.Case
 
 	scriptPath string
 }
@@ -42,14 +42,14 @@ func (c *caseExternal) Desc() string {
 	return c.desc
 }
 
-func (c *caseExternal) TestCase() rpcpb.Case {
-	return c.rpcpbCase
+func (c *caseExternal) TestCase() sdrpcpb.Case {
+	return c.sdrpcpbCase
 }
 
 func new_Case_EXTERNAL(scriptPath string) Case {
 	return &caseExternal{
 		desc:       fmt.Sprintf("external fault injector (script: %q)", scriptPath),
-		rpcpbCase:  rpcpb.Case_EXTERNAL,
+		sdrpcpbCase:  sdrpcpb.Case_EXTERNAL,
 		scriptPath: scriptPath,
 	}
 }

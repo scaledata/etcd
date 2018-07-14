@@ -19,9 +19,9 @@ import (
 	"encoding/json"
 	"path"
 
-	etcderr "github.com/coreos/etcd/error"
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
+	etcderr "github.com/scaledata/etcd/error"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
 )
 
 func (s *store) ensureAuthDirectories() error {
@@ -32,7 +32,7 @@ func (s *store) ensureAuthDirectories() error {
 		ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 		defer cancel()
 		pe := false
-		rr := etcdserverpb.Request{
+		rr := sdetcdserverpb.Request{
 			Method:    "PUT",
 			Path:      res,
 			Dir:       true,
@@ -52,7 +52,7 @@ func (s *store) ensureAuthDirectories() error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 	pe := false
-	rr := etcdserverpb.Request{
+	rr := sdetcdserverpb.Request{
 		Method:    "PUT",
 		Path:      StorePermsPrefix + "/enabled",
 		Val:       "false",
@@ -113,7 +113,7 @@ func (s *store) requestResource(res string, dir, quorum bool) (etcdserver.Respon
 	if quorum {
 		method = "QGET"
 	}
-	rr := etcdserverpb.Request{
+	rr := sdetcdserverpb.Request{
 		Method: method,
 		Path:   p,
 		Dir:    dir,
@@ -139,7 +139,7 @@ func (s *store) setResource(res string, value interface{}, prevexist bool) (etcd
 		return etcdserver.Response{}, err
 	}
 	p := path.Join(StorePermsPrefix, res)
-	rr := etcdserverpb.Request{
+	rr := sdetcdserverpb.Request{
 		Method:    "PUT",
 		Path:      p,
 		Val:       string(data),
@@ -157,7 +157,7 @@ func (s *store) deleteResource(res string) (etcdserver.Response, error) {
 	defer cancel()
 	pex := true
 	p := path.Join(StorePermsPrefix, res)
-	rr := etcdserverpb.Request{
+	rr := sdetcdserverpb.Request{
 		Method:    "DELETE",
 		Path:      p,
 		PrevExist: &pex,

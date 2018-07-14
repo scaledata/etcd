@@ -25,16 +25,16 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/coreos/etcd/functional/rpcpb"
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/coreos/etcd/pkg/proxy"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
+	"github.com/scaledata/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/pkg/proxy"
 
 	"go.uber.org/zap"
 )
 
 // return error for system errors (e.g. fail to create files)
 // return status error in response for wrong configuration/operation (e.g. start etcd twice)
-func (srv *Server) handleTesterRequest(req *rpcpb.Request) (resp *rpcpb.Response, err error) {
+func (srv *Server) handleTesterRequest(req *sdrpcpb.Request) (resp *sdrpcpb.Response, err error) {
 	defer func() {
 		if err == nil && req != nil {
 			srv.last = req.Operation
@@ -47,48 +47,48 @@ func (srv *Server) handleTesterRequest(req *rpcpb.Request) (resp *rpcpb.Response
 	}
 
 	switch req.Operation {
-	case rpcpb.Operation_INITIAL_START_ETCD:
+	case sdrpcpb.Operation_INITIAL_START_ETCD:
 		return srv.handle_INITIAL_START_ETCD(req)
-	case rpcpb.Operation_RESTART_ETCD:
+	case sdrpcpb.Operation_RESTART_ETCD:
 		return srv.handle_RESTART_ETCD()
 
-	case rpcpb.Operation_SIGTERM_ETCD:
+	case sdrpcpb.Operation_SIGTERM_ETCD:
 		return srv.handle_SIGTERM_ETCD()
-	case rpcpb.Operation_SIGQUIT_ETCD_AND_REMOVE_DATA:
+	case sdrpcpb.Operation_SIGQUIT_ETCD_AND_REMOVE_DATA:
 		return srv.handle_SIGQUIT_ETCD_AND_REMOVE_DATA()
 
-	case rpcpb.Operation_SAVE_SNAPSHOT:
+	case sdrpcpb.Operation_SAVE_SNAPSHOT:
 		return srv.handle_SAVE_SNAPSHOT()
-	case rpcpb.Operation_RESTORE_RESTART_FROM_SNAPSHOT:
+	case sdrpcpb.Operation_RESTORE_RESTART_FROM_SNAPSHOT:
 		return srv.handle_RESTORE_RESTART_FROM_SNAPSHOT()
-	case rpcpb.Operation_RESTART_FROM_SNAPSHOT:
+	case sdrpcpb.Operation_RESTART_FROM_SNAPSHOT:
 		return srv.handle_RESTART_FROM_SNAPSHOT()
 
-	case rpcpb.Operation_SIGQUIT_ETCD_AND_ARCHIVE_DATA:
+	case sdrpcpb.Operation_SIGQUIT_ETCD_AND_ARCHIVE_DATA:
 		return srv.handle_SIGQUIT_ETCD_AND_ARCHIVE_DATA()
-	case rpcpb.Operation_SIGQUIT_ETCD_AND_REMOVE_DATA_AND_STOP_AGENT:
+	case sdrpcpb.Operation_SIGQUIT_ETCD_AND_REMOVE_DATA_AND_STOP_AGENT:
 		return srv.handle_SIGQUIT_ETCD_AND_REMOVE_DATA_AND_STOP_AGENT()
 
-	case rpcpb.Operation_BLACKHOLE_PEER_PORT_TX_RX:
+	case sdrpcpb.Operation_BLACKHOLE_PEER_PORT_TX_RX:
 		return srv.handle_BLACKHOLE_PEER_PORT_TX_RX()
-	case rpcpb.Operation_UNBLACKHOLE_PEER_PORT_TX_RX:
+	case sdrpcpb.Operation_UNBLACKHOLE_PEER_PORT_TX_RX:
 		return srv.handle_UNBLACKHOLE_PEER_PORT_TX_RX()
-	case rpcpb.Operation_DELAY_PEER_PORT_TX_RX:
+	case sdrpcpb.Operation_DELAY_PEER_PORT_TX_RX:
 		return srv.handle_DELAY_PEER_PORT_TX_RX()
-	case rpcpb.Operation_UNDELAY_PEER_PORT_TX_RX:
+	case sdrpcpb.Operation_UNDELAY_PEER_PORT_TX_RX:
 		return srv.handle_UNDELAY_PEER_PORT_TX_RX()
 
 	default:
 		msg := fmt.Sprintf("operation not found (%v)", req.Operation)
-		return &rpcpb.Response{Success: false, Status: msg}, errors.New(msg)
+		return &sdrpcpb.Response{Success: false, Status: msg}, errors.New(msg)
 	}
 }
 
-func (srv *Server) handle_INITIAL_START_ETCD(req *rpcpb.Request) (*rpcpb.Response, error) {
-	if srv.last != rpcpb.Operation_NOT_STARTED {
-		return &rpcpb.Response{
+func (srv *Server) handle_INITIAL_START_ETCD(req *sdrpcpb.Request) (*sdrpcpb.Response, error) {
+	if srv.last != sdrpcpb.Operation_NOT_STARTED {
+		return &sdrpcpb.Response{
 			Success: false,
-			Status:  fmt.Sprintf("%q is not valid; last server operation was %q", rpcpb.Operation_INITIAL_START_ETCD.String(), srv.last.String()),
+			Status:  fmt.Sprintf("%q is not valid; last server operation was %q", sdrpcpb.Operation_INITIAL_START_ETCD.String(), srv.last.String()),
 			Member:  req.Member,
 		}, nil
 	}
@@ -123,7 +123,7 @@ func (srv *Server) handle_INITIAL_START_ETCD(req *rpcpb.Request) (*rpcpb.Respons
 		return nil, err
 	}
 
-	return &rpcpb.Response{
+	return &sdrpcpb.Response{
 		Success: true,
 		Status:  "start etcd PASS",
 		Member:  srv.Member,
@@ -417,7 +417,7 @@ func (srv *Server) startEtcdCmd() error {
 	return srv.etcdCmd.Start()
 }
 
-func (srv *Server) handle_RESTART_ETCD() (*rpcpb.Response, error) {
+func (srv *Server) handle_RESTART_ETCD() (*sdrpcpb.Response, error) {
 	var err error
 	if !fileutil.Exist(srv.Member.BaseDir) {
 		err = fileutil.TouchDirAll(srv.Member.BaseDir)
@@ -448,14 +448,14 @@ func (srv *Server) handle_RESTART_ETCD() (*rpcpb.Response, error) {
 		return nil, err
 	}
 
-	return &rpcpb.Response{
+	return &sdrpcpb.Response{
 		Success: true,
 		Status:  "restart etcd PASS",
 		Member:  srv.Member,
 	}, nil
 }
 
-func (srv *Server) handle_SIGTERM_ETCD() (*rpcpb.Response, error) {
+func (srv *Server) handle_SIGTERM_ETCD() (*sdrpcpb.Response, error) {
 	srv.stopProxy()
 
 	err := stopWithSig(srv.etcdCmd, syscall.SIGTERM)
@@ -464,13 +464,13 @@ func (srv *Server) handle_SIGTERM_ETCD() (*rpcpb.Response, error) {
 	}
 	srv.lg.Info("killed etcd", zap.String("signal", syscall.SIGTERM.String()))
 
-	return &rpcpb.Response{
+	return &sdrpcpb.Response{
 		Success: true,
 		Status:  "killed etcd",
 	}, nil
 }
 
-func (srv *Server) handle_SIGQUIT_ETCD_AND_REMOVE_DATA() (*rpcpb.Response, error) {
+func (srv *Server) handle_SIGQUIT_ETCD_AND_REMOVE_DATA() (*sdrpcpb.Response, error) {
 	srv.stopProxy()
 
 	err := stopWithSig(srv.etcdCmd, syscall.SIGQUIT)
@@ -506,25 +506,25 @@ func (srv *Server) handle_SIGQUIT_ETCD_AND_REMOVE_DATA() (*rpcpb.Response, error
 		return nil, err
 	}
 
-	return &rpcpb.Response{
+	return &sdrpcpb.Response{
 		Success: true,
 		Status:  "killed etcd and removed base directory",
 	}, nil
 }
 
-func (srv *Server) handle_SAVE_SNAPSHOT() (*rpcpb.Response, error) {
+func (srv *Server) handle_SAVE_SNAPSHOT() (*sdrpcpb.Response, error) {
 	err := srv.Member.SaveSnapshot(srv.lg)
 	if err != nil {
 		return nil, err
 	}
-	return &rpcpb.Response{
+	return &sdrpcpb.Response{
 		Success:      true,
 		Status:       "saved snapshot",
 		SnapshotInfo: srv.Member.SnapshotInfo,
 	}, nil
 }
 
-func (srv *Server) handle_RESTORE_RESTART_FROM_SNAPSHOT() (resp *rpcpb.Response, err error) {
+func (srv *Server) handle_RESTORE_RESTART_FROM_SNAPSHOT() (resp *sdrpcpb.Response, err error) {
 	err = srv.Member.RestoreSnapshot(srv.lg)
 	if err != nil {
 		return nil, err
@@ -536,7 +536,7 @@ func (srv *Server) handle_RESTORE_RESTART_FROM_SNAPSHOT() (resp *rpcpb.Response,
 	return resp, err
 }
 
-func (srv *Server) handle_RESTART_FROM_SNAPSHOT() (resp *rpcpb.Response, err error) {
+func (srv *Server) handle_RESTART_FROM_SNAPSHOT() (resp *sdrpcpb.Response, err error) {
 	srv.creatEtcdCmd(true)
 
 	if err = srv.saveTLSAssets(); err != nil {
@@ -559,14 +559,14 @@ func (srv *Server) handle_RESTART_FROM_SNAPSHOT() (resp *rpcpb.Response, err err
 		return nil, err
 	}
 
-	return &rpcpb.Response{
+	return &sdrpcpb.Response{
 		Success:      true,
 		Status:       "restarted etcd from snapshot",
 		SnapshotInfo: srv.Member.SnapshotInfo,
 	}, nil
 }
 
-func (srv *Server) handle_SIGQUIT_ETCD_AND_ARCHIVE_DATA() (*rpcpb.Response, error) {
+func (srv *Server) handle_SIGQUIT_ETCD_AND_ARCHIVE_DATA() (*sdrpcpb.Response, error) {
 	srv.stopProxy()
 
 	// exit with stackstrace
@@ -599,14 +599,14 @@ func (srv *Server) handle_SIGQUIT_ETCD_AND_ARCHIVE_DATA() (*rpcpb.Response, erro
 	}
 	srv.lg.Info("cleaned up page cache")
 
-	return &rpcpb.Response{
+	return &sdrpcpb.Response{
 		Success: true,
 		Status:  "cleaned up etcd",
 	}, nil
 }
 
 // stop proxy, etcd, delete data directory
-func (srv *Server) handle_SIGQUIT_ETCD_AND_REMOVE_DATA_AND_STOP_AGENT() (*rpcpb.Response, error) {
+func (srv *Server) handle_SIGQUIT_ETCD_AND_REMOVE_DATA_AND_STOP_AGENT() (*sdrpcpb.Response, error) {
 	srv.stopProxy()
 
 	err := stopWithSig(srv.etcdCmd, syscall.SIGQUIT)
@@ -627,39 +627,39 @@ func (srv *Server) handle_SIGQUIT_ETCD_AND_REMOVE_DATA_AND_STOP_AGENT() (*rpcpb.
 	// stop agent server
 	srv.Stop()
 
-	return &rpcpb.Response{
+	return &sdrpcpb.Response{
 		Success: true,
 		Status:  "destroyed etcd and agent",
 	}, nil
 }
 
-func (srv *Server) handle_BLACKHOLE_PEER_PORT_TX_RX() (*rpcpb.Response, error) {
+func (srv *Server) handle_BLACKHOLE_PEER_PORT_TX_RX() (*sdrpcpb.Response, error) {
 	for port, px := range srv.advertisePeerPortToProxy {
 		srv.lg.Info("blackholing", zap.Int("peer-port", port))
 		px.BlackholeTx()
 		px.BlackholeRx()
 		srv.lg.Info("blackholed", zap.Int("peer-port", port))
 	}
-	return &rpcpb.Response{
+	return &sdrpcpb.Response{
 		Success: true,
 		Status:  "blackholed peer port tx/rx",
 	}, nil
 }
 
-func (srv *Server) handle_UNBLACKHOLE_PEER_PORT_TX_RX() (*rpcpb.Response, error) {
+func (srv *Server) handle_UNBLACKHOLE_PEER_PORT_TX_RX() (*sdrpcpb.Response, error) {
 	for port, px := range srv.advertisePeerPortToProxy {
 		srv.lg.Info("unblackholing", zap.Int("peer-port", port))
 		px.UnblackholeTx()
 		px.UnblackholeRx()
 		srv.lg.Info("unblackholed", zap.Int("peer-port", port))
 	}
-	return &rpcpb.Response{
+	return &sdrpcpb.Response{
 		Success: true,
 		Status:  "unblackholed peer port tx/rx",
 	}, nil
 }
 
-func (srv *Server) handle_DELAY_PEER_PORT_TX_RX() (*rpcpb.Response, error) {
+func (srv *Server) handle_DELAY_PEER_PORT_TX_RX() (*sdrpcpb.Response, error) {
 	lat := time.Duration(srv.Tester.UpdatedDelayLatencyMs) * time.Millisecond
 	rv := time.Duration(srv.Tester.DelayLatencyMsRv) * time.Millisecond
 
@@ -678,20 +678,20 @@ func (srv *Server) handle_DELAY_PEER_PORT_TX_RX() (*rpcpb.Response, error) {
 		)
 	}
 
-	return &rpcpb.Response{
+	return &sdrpcpb.Response{
 		Success: true,
 		Status:  "delayed peer port tx/rx",
 	}, nil
 }
 
-func (srv *Server) handle_UNDELAY_PEER_PORT_TX_RX() (*rpcpb.Response, error) {
+func (srv *Server) handle_UNDELAY_PEER_PORT_TX_RX() (*sdrpcpb.Response, error) {
 	for port, px := range srv.advertisePeerPortToProxy {
 		srv.lg.Info("undelaying", zap.Int("peer-port", port))
 		px.UndelayTx()
 		px.UndelayRx()
 		srv.lg.Info("undelayed", zap.Int("peer-port", port))
 	}
-	return &rpcpb.Response{
+	return &sdrpcpb.Response{
 		Success: true,
 		Status:  "undelayed peer port tx/rx",
 	}, nil

@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
 )
 
 func TestCtlV3MemberList(t *testing.T) { testCtl(t, memberListTest) }
@@ -46,26 +46,26 @@ func ctlV3MemberList(cx ctlCtx) error {
 	return spawnWithExpects(cmdArgs, lines...)
 }
 
-func getMemberList(cx ctlCtx) (etcdserverpb.MemberListResponse, error) {
+func getMemberList(cx ctlCtx) (sdetcdserverpb.MemberListResponse, error) {
 	cmdArgs := append(cx.PrefixArgs(), "--write-out", "json", "member", "list")
 
 	proc, err := spawnCmd(cmdArgs)
 	if err != nil {
-		return etcdserverpb.MemberListResponse{}, err
+		return sdetcdserverpb.MemberListResponse{}, err
 	}
 	var txt string
 	txt, err = proc.Expect("members")
 	if err != nil {
-		return etcdserverpb.MemberListResponse{}, err
+		return sdetcdserverpb.MemberListResponse{}, err
 	}
 	if err = proc.Close(); err != nil {
-		return etcdserverpb.MemberListResponse{}, err
+		return sdetcdserverpb.MemberListResponse{}, err
 	}
 
-	resp := etcdserverpb.MemberListResponse{}
+	resp := sdetcdserverpb.MemberListResponse{}
 	dec := json.NewDecoder(strings.NewReader(txt))
 	if err := dec.Decode(&resp); err == io.EOF {
-		return etcdserverpb.MemberListResponse{}, err
+		return sdetcdserverpb.MemberListResponse{}, err
 	}
 	return resp, nil
 }

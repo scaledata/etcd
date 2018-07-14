@@ -17,59 +17,59 @@ package rafthttp
 import (
 	"testing"
 
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 func TestPeerPick(t *testing.T) {
 	tests := []struct {
 		msgappWorking  bool
 		messageWorking bool
-		m              raftpb.Message
+		m              sdraftpb.Message
 		wpicked        string
 	}{
 		{
 			true, true,
-			raftpb.Message{Type: raftpb.MsgSnap},
+			sdraftpb.Message{Type: sdraftpb.MsgSnap},
 			pipelineMsg,
 		},
 		{
 			true, true,
-			raftpb.Message{Type: raftpb.MsgApp, Term: 1, LogTerm: 1},
+			sdraftpb.Message{Type: sdraftpb.MsgApp, Term: 1, LogTerm: 1},
 			streamAppV2,
 		},
 		{
 			true, true,
-			raftpb.Message{Type: raftpb.MsgProp},
+			sdraftpb.Message{Type: sdraftpb.MsgProp},
 			streamMsg,
 		},
 		{
 			true, true,
-			raftpb.Message{Type: raftpb.MsgHeartbeat},
+			sdraftpb.Message{Type: sdraftpb.MsgHeartbeat},
 			streamMsg,
 		},
 		{
 			false, true,
-			raftpb.Message{Type: raftpb.MsgApp, Term: 1, LogTerm: 1},
+			sdraftpb.Message{Type: sdraftpb.MsgApp, Term: 1, LogTerm: 1},
 			streamMsg,
 		},
 		{
 			false, false,
-			raftpb.Message{Type: raftpb.MsgApp, Term: 1, LogTerm: 1},
+			sdraftpb.Message{Type: sdraftpb.MsgApp, Term: 1, LogTerm: 1},
 			pipelineMsg,
 		},
 		{
 			false, false,
-			raftpb.Message{Type: raftpb.MsgProp},
+			sdraftpb.Message{Type: sdraftpb.MsgProp},
 			pipelineMsg,
 		},
 		{
 			false, false,
-			raftpb.Message{Type: raftpb.MsgSnap},
+			sdraftpb.Message{Type: sdraftpb.MsgSnap},
 			pipelineMsg,
 		},
 		{
 			false, false,
-			raftpb.Message{Type: raftpb.MsgHeartbeat},
+			sdraftpb.Message{Type: sdraftpb.MsgHeartbeat},
 			pipelineMsg,
 		},
 	}

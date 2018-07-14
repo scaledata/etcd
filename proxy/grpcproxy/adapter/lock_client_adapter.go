@@ -17,21 +17,21 @@ package adapter
 import (
 	"context"
 
-	"github.com/coreos/etcd/etcdserver/api/v3lock/v3lockpb"
+	"github.com/scaledata/etcd/etcdserver/api/v3lock/sdv3lockpb"
 
 	"google.golang.org/grpc"
 )
 
-type ls2lsc struct{ ls v3lockpb.LockServer }
+type ls2lsc struct{ ls sdv3lockpb.LockServer }
 
-func LockServerToLockClient(ls v3lockpb.LockServer) v3lockpb.LockClient {
+func LockServerToLockClient(ls sdv3lockpb.LockServer) sdv3lockpb.LockClient {
 	return &ls2lsc{ls}
 }
 
-func (s *ls2lsc) Lock(ctx context.Context, r *v3lockpb.LockRequest, opts ...grpc.CallOption) (*v3lockpb.LockResponse, error) {
+func (s *ls2lsc) Lock(ctx context.Context, r *sdv3lockpb.LockRequest, opts ...grpc.CallOption) (*sdv3lockpb.LockResponse, error) {
 	return s.ls.Lock(ctx, r)
 }
 
-func (s *ls2lsc) Unlock(ctx context.Context, r *v3lockpb.UnlockRequest, opts ...grpc.CallOption) (*v3lockpb.UnlockResponse, error) {
+func (s *ls2lsc) Unlock(ctx context.Context, r *sdv3lockpb.UnlockRequest, opts ...grpc.CallOption) (*sdv3lockpb.UnlockResponse, error) {
 	return s.ls.Unlock(ctx, r)
 }

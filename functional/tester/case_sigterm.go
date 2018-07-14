@@ -14,19 +14,19 @@
 
 package tester
 
-import "github.com/coreos/etcd/functional/rpcpb"
+import "github.com/scaledata/etcd/functional/sdrpcpb"
 
 func inject_SIGTERM_ETCD(clus *Cluster, idx int) error {
-	return clus.sendOp(idx, rpcpb.Operation_SIGTERM_ETCD)
+	return clus.sendOp(idx, sdrpcpb.Operation_SIGTERM_ETCD)
 }
 
 func recover_SIGTERM_ETCD(clus *Cluster, idx int) error {
-	return clus.sendOp(idx, rpcpb.Operation_RESTART_ETCD)
+	return clus.sendOp(idx, sdrpcpb.Operation_RESTART_ETCD)
 }
 
 func new_Case_SIGTERM_ONE_FOLLOWER(clus *Cluster) Case {
 	cc := caseByFunc{
-		rpcpbCase:     rpcpb.Case_SIGTERM_ONE_FOLLOWER,
+		sdrpcpbCase:     sdrpcpb.Case_SIGTERM_ONE_FOLLOWER,
 		injectMember:  inject_SIGTERM_ETCD,
 		recoverMember: recover_SIGTERM_ETCD,
 	}
@@ -39,14 +39,14 @@ func new_Case_SIGTERM_ONE_FOLLOWER(clus *Cluster) Case {
 
 func new_Case_SIGTERM_ONE_FOLLOWER_UNTIL_TRIGGER_SNAPSHOT(clus *Cluster) Case {
 	return &caseUntilSnapshot{
-		rpcpbCase: rpcpb.Case_SIGTERM_ONE_FOLLOWER_UNTIL_TRIGGER_SNAPSHOT,
+		sdrpcpbCase: sdrpcpb.Case_SIGTERM_ONE_FOLLOWER_UNTIL_TRIGGER_SNAPSHOT,
 		Case:      new_Case_SIGTERM_ONE_FOLLOWER(clus),
 	}
 }
 
 func new_Case_SIGTERM_LEADER(clus *Cluster) Case {
 	cc := caseByFunc{
-		rpcpbCase:     rpcpb.Case_SIGTERM_LEADER,
+		sdrpcpbCase:     sdrpcpb.Case_SIGTERM_LEADER,
 		injectMember:  inject_SIGTERM_ETCD,
 		recoverMember: recover_SIGTERM_ETCD,
 	}
@@ -59,7 +59,7 @@ func new_Case_SIGTERM_LEADER(clus *Cluster) Case {
 
 func new_Case_SIGTERM_LEADER_UNTIL_TRIGGER_SNAPSHOT(clus *Cluster) Case {
 	return &caseUntilSnapshot{
-		rpcpbCase: rpcpb.Case_SIGTERM_LEADER_UNTIL_TRIGGER_SNAPSHOT,
+		sdrpcpbCase: sdrpcpb.Case_SIGTERM_LEADER_UNTIL_TRIGGER_SNAPSHOT,
 		Case:      new_Case_SIGTERM_LEADER(clus),
 	}
 }
@@ -67,7 +67,7 @@ func new_Case_SIGTERM_LEADER_UNTIL_TRIGGER_SNAPSHOT(clus *Cluster) Case {
 func new_Case_SIGTERM_QUORUM(clus *Cluster) Case {
 	c := &caseQuorum{
 		caseByFunc: caseByFunc{
-			rpcpbCase:     rpcpb.Case_SIGTERM_QUORUM,
+			sdrpcpbCase:     sdrpcpb.Case_SIGTERM_QUORUM,
 			injectMember:  inject_SIGTERM_ETCD,
 			recoverMember: recover_SIGTERM_ETCD,
 		},
@@ -81,7 +81,7 @@ func new_Case_SIGTERM_QUORUM(clus *Cluster) Case {
 
 func new_Case_SIGTERM_ALL(clus *Cluster) Case {
 	c := &caseAll{
-		rpcpbCase:     rpcpb.Case_SIGTERM_ALL,
+		sdrpcpbCase:     sdrpcpb.Case_SIGTERM_ALL,
 		injectMember:  inject_SIGTERM_ETCD,
 		recoverMember: recover_SIGTERM_ETCD,
 	}

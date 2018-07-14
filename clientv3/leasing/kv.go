@@ -20,11 +20,11 @@ import (
 	"sync"
 	"time"
 
-	v3 "github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/clientv3/concurrency"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	v3 "github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/clientv3/concurrency"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc/rpctypes"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -426,7 +426,7 @@ func (lkv *leasingKV) revokeRange(ctx context.Context, begin, end string) (int64
 	return lkv.revokeLeaseKvs(ctx, leaseKeys.Kvs)
 }
 
-func (lkv *leasingKV) revokeLeaseKvs(ctx context.Context, kvs []*mvccpb.KeyValue) (int64, error) {
+func (lkv *leasingKV) revokeLeaseKvs(ctx context.Context, kvs []*sdmvccpb.KeyValue) (int64, error) {
 	maxLeaseRev := int64(0)
 	for _, kv := range kvs {
 		if rev := kv.CreateRevision; rev > maxLeaseRev {

@@ -27,17 +27,17 @@ import (
 	"strings"
 	"time"
 
-	etcdErr "github.com/coreos/etcd/error"
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/api"
-	"github.com/coreos/etcd/etcdserver/api/etcdhttp"
-	"github.com/coreos/etcd/etcdserver/api/v2http/httptypes"
-	"github.com/coreos/etcd/etcdserver/auth"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/etcdserver/membership"
-	"github.com/coreos/etcd/etcdserver/stats"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/store"
+	etcdErr "github.com/scaledata/etcd/error"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/api"
+	"github.com/scaledata/etcd/etcdserver/api/etcdhttp"
+	"github.com/scaledata/etcd/etcdserver/api/v2http/httptypes"
+	"github.com/scaledata/etcd/etcdserver/auth"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/etcdserver/membership"
+	"github.com/scaledata/etcd/etcdserver/stats"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/store"
 
 	"github.com/jonboulle/clockwork"
 )
@@ -316,9 +316,9 @@ func (h *statsHandler) serveLeader(w http.ResponseWriter, r *http.Request) {
 // parseKeyRequest converts a received http.Request on keysPrefix to
 // a server Request, performing validation of supplied fields as appropriate.
 // If any validation fails, an empty Request and non-nil error is returned.
-func parseKeyRequest(r *http.Request, clock clockwork.Clock) (etcdserverpb.Request, bool, error) {
+func parseKeyRequest(r *http.Request, clock clockwork.Clock) (sdetcdserverpb.Request, bool, error) {
 	var noValueOnSuccess bool
-	emptyReq := etcdserverpb.Request{}
+	emptyReq := sdetcdserverpb.Request{}
 
 	err := r.ParseForm()
 	if err != nil {
@@ -466,7 +466,7 @@ func parseKeyRequest(r *http.Request, clock clockwork.Clock) (etcdserverpb.Reque
 		}
 	}
 
-	rr := etcdserverpb.Request{
+	rr := sdetcdserverpb.Request{
 		Method:    r.Method,
 		Path:      p,
 		Val:       r.FormValue("value"),

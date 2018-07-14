@@ -17,8 +17,8 @@ package mvcc
 import (
 	"encoding/binary"
 
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 func UpdateConsistentIndex(be backend.Backend, index uint64) {
@@ -41,7 +41,7 @@ func UpdateConsistentIndex(be backend.Backend, index uint64) {
 	tx.UnsafePut(metaBucketName, consistentIndexKeyName, bs)
 }
 
-func WriteKV(be backend.Backend, kv mvccpb.KeyValue) {
+func WriteKV(be backend.Backend, kv sdmvccpb.KeyValue) {
 	ibytes := newRevBytes()
 	revToBytes(revision{main: kv.ModRevision}, ibytes)
 

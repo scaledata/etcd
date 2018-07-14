@@ -33,7 +33,7 @@ import (
 	"reflect"
 	"sort"
 
-	pb "github.com/coreos/etcd/raft/raftpb"
+	pb "github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 func TestFollowerUpdateTermFromMessage(t *testing.T) {

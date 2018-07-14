@@ -20,15 +20,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
 
 	"go.uber.org/zap"
 )
 
 type fetchSnapshotCaseQuorum struct {
 	desc        string
-	rpcpbCase   rpcpb.Case
+	sdrpcpbCase   sdrpcpb.Case
 	injected    map[int]struct{}
 	snapshotted int
 }
@@ -46,8 +46,8 @@ func (c *fetchSnapshotCaseQuorum) Inject(clus *Cluster) error {
 		"save snapshot on leader node START",
 		zap.String("target-endpoint", clus.Members[lead].EtcdClientEndpoint),
 	)
-	var resp *rpcpb.Response
-	resp, err = clus.sendOpWithResp(lead, rpcpb.Operation_SAVE_SNAPSHOT)
+	var resp *sdrpcpb.Response
+	resp, err = clus.sendOpWithResp(lead, sdrpcpb.Operation_SAVE_SNAPSHOT)
 	if resp == nil || (resp != nil && !resp.Success) || err != nil {
 		clus.lg.Info(
 			"save snapshot on leader node FAIL",
@@ -112,7 +112,7 @@ func (c *fetchSnapshotCaseQuorum) Inject(clus *Cluster) error {
 			"disastrous machine failure to quorum START",
 			zap.String("target-endpoint", clus.Members[idx].EtcdClientEndpoint),
 		)
-		err = clus.sendOp(idx, rpcpb.Operation_SIGQUIT_ETCD_AND_REMOVE_DATA)
+		err = clus.sendOp(idx, sdrpcpb.Operation_SIGQUIT_ETCD_AND_REMOVE_DATA)
 		clus.lg.Info(
 			"disastrous machine failure to quorum END",
 			zap.String("target-endpoint", clus.Members[idx].EtcdClientEndpoint),
@@ -129,7 +129,7 @@ func (c *fetchSnapshotCaseQuorum) Inject(clus *Cluster) error {
 		"disastrous machine failure to old leader START",
 		zap.String("target-endpoint", clus.Members[lead].EtcdClientEndpoint),
 	)
-	err = clus.sendOp(lead, rpcpb.Operation_SIGQUIT_ETCD_AND_REMOVE_DATA)
+	err = clus.sendOp(lead, sdrpcpb.Operation_SIGQUIT_ETCD_AND_REMOVE_DATA)
 	clus.lg.Info(
 		"disastrous machine failure to old leader END",
 		zap.String("target-endpoint", clus.Members[lead].EtcdClientEndpoint),
@@ -159,7 +159,7 @@ func (c *fetchSnapshotCaseQuorum) Recover(clus *Cluster) error {
 		zap.String("target-endpoint", clus.Members[oldlead].EtcdClientEndpoint),
 		zap.Strings("initial-cluster", initClus),
 	)
-	err := clus.sendOp(oldlead, rpcpb.Operation_RESTORE_RESTART_FROM_SNAPSHOT)
+	err := clus.sendOp(oldlead, sdrpcpb.Operation_RESTORE_RESTART_FROM_SNAPSHOT)
 	clus.lg.Info(
 		"restore snapshot and restart from snapshot request END",
 		zap.String("target-endpoint", clus.Members[oldlead].EtcdClientEndpoint),
@@ -216,7 +216,7 @@ func (c *fetchSnapshotCaseQuorum) Recover(clus *Cluster) error {
 			zap.String("target-endpoint", clus.Members[idx].EtcdClientEndpoint),
 			zap.Strings("initial-cluster", initClus),
 		)
-		err = clus.sendOp(idx, rpcpb.Operation_RESTART_FROM_SNAPSHOT)
+		err = clus.sendOp(idx, sdrpcpb.Operation_RESTART_FROM_SNAPSHOT)
 		clus.lg.Info(
 			"restart from snapshot request DONE",
 			zap.String("target-endpoint", clus.Members[idx].EtcdClientEndpoint),
@@ -253,16 +253,16 @@ func (c *fetchSnapshotCaseQuorum) Desc() string {
 	if c.desc != "" {
 		return c.desc
 	}
-	return c.rpcpbCase.String()
+	return c.sdrpcpbCase.String()
 }
 
-func (c *fetchSnapshotCaseQuorum) TestCase() rpcpb.Case {
-	return c.rpcpbCase
+func (c *fetchSnapshotCaseQuorum) TestCase() sdrpcpb.Case {
+	return c.sdrpcpbCase
 }
 
 func new_Case_SIGQUIT_AND_REMOVE_QUORUM_AND_RESTORE_LEADER_SNAPSHOT_FROM_SCRATCH(clus *Cluster) Case {
 	c := &fetchSnapshotCaseQuorum{
-		rpcpbCase:   rpcpb.Case_SIGQUIT_AND_REMOVE_QUORUM_AND_RESTORE_LEADER_SNAPSHOT_FROM_SCRATCH,
+		sdrpcpbCase:   sdrpcpb.Case_SIGQUIT_AND_REMOVE_QUORUM_AND_RESTORE_LEADER_SNAPSHOT_FROM_SCRATCH,
 		injected:    make(map[int]struct{}),
 		snapshotted: -1,
 	}

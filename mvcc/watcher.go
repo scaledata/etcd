@@ -19,7 +19,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 var (
@@ -29,7 +29,7 @@ var (
 type WatchID int64
 
 // FilterFunc returns true if the given event should be filtered out.
-type FilterFunc func(e mvccpb.Event) bool
+type FilterFunc func(e sdmvccpb.Event) bool
 
 type WatchStream interface {
 	// Watch creates a watcher. The watcher watches the events happening or
@@ -70,7 +70,7 @@ type WatchResponse struct {
 	WatchID WatchID
 
 	// Events contains all the events that needs to send.
-	Events []mvccpb.Event
+	Events []sdmvccpb.Event
 
 	// Revision is the revision of the KV when the watchResponse is created.
 	// For a normal response, the revision should be the same as the last

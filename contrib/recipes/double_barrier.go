@@ -17,9 +17,9 @@ package recipe
 import (
 	"context"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/clientv3/concurrency"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/clientv3/concurrency"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 // DoubleBarrier blocks processes on Enter until an expected count enters, then
@@ -70,7 +70,7 @@ func (b *DoubleBarrier) Enter() error {
 		client,
 		b.key+"/ready",
 		ek.Revision(),
-		[]mvccpb.Event_EventType{mvccpb.PUT})
+		[]sdmvccpb.Event_EventType{sdmvccpb.PUT})
 	return err
 }
 
@@ -113,7 +113,7 @@ func (b *DoubleBarrier) Leave() error {
 			client,
 			string(highest.Key),
 			highest.ModRevision,
-			[]mvccpb.Event_EventType{mvccpb.DELETE})
+			[]sdmvccpb.Event_EventType{sdmvccpb.DELETE})
 		if err != nil {
 			return err
 		}
@@ -130,7 +130,7 @@ func (b *DoubleBarrier) Leave() error {
 		client,
 		key,
 		lowest.ModRevision,
-		[]mvccpb.Event_EventType{mvccpb.DELETE})
+		[]sdmvccpb.Event_EventType{sdmvccpb.DELETE})
 	if err != nil {
 		return err
 	}

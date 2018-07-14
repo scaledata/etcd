@@ -17,7 +17,7 @@ package tester
 import (
 	"time"
 
-	"github.com/coreos/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
 
 	"go.uber.org/zap"
 )
@@ -36,16 +36,16 @@ func (c *caseNoFailWithStress) Desc() string {
 	if c.desc != "" {
 		return c.desc
 	}
-	return c.rpcpbCase.String()
+	return c.sdrpcpbCase.String()
 }
 
-func (c *caseNoFailWithStress) TestCase() rpcpb.Case {
-	return c.rpcpbCase
+func (c *caseNoFailWithStress) TestCase() sdrpcpb.Case {
+	return c.sdrpcpbCase
 }
 
 func new_Case_NO_FAIL_WITH_STRESS(clus *Cluster) Case {
 	c := &caseNoFailWithStress{
-		rpcpbCase: rpcpb.Case_NO_FAIL_WITH_STRESS,
+		sdrpcpbCase: sdrpcpb.Case_NO_FAIL_WITH_STRESS,
 	}
 	return &caseDelay{
 		Case:          c,
@@ -81,16 +81,16 @@ func (c *caseNoFailWithNoStressForLiveness) Desc() string {
 	if c.desc != "" {
 		return c.desc
 	}
-	return c.rpcpbCase.String()
+	return c.sdrpcpbCase.String()
 }
 
-func (c *caseNoFailWithNoStressForLiveness) TestCase() rpcpb.Case {
-	return c.rpcpbCase
+func (c *caseNoFailWithNoStressForLiveness) TestCase() sdrpcpb.Case {
+	return c.sdrpcpbCase
 }
 
 func new_Case_NO_FAIL_WITH_NO_STRESS_FOR_LIVENESS(clus *Cluster) Case {
 	c := &caseNoFailWithNoStressForLiveness{
-		rpcpbCase: rpcpb.Case_NO_FAIL_WITH_NO_STRESS_FOR_LIVENESS,
+		sdrpcpbCase: sdrpcpb.Case_NO_FAIL_WITH_NO_STRESS_FOR_LIVENESS,
 	}
 	return &caseDelay{
 		Case:          c,

@@ -19,8 +19,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/coreos/etcd/functional/rpcpb"
-	"github.com/coreos/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
+	"github.com/scaledata/etcd/pkg/fileutil"
 
 	"go.uber.org/zap"
 )
@@ -150,7 +150,7 @@ func (clus *Cluster) doRound() error {
 
 		stressStarted := false
 		fcase := fa.TestCase()
-		if fcase != rpcpb.Case_NO_FAIL_WITH_NO_STRESS_FOR_LIVENESS {
+		if fcase != sdrpcpb.Case_NO_FAIL_WITH_NO_STRESS_FOR_LIVENESS {
 			clus.lg.Info(
 				"stress START",
 				zap.Int("round", clus.rd),
@@ -198,7 +198,7 @@ func (clus *Cluster) doRound() error {
 				zap.String("desc", fa.Desc()),
 			)
 			ems := clus.stresser.Pause()
-			if fcase == rpcpb.Case_NO_FAIL_WITH_STRESS && len(ems) > 0 {
+			if fcase == sdrpcpb.Case_NO_FAIL_WITH_STRESS && len(ems) > 0 {
 				ess := make([]string, 0, len(ems))
 				cnt := 0
 				for k, v := range ems {
@@ -230,11 +230,11 @@ func (clus *Cluster) doRound() error {
 			return fmt.Errorf("wait full health error: %v", err)
 		}
 
-		checkerFailExceptions := []rpcpb.Checker{}
+		checkerFailExceptions := []sdrpcpb.Checker{}
 		switch fcase {
-		case rpcpb.Case_SIGQUIT_AND_REMOVE_QUORUM_AND_RESTORE_LEADER_SNAPSHOT_FROM_SCRATCH:
+		case sdrpcpb.Case_SIGQUIT_AND_REMOVE_QUORUM_AND_RESTORE_LEADER_SNAPSHOT_FROM_SCRATCH:
 			// TODO: restore from snapshot
-			checkerFailExceptions = append(checkerFailExceptions, rpcpb.Checker_LEASE_EXPIRE)
+			checkerFailExceptions = append(checkerFailExceptions, sdrpcpb.Checker_LEASE_EXPIRE)
 		}
 
 		clus.lg.Info(

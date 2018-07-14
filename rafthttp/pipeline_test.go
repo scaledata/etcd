@@ -24,11 +24,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver/stats"
-	"github.com/coreos/etcd/pkg/testutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/version"
+	"github.com/scaledata/etcd/etcdserver/stats"
+	"github.com/scaledata/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/version"
 )
 
 // TestPipelineSend tests that pipeline could send data using roundtripper
@@ -39,7 +39,7 @@ func TestPipelineSend(t *testing.T) {
 	tp := &Transport{pipelineRt: tr}
 	p := startTestPipeline(tp, picker)
 
-	p.msgc <- raftpb.Message{Type: raftpb.MsgApp}
+	p.msgc <- sdraftpb.Message{Type: sdraftpb.MsgApp}
 	tr.rec.Wait(1)
 	p.stop()
 	if p.followerStats.Counts.Success != 1 {
@@ -57,7 +57,7 @@ func TestPipelineKeepSendingWhenPostError(t *testing.T) {
 	defer p.stop()
 
 	for i := 0; i < 50; i++ {
-		p.msgc <- raftpb.Message{Type: raftpb.MsgApp}
+		p.msgc <- sdraftpb.Message{Type: sdraftpb.MsgApp}
 	}
 
 	_, err := tr.rec.Wait(50)
@@ -77,7 +77,7 @@ func TestPipelineExceedMaximumServing(t *testing.T) {
 	// nothing can go out as we block the sender
 	for i := 0; i < connPerPipeline+pipelineBufSize; i++ {
 		select {
-		case p.msgc <- raftpb.Message{}:
+		case p.msgc <- sdraftpb.Message{}:
 		case <-time.After(time.Second):
 			t.Errorf("failed to send out message")
 		}
@@ -85,7 +85,7 @@ func TestPipelineExceedMaximumServing(t *testing.T) {
 
 	// try to send a data when we are sure the buffer is full
 	select {
-	case p.msgc <- raftpb.Message{}:
+	case p.msgc <- sdraftpb.Message{}:
 		t.Errorf("unexpected message sendout")
 	default:
 	}
@@ -95,7 +95,7 @@ func TestPipelineExceedMaximumServing(t *testing.T) {
 
 	// It could send new data after previous ones succeed
 	select {
-	case p.msgc <- raftpb.Message{}:
+	case p.msgc <- sdraftpb.Message{}:
 	case <-time.After(time.Second):
 		t.Errorf("failed to send out message")
 	}
@@ -110,7 +110,7 @@ func TestPipelineSendFailed(t *testing.T) {
 	tp := &Transport{pipelineRt: rt}
 	p := startTestPipeline(tp, picker)
 
-	p.msgc <- raftpb.Message{Type: raftpb.MsgApp}
+	p.msgc <- sdraftpb.Message{Type: sdraftpb.MsgApp}
 	if _, err := rt.rec.Wait(1); err != nil {
 		t.Fatal(err)
 	}
@@ -218,7 +218,7 @@ func TestStopBlockedPipeline(t *testing.T) {
 	p := startTestPipeline(tp, picker)
 	// send many messages that most of them will be blocked in buffer
 	for i := 0; i < connPerPipeline*10; i++ {
-		p.msgc <- raftpb.Message{}
+		p.msgc <- sdraftpb.Message{}
 	}
 
 	done := make(chan struct{})

@@ -26,14 +26,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/etcd/compactor"
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/pkg/cors"
-	"github.com/coreos/etcd/pkg/netutil"
-	"github.com/coreos/etcd/pkg/srv"
-	"github.com/coreos/etcd/pkg/tlsutil"
-	"github.com/coreos/etcd/pkg/transport"
-	"github.com/coreos/etcd/pkg/types"
+	"github.com/scaledata/etcd/compactor"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/pkg/cors"
+	"github.com/scaledata/etcd/pkg/netutil"
+	"github.com/scaledata/etcd/pkg/srv"
+	"github.com/scaledata/etcd/pkg/tlsutil"
+	"github.com/scaledata/etcd/pkg/transport"
+	"github.com/scaledata/etcd/pkg/types"
 
 	"github.com/coreos/pkg/capnslog"
 	"github.com/ghodss/yaml"
@@ -141,7 +141,7 @@ type Config struct {
 	//
 	// If single-node, it advances ticks regardless.
 	//
-	// See https://github.com/coreos/etcd/issues/9333 for more detail.
+	// See https://github.com/scaledata/etcd/issues/9333 for more detail.
 	InitialElectionTickAdvance bool `json:"initial-election-tick-advance"`
 
 	QuotaBackendBytes int64 `json:"quota-backend-bytes"`
@@ -319,7 +319,7 @@ func (cfg *Config) SetupLogging() {
 		grpclog.SetLoggerV2(grpclog.NewLoggerV2(ioutil.Discard, os.Stderr, os.Stderr))
 	}
 	if cfg.LogPkgLevels != "" {
-		repoLog := capnslog.MustRepoLogger("github.com/coreos/etcd")
+		repoLog := capnslog.MustRepoLogger("github.com/scaledata/etcd")
 		settings, err := repoLog.ParseLogLevelConfig(cfg.LogPkgLevels)
 		if err != nil {
 			plog.Warningf("couldn't parse log level string: %s, continuing with default levels", err.Error())

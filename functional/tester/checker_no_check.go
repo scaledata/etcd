@@ -14,11 +14,11 @@
 
 package tester
 
-import "github.com/coreos/etcd/functional/rpcpb"
+import "github.com/scaledata/etcd/functional/sdrpcpb"
 
 type noCheck struct{}
 
 func newNoChecker() Checker                       { return &noCheck{} }
-func (nc *noCheck) Type() rpcpb.Checker           { return rpcpb.Checker_NO_CHECK }
+func (nc *noCheck) Type() sdrpcpb.Checker           { return sdrpcpb.Checker_NO_CHECK }
 func (nc *noCheck) EtcdClientEndpoints() []string { return nil }
 func (nc *noCheck) Check() error                  { return nil }

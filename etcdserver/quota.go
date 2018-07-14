@@ -14,7 +14,7 @@
 
 package etcdserver
 
-import pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
+import pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
 
 const (
 	// DefaultQuotaBytes is the number of bytes the backend Size may

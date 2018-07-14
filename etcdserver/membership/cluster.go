@@ -27,13 +27,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/pkg/netutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/store"
-	"github.com/coreos/etcd/version"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/pkg/netutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/store"
+	"github.com/scaledata/etcd/version"
 
 	"github.com/coreos/go-semver/semver"
 )
@@ -222,14 +222,14 @@ func (c *RaftCluster) Recover(onSet func(*semver.Version)) {
 
 // ValidateConfigurationChange takes a proposed ConfChange and
 // ensures that it is still valid.
-func (c *RaftCluster) ValidateConfigurationChange(cc raftpb.ConfChange) error {
+func (c *RaftCluster) ValidateConfigurationChange(cc sdraftpb.ConfChange) error {
 	members, removed := membersFromStore(c.store)
 	id := types.ID(cc.NodeID)
 	if removed[id] {
 		return ErrIDRemoved
 	}
 	switch cc.Type {
-	case raftpb.ConfChangeAddNode:
+	case sdraftpb.ConfChangeAddNode:
 		if members[id] != nil {
 			return ErrIDExists
 		}
@@ -248,11 +248,11 @@ func (c *RaftCluster) ValidateConfigurationChange(cc raftpb.ConfChange) error {
 				return ErrPeerURLexists
 			}
 		}
-	case raftpb.ConfChangeRemoveNode:
+	case sdraftpb.ConfChangeRemoveNode:
 		if members[id] == nil {
 			return ErrIDNotFound
 		}
-	case raftpb.ConfChangeUpdateNode:
+	case sdraftpb.ConfChangeUpdateNode:
 		if members[id] == nil {
 			return ErrIDNotFound
 		}
@@ -392,7 +392,7 @@ func (c *RaftCluster) IsReadyToAddNewMember() bool {
 
 	if nstarted == 1 && nmembers == 2 {
 		// a case of adding a new node to 1-member cluster for restoring cluster data
-		// https://github.com/coreos/etcd/blob/master/Documentation/v2/admin_guide.md#restoring-the-cluster
+		// https://github.com/scaledata/etcd/blob/master/Documentation/v2/admin_guide.md#restoring-the-cluster
 
 		plog.Debugf("The number of started member is 1. This cluster can accept add member request.")
 		return true

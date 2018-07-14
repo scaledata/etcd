@@ -19,9 +19,9 @@ import (
 	"errors"
 	"fmt"
 
-	v3 "github.com/coreos/etcd/clientv3"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	v3 "github.com/scaledata/etcd/clientv3"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 var (
@@ -171,7 +171,7 @@ func (e *Election) observe(ctx context.Context, ch chan<- v3.GetResponse) {
 			return
 		}
 
-		var kv *mvccpb.KeyValue
+		var kv *sdmvccpb.KeyValue
 		var hdr *pb.ResponseHeader
 
 		if len(resp.Kvs) == 0 {
@@ -187,7 +187,7 @@ func (e *Election) observe(ctx context.Context, ch chan<- v3.GetResponse) {
 				}
 				// only accept puts; a delete will make observe() spin
 				for _, ev := range wr.Events {
-					if ev.Type == mvccpb.PUT {
+					if ev.Type == sdmvccpb.PUT {
 						hdr, kv = &wr.Header, ev.Kv
 						// may have multiple revs; hdr.rev = the last rev
 						// set to kv's rev in case batch has multiple Puts
@@ -202,7 +202,7 @@ func (e *Election) observe(ctx context.Context, ch chan<- v3.GetResponse) {
 		}
 
 		select {
-		case ch <- v3.GetResponse{Header: hdr, Kvs: []*mvccpb.KeyValue{kv}}:
+		case ch <- v3.GetResponse{Header: hdr, Kvs: []*sdmvccpb.KeyValue{kv}}:
 		case <-ctx.Done():
 			return
 		}
@@ -217,12 +217,12 @@ func (e *Election) observe(ctx context.Context, ch chan<- v3.GetResponse) {
 				return
 			}
 			for _, ev := range wr.Events {
-				if ev.Type == mvccpb.DELETE {
+				if ev.Type == sdmvccpb.DELETE {
 					keyDeleted = true
 					break
 				}
 				resp.Header = &wr.Header
-				resp.Kvs = []*mvccpb.KeyValue{ev.Kv}
+				resp.Kvs = []*sdmvccpb.KeyValue{ev.Kv}
 				select {
 				case ch <- *resp:
 				case <-cctx.Done():

@@ -24,10 +24,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver/api/v3rpc"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/coreos/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
+	"github.com/scaledata/etcd/pkg/testutil"
 )
 
 // TestV3WatchFromCurrentRevision tests Watch APIs from current revision.
@@ -50,10 +50,10 @@ func TestV3WatchFromCurrentRevision(t *testing.T) {
 				{
 					Header:  &pb.ResponseHeader{Revision: 2},
 					Created: false,
-					Events: []*mvccpb.Event{
+					Events: []*sdmvccpb.Event{
 						{
-							Type: mvccpb.PUT,
-							Kv:   &mvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
+							Type: sdmvccpb.PUT,
+							Kv:   &sdmvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
 						},
 					},
 				},
@@ -80,10 +80,10 @@ func TestV3WatchFromCurrentRevision(t *testing.T) {
 				{
 					Header:  &pb.ResponseHeader{Revision: 2},
 					Created: false,
-					Events: []*mvccpb.Event{
+					Events: []*sdmvccpb.Event{
 						{
-							Type: mvccpb.PUT,
-							Kv:   &mvccpb.KeyValue{Key: []byte("fooLong"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
+							Type: sdmvccpb.PUT,
+							Kv:   &sdmvccpb.KeyValue{Key: []byte("fooLong"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
 						},
 					},
 				},
@@ -111,10 +111,10 @@ func TestV3WatchFromCurrentRevision(t *testing.T) {
 				{
 					Header:  &pb.ResponseHeader{Revision: 2},
 					Created: false,
-					Events: []*mvccpb.Event{
+					Events: []*sdmvccpb.Event{
 						{
-							Type: mvccpb.PUT,
-							Kv:   &mvccpb.KeyValue{Key: []byte("fooLong"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
+							Type: sdmvccpb.PUT,
+							Kv:   &sdmvccpb.KeyValue{Key: []byte("fooLong"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
 						},
 					},
 				},
@@ -131,30 +131,30 @@ func TestV3WatchFromCurrentRevision(t *testing.T) {
 				{
 					Header:  &pb.ResponseHeader{Revision: 2},
 					Created: false,
-					Events: []*mvccpb.Event{
+					Events: []*sdmvccpb.Event{
 						{
-							Type: mvccpb.PUT,
-							Kv:   &mvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
+							Type: sdmvccpb.PUT,
+							Kv:   &sdmvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
 						},
 					},
 				},
 				{
 					Header:  &pb.ResponseHeader{Revision: 3},
 					Created: false,
-					Events: []*mvccpb.Event{
+					Events: []*sdmvccpb.Event{
 						{
-							Type: mvccpb.PUT,
-							Kv:   &mvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 3, Version: 2},
+							Type: sdmvccpb.PUT,
+							Kv:   &sdmvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 3, Version: 2},
 						},
 					},
 				},
 				{
 					Header:  &pb.ResponseHeader{Revision: 4},
 					Created: false,
-					Events: []*mvccpb.Event{
+					Events: []*sdmvccpb.Event{
 						{
-							Type: mvccpb.PUT,
-							Kv:   &mvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 4, Version: 3},
+							Type: sdmvccpb.PUT,
+							Kv:   &sdmvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 4, Version: 3},
 						},
 					},
 				},
@@ -172,30 +172,30 @@ func TestV3WatchFromCurrentRevision(t *testing.T) {
 				{
 					Header:  &pb.ResponseHeader{Revision: 2},
 					Created: false,
-					Events: []*mvccpb.Event{
+					Events: []*sdmvccpb.Event{
 						{
-							Type: mvccpb.PUT,
-							Kv:   &mvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
+							Type: sdmvccpb.PUT,
+							Kv:   &sdmvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
 						},
 					},
 				},
 				{
 					Header:  &pb.ResponseHeader{Revision: 3},
 					Created: false,
-					Events: []*mvccpb.Event{
+					Events: []*sdmvccpb.Event{
 						{
-							Type: mvccpb.PUT,
-							Kv:   &mvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 3, Version: 2},
+							Type: sdmvccpb.PUT,
+							Kv:   &sdmvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 3, Version: 2},
 						},
 					},
 				},
 				{
 					Header:  &pb.ResponseHeader{Revision: 4},
 					Created: false,
-					Events: []*mvccpb.Event{
+					Events: []*sdmvccpb.Event{
 						{
-							Type: mvccpb.PUT,
-							Kv:   &mvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 4, Version: 3},
+							Type: sdmvccpb.PUT,
+							Kv:   &sdmvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 4, Version: 3},
 						},
 					},
 				},
@@ -578,10 +578,10 @@ func TestV3WatchEmptyKey(t *testing.T) {
 	if rerr != nil {
 		t.Fatal(rerr)
 	}
-	wevs := []*mvccpb.Event{
+	wevs := []*sdmvccpb.Event{
 		{
-			Type: mvccpb.PUT,
-			Kv:   &mvccpb.KeyValue{Key: []byte("foo"), CreateRevision: 2, ModRevision: 2, Version: 1},
+			Type: sdmvccpb.PUT,
+			Kv:   &sdmvccpb.KeyValue{Key: []byte("foo"), CreateRevision: 2, ModRevision: 2, Version: 1},
 		},
 	}
 	if !reflect.DeepEqual(resp.Events, wevs) {
@@ -744,7 +744,7 @@ func testV3WatchMultipleEventsTxn(t *testing.T, startRev int64) {
 		t.Fatalf("kvc.Txn failed: %+v", tresp)
 	}
 
-	events := []*mvccpb.Event{}
+	events := []*sdmvccpb.Event{}
 	for len(events) < 3 {
 		resp, err := wStream.Recv()
 		if err != nil {
@@ -754,18 +754,18 @@ func testV3WatchMultipleEventsTxn(t *testing.T, startRev int64) {
 	}
 	sort.Sort(eventsSortByKey(events))
 
-	wevents := []*mvccpb.Event{
+	wevents := []*sdmvccpb.Event{
 		{
-			Type: mvccpb.PUT,
-			Kv:   &mvccpb.KeyValue{Key: []byte("foo0"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
+			Type: sdmvccpb.PUT,
+			Kv:   &sdmvccpb.KeyValue{Key: []byte("foo0"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
 		},
 		{
-			Type: mvccpb.PUT,
-			Kv:   &mvccpb.KeyValue{Key: []byte("foo1"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
+			Type: sdmvccpb.PUT,
+			Kv:   &sdmvccpb.KeyValue{Key: []byte("foo1"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
 		},
 		{
-			Type: mvccpb.PUT,
-			Kv:   &mvccpb.KeyValue{Key: []byte("foo2"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
+			Type: sdmvccpb.PUT,
+			Kv:   &sdmvccpb.KeyValue{Key: []byte("foo2"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
 		},
 	}
 
@@ -779,7 +779,7 @@ func testV3WatchMultipleEventsTxn(t *testing.T, startRev int64) {
 	}
 }
 
-type eventsSortByKey []*mvccpb.Event
+type eventsSortByKey []*sdmvccpb.Event
 
 func (evs eventsSortByKey) Len() int           { return len(evs) }
 func (evs eventsSortByKey) Swap(i, j int)      { evs[i], evs[j] = evs[j], evs[i] }
@@ -820,26 +820,26 @@ func TestV3WatchMultipleEventsPutUnsynced(t *testing.T) {
 		t.Fatalf("couldn't put key (%v)", err)
 	}
 
-	allWevents := []*mvccpb.Event{
+	allWevents := []*sdmvccpb.Event{
 		{
-			Type: mvccpb.PUT,
-			Kv:   &mvccpb.KeyValue{Key: []byte("foo0"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
+			Type: sdmvccpb.PUT,
+			Kv:   &sdmvccpb.KeyValue{Key: []byte("foo0"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
 		},
 		{
-			Type: mvccpb.PUT,
-			Kv:   &mvccpb.KeyValue{Key: []byte("foo1"), Value: []byte("bar"), CreateRevision: 3, ModRevision: 3, Version: 1},
+			Type: sdmvccpb.PUT,
+			Kv:   &sdmvccpb.KeyValue{Key: []byte("foo1"), Value: []byte("bar"), CreateRevision: 3, ModRevision: 3, Version: 1},
 		},
 		{
-			Type: mvccpb.PUT,
-			Kv:   &mvccpb.KeyValue{Key: []byte("foo0"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 4, Version: 2},
+			Type: sdmvccpb.PUT,
+			Kv:   &sdmvccpb.KeyValue{Key: []byte("foo0"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 4, Version: 2},
 		},
 		{
-			Type: mvccpb.PUT,
-			Kv:   &mvccpb.KeyValue{Key: []byte("foo1"), Value: []byte("bar"), CreateRevision: 3, ModRevision: 5, Version: 2},
+			Type: sdmvccpb.PUT,
+			Kv:   &sdmvccpb.KeyValue{Key: []byte("foo1"), Value: []byte("bar"), CreateRevision: 3, ModRevision: 5, Version: 2},
 		},
 	}
 
-	events := []*mvccpb.Event{}
+	events := []*sdmvccpb.Event{}
 	for len(events) < 4 {
 		resp, err := wStream.Recv()
 		if err != nil {
@@ -915,10 +915,10 @@ func testV3WatchMultipleStreams(t *testing.T, startRev int64) {
 
 	var wg sync.WaitGroup
 	wg.Add(len(streams))
-	wevents := []*mvccpb.Event{
+	wevents := []*sdmvccpb.Event{
 		{
-			Type: mvccpb.PUT,
-			Kv:   &mvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
+			Type: sdmvccpb.PUT,
+			Kv:   &sdmvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1},
 		},
 	}
 	for i := range streams {
@@ -1115,10 +1115,10 @@ func TestV3WatchWithFilter(t *testing.T) {
 
 	select {
 	case resp := <-recv:
-		wevs := []*mvccpb.Event{
+		wevs := []*sdmvccpb.Event{
 			{
-				Type: mvccpb.DELETE,
-				Kv:   &mvccpb.KeyValue{Key: []byte("foo"), ModRevision: 3},
+				Type: sdmvccpb.DELETE,
+				Kv:   &sdmvccpb.KeyValue{Key: []byte("foo"), ModRevision: 3},
 			},
 		}
 		if !reflect.DeepEqual(resp.Events, wevs) {

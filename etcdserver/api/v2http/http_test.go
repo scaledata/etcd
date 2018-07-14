@@ -22,12 +22,12 @@ import (
 	"sort"
 	"testing"
 
-	etcdErr "github.com/coreos/etcd/error"
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/etcdserver/membership"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
+	etcdErr "github.com/scaledata/etcd/error"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/etcdserver/membership"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 
 	"github.com/coreos/go-semver/semver"
 )
@@ -58,10 +58,10 @@ type errServer struct {
 	fakeServer
 }
 
-func (fs *errServer) Do(ctx context.Context, r etcdserverpb.Request) (etcdserver.Response, error) {
+func (fs *errServer) Do(ctx context.Context, r sdetcdserverpb.Request) (etcdserver.Response, error) {
 	return etcdserver.Response{}, fs.err
 }
-func (fs *errServer) Process(ctx context.Context, m raftpb.Message) error {
+func (fs *errServer) Process(ctx context.Context, m sdraftpb.Message) error {
 	return fs.err
 }
 func (fs *errServer) AddMember(ctx context.Context, m membership.Member) ([]*membership.Member, error) {

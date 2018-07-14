@@ -21,9 +21,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/coreos/etcd/pkg/crc"
-	"github.com/coreos/etcd/pkg/ioutil"
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/pkg/crc"
+	"github.com/scaledata/etcd/pkg/ioutil"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 )
 
 // walPageBytes is the alignment for flushing records to the backing Writer.
@@ -59,7 +59,7 @@ func newFileEncoder(f *os.File, prevCrc uint32) (*encoder, error) {
 	return newEncoder(f, prevCrc, int(offset)), nil
 }
 
-func (e *encoder) encode(rec *walpb.Record) error {
+func (e *encoder) encode(rec *sdwalpb.Record) error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 

@@ -21,7 +21,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/coreos/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
 )
 
 type failpointStats struct {
@@ -52,7 +52,7 @@ func failpointFailures(clus *Cluster) (ret []Case, err error) {
 				// hack to trigger snapshot failpoints
 				fpFails[i] = &caseUntilSnapshot{
 					desc:      fpf.Desc(),
-					rpcpbCase: rpcpb.Case_FAILPOINTS,
+					sdrpcpbCase: sdrpcpb.Case_FAILPOINTS,
 					Case:      fpf,
 				}
 			} else {
@@ -96,7 +96,7 @@ func casesFromFailpoint(fp string, failpointCommands []string) (fs []Case) {
 			&caseFollower{
 				caseByFunc: caseByFunc{
 					desc:          fmt.Sprintf("failpoint %q (one: %q)", fp, fcmd),
-					rpcpbCase:     rpcpb.Case_FAILPOINTS,
+					sdrpcpbCase:     sdrpcpb.Case_FAILPOINTS,
 					injectMember:  inject,
 					recoverMember: recov,
 				},
@@ -106,7 +106,7 @@ func casesFromFailpoint(fp string, failpointCommands []string) (fs []Case) {
 			&caseLeader{
 				caseByFunc: caseByFunc{
 					desc:          fmt.Sprintf("failpoint %q (leader: %q)", fp, fcmd),
-					rpcpbCase:     rpcpb.Case_FAILPOINTS,
+					sdrpcpbCase:     sdrpcpb.Case_FAILPOINTS,
 					injectMember:  inject,
 					recoverMember: recov,
 				},
@@ -116,7 +116,7 @@ func casesFromFailpoint(fp string, failpointCommands []string) (fs []Case) {
 			&caseQuorum{
 				caseByFunc: caseByFunc{
 					desc:          fmt.Sprintf("failpoint %q (quorum: %q)", fp, fcmd),
-					rpcpbCase:     rpcpb.Case_FAILPOINTS,
+					sdrpcpbCase:     sdrpcpb.Case_FAILPOINTS,
 					injectMember:  inject,
 					recoverMember: recov,
 				},
@@ -124,7 +124,7 @@ func casesFromFailpoint(fp string, failpointCommands []string) (fs []Case) {
 			},
 			&caseAll{
 				desc:          fmt.Sprintf("failpoint %q (all: %q)", fp, fcmd),
-				rpcpbCase:     rpcpb.Case_FAILPOINTS,
+				sdrpcpbCase:     sdrpcpb.Case_FAILPOINTS,
 				injectMember:  inject,
 				recoverMember: recov,
 			},

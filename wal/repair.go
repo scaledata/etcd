@@ -19,8 +19,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 )
 
 // Repair tries to repair ErrUnexpectedEOF in the
@@ -32,7 +32,7 @@ func Repair(dirpath string) bool {
 	}
 	defer f.Close()
 
-	rec := &walpb.Record{}
+	rec := &sdwalpb.Record{}
 	decoder := newDecoder(f)
 	for {
 		lastOffset := decoder.lastOffset()

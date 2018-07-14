@@ -14,12 +14,12 @@
 
 package tester
 
-import "github.com/coreos/etcd/functional/rpcpb"
+import "github.com/scaledata/etcd/functional/sdrpcpb"
 
 // Checker checks cluster consistency.
 type Checker interface {
 	// Type returns the checker type.
-	Type() rpcpb.Checker
+	Type() sdrpcpb.Checker
 	// EtcdClientEndpoints returns the client endpoints of
 	// all checker target nodes..
 	EtcdClientEndpoints() []string

@@ -21,11 +21,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/clientv3/concurrency"
-	"github.com/coreos/etcd/contrib/recipes"
-	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/coreos/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/clientv3/concurrency"
+	"github.com/scaledata/etcd/contrib/recipes"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
+	"github.com/scaledata/etcd/pkg/testutil"
 )
 
 func TestMutexSingleNode(t *testing.T) {
@@ -168,7 +168,7 @@ func TestMutexWaitsOnCurrentHolder(t *testing.T) {
 		if len(wrp.Events) != 1 {
 			t.Fatalf("expect a event, but got %v events", len(wrp.Events))
 		}
-		if e := wrp.Events[0]; e.Type != mvccpb.PUT {
+		if e := wrp.Events[0]; e.Type != sdmvccpb.PUT {
 			t.Fatalf("expect a put event on prefix test-mutex, but got event type %v", e.Type)
 		}
 	case <-time.After(time.Second):
@@ -184,7 +184,7 @@ func TestMutexWaitsOnCurrentHolder(t *testing.T) {
 		if len(wrp.Events) != 1 {
 			t.Fatalf("expect a event, but got %v events", len(wrp.Events))
 		}
-		if e := wrp.Events[0]; e.Type != mvccpb.DELETE {
+		if e := wrp.Events[0]; e.Type != sdmvccpb.DELETE {
 			t.Fatalf("expect a delete event on prefix test-mutex, but got event type %v", e.Type)
 		}
 	case <-time.After(time.Second):

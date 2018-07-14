@@ -20,13 +20,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 // Handler for a http based key-value store backed by raft
 type httpKVAPI struct {
 	store       *kvstore
-	confChangeC chan<- raftpb.ConfChange
+	confChangeC chan<- sdraftpb.ConfChange
 }
 
 func (h *httpKVAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -66,8 +66,8 @@ func (h *httpKVAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		cc := raftpb.ConfChange{
-			Type:    raftpb.ConfChangeAddNode,
+		cc := sdraftpb.ConfChange{
+			Type:    sdraftpb.ConfChangeAddNode,
 			NodeID:  nodeId,
 			Context: url,
 		}
@@ -83,8 +83,8 @@ func (h *httpKVAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		cc := raftpb.ConfChange{
-			Type:   raftpb.ConfChangeRemoveNode,
+		cc := sdraftpb.ConfChange{
+			Type:   sdraftpb.ConfChangeRemoveNode,
 			NodeID: nodeId,
 		}
 		h.confChangeC <- cc
@@ -101,7 +101,7 @@ func (h *httpKVAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // serveHttpKVAPI starts a key-value server with a GET/PUT API and listens.
-func serveHttpKVAPI(kv *kvstore, port int, confChangeC chan<- raftpb.ConfChange, errorC <-chan error) {
+func serveHttpKVAPI(kv *kvstore, port int, confChangeC chan<- sdraftpb.ConfChange, errorC <-chan error) {
 	srv := http.Server{
 		Addr: ":" + strconv.Itoa(port),
 		Handler: &httpKVAPI{

@@ -19,7 +19,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coreos/etcd/pkg/expect"
+	"github.com/scaledata/etcd/pkg/expect"
 )
 
 var (

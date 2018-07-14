@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/coreos/etcd/auth/authpb"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
+	"github.com/scaledata/etcd/auth/sdauthpb"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
 
 	"google.golang.org/grpc"
 )
@@ -43,14 +43,14 @@ type (
 	AuthUserListResponse             pb.AuthUserListResponse
 	AuthRoleListResponse             pb.AuthRoleListResponse
 
-	PermissionType authpb.Permission_Type
-	Permission     authpb.Permission
+	PermissionType sdauthpb.Permission_Type
+	Permission     sdauthpb.Permission
 )
 
 const (
-	PermRead      = authpb.READ
-	PermWrite     = authpb.WRITE
-	PermReadWrite = authpb.READWRITE
+	PermRead      = sdauthpb.READ
+	PermWrite     = sdauthpb.WRITE
+	PermReadWrite = sdauthpb.READWRITE
 )
 
 type Auth interface {
@@ -164,10 +164,10 @@ func (auth *auth) RoleAdd(ctx context.Context, name string) (*AuthRoleAddRespons
 }
 
 func (auth *auth) RoleGrantPermission(ctx context.Context, name string, key, rangeEnd string, permType PermissionType) (*AuthRoleGrantPermissionResponse, error) {
-	perm := &authpb.Permission{
+	perm := &sdauthpb.Permission{
 		Key:      []byte(key),
 		RangeEnd: []byte(rangeEnd),
-		PermType: authpb.Permission_Type(permType),
+		PermType: sdauthpb.Permission_Type(permType),
 	}
 	resp, err := auth.remote.RoleGrantPermission(ctx, &pb.AuthRoleGrantPermissionRequest{Name: name, Perm: perm}, auth.callOpts...)
 	return (*AuthRoleGrantPermissionResponse)(resp), toErr(ctx, err)
@@ -194,7 +194,7 @@ func (auth *auth) RoleDelete(ctx context.Context, role string) (*AuthRoleDeleteR
 }
 
 func StrToPermissionType(s string) (PermissionType, error) {
-	val, ok := authpb.Permission_Type_value[strings.ToUpper(s)]
+	val, ok := sdauthpb.Permission_Type_value[strings.ToUpper(s)]
 	if ok {
 		return PermissionType(val), nil
 	}

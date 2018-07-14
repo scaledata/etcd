@@ -17,12 +17,12 @@ package recipe
 import (
 	"context"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 // WaitEvents waits on a key until it observes the given events and returns the final one.
-func WaitEvents(c *clientv3.Client, key string, rev int64, evs []mvccpb.Event_EventType) (*clientv3.Event, error) {
+func WaitEvents(c *clientv3.Client, key string, rev int64, evs []sdmvccpb.Event_EventType) (*clientv3.Event, error) {
 	wc := c.Watch(context.Background(), key, clientv3.WithRev(rev))
 	if wc == nil {
 		return nil, ErrNoWatcher
@@ -30,7 +30,7 @@ func WaitEvents(c *clientv3.Client, key string, rev int64, evs []mvccpb.Event_Ev
 	return waitEvents(wc, evs), nil
 }
 
-func WaitPrefixEvents(c *clientv3.Client, prefix string, rev int64, evs []mvccpb.Event_EventType) (*clientv3.Event, error) {
+func WaitPrefixEvents(c *clientv3.Client, prefix string, rev int64, evs []sdmvccpb.Event_EventType) (*clientv3.Event, error) {
 	wc := c.Watch(context.Background(), prefix, clientv3.WithPrefix(), clientv3.WithRev(rev))
 	if wc == nil {
 		return nil, ErrNoWatcher
@@ -38,7 +38,7 @@ func WaitPrefixEvents(c *clientv3.Client, prefix string, rev int64, evs []mvccpb
 	return waitEvents(wc, evs), nil
 }
 
-func waitEvents(wc clientv3.WatchChan, evs []mvccpb.Event_EventType) *clientv3.Event {
+func waitEvents(wc clientv3.WatchChan, evs []sdmvccpb.Event_EventType) *clientv3.Event {
 	i := 0
 	for wresp := range wc {
 		for _, ev := range wresp.Events {

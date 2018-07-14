@@ -15,7 +15,7 @@
 package mvcc
 
 import (
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
 )
 
 func (tw *watchableStoreTxnWrite) End() {
@@ -26,14 +26,14 @@ func (tw *watchableStoreTxnWrite) End() {
 	}
 
 	rev := tw.Rev() + 1
-	evs := make([]mvccpb.Event, len(changes))
+	evs := make([]sdmvccpb.Event, len(changes))
 	for i, change := range changes {
 		evs[i].Kv = &changes[i]
 		if change.CreateRevision == 0 {
-			evs[i].Type = mvccpb.DELETE
+			evs[i].Type = sdmvccpb.DELETE
 			evs[i].Kv.ModRevision = rev
 		} else {
-			evs[i].Type = mvccpb.PUT
+			evs[i].Type = sdmvccpb.PUT
 		}
 	}
 

@@ -22,10 +22,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/clientv3/mirror"
-	"github.com/coreos/etcd/integration"
-	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/coreos/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/clientv3/mirror"
+	"github.com/scaledata/etcd/integration"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
+	"github.com/scaledata/etcd/pkg/testutil"
 )
 
 func TestMirrorSync(t *testing.T) {
@@ -42,7 +42,7 @@ func TestMirrorSync(t *testing.T) {
 
 	syncer := mirror.NewSyncer(c, "", 0)
 	gch, ech := syncer.SyncBase(context.TODO())
-	wkvs := []*mvccpb.KeyValue{{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1}}
+	wkvs := []*sdmvccpb.KeyValue{{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 2, Version: 1}}
 
 	for g := range gch {
 		if !reflect.DeepEqual(g.Kvs, wkvs) {
@@ -63,7 +63,7 @@ func TestMirrorSync(t *testing.T) {
 
 	select {
 	case r := <-wch:
-		wkv := &mvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 3, Version: 2}
+		wkv := &sdmvccpb.KeyValue{Key: []byte("foo"), Value: []byte("bar"), CreateRevision: 2, ModRevision: 3, Version: 2}
 		if !reflect.DeepEqual(r.Events[0].Kv, wkv) {
 			t.Fatalf("kv = %v, want %v", r.Events[0].Kv, wkv)
 		}

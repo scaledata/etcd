@@ -19,32 +19,32 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	"github.com/coreos/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/etcdserver/api/v3rpc/rpctypes"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
 type leaseExpireChecker struct {
-	ctype rpcpb.Checker
+	ctype sdrpcpb.Checker
 	lg    *zap.Logger
-	m     *rpcpb.Member
+	m     *sdrpcpb.Member
 	ls    *leaseStresser
 	cli   *clientv3.Client
 }
 
 func newLeaseExpireChecker(ls *leaseStresser) Checker {
 	return &leaseExpireChecker{
-		ctype: rpcpb.Checker_LEASE_EXPIRE,
+		ctype: sdrpcpb.Checker_LEASE_EXPIRE,
 		lg:    ls.lg,
 		m:     ls.m,
 		ls:    ls,
 	}
 }
 
-func (lc *leaseExpireChecker) Type() rpcpb.Checker {
+func (lc *leaseExpireChecker) Type() sdrpcpb.Checker {
 	return lc.ctype
 }
 

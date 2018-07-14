@@ -20,12 +20,12 @@ import (
 	"sort"
 	"time"
 
-	"github.com/coreos/etcd/auth"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/mvcc"
-	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/coreos/etcd/pkg/types"
+	"github.com/scaledata/etcd/auth"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/mvcc"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
+	"github.com/scaledata/etcd/pkg/types"
 
 	"github.com/gogo/protobuf/proto"
 )
@@ -228,7 +228,7 @@ func (a *applierV3backend) DeleteRange(txn mvcc.TxnWrite, dr *pb.DeleteRangeRequ
 			return nil, err
 		}
 		if rr != nil {
-			resp.PrevKvs = make([]*mvccpb.KeyValue, len(rr.KVs))
+			resp.PrevKvs = make([]*sdmvccpb.KeyValue, len(rr.KVs))
 			for i := range rr.KVs {
 				resp.PrevKvs[i] = &rr.KVs[i]
 			}
@@ -272,19 +272,19 @@ func (a *applierV3backend) Range(txn mvcc.TxnRead, r *pb.RangeRequest) (*pb.Rang
 	}
 
 	if r.MaxModRevision != 0 {
-		f := func(kv *mvccpb.KeyValue) bool { return kv.ModRevision > r.MaxModRevision }
+		f := func(kv *sdmvccpb.KeyValue) bool { return kv.ModRevision > r.MaxModRevision }
 		pruneKVs(rr, f)
 	}
 	if r.MinModRevision != 0 {
-		f := func(kv *mvccpb.KeyValue) bool { return kv.ModRevision < r.MinModRevision }
+		f := func(kv *sdmvccpb.KeyValue) bool { return kv.ModRevision < r.MinModRevision }
 		pruneKVs(rr, f)
 	}
 	if r.MaxCreateRevision != 0 {
-		f := func(kv *mvccpb.KeyValue) bool { return kv.CreateRevision > r.MaxCreateRevision }
+		f := func(kv *sdmvccpb.KeyValue) bool { return kv.CreateRevision > r.MaxCreateRevision }
 		pruneKVs(rr, f)
 	}
 	if r.MinCreateRevision != 0 {
-		f := func(kv *mvccpb.KeyValue) bool { return kv.CreateRevision < r.MinCreateRevision }
+		f := func(kv *sdmvccpb.KeyValue) bool { return kv.CreateRevision < r.MinCreateRevision }
 		pruneKVs(rr, f)
 	}
 
@@ -324,7 +324,7 @@ func (a *applierV3backend) Range(txn mvcc.TxnRead, r *pb.RangeRequest) (*pb.Rang
 
 	resp.Header.Revision = rr.Rev
 	resp.Count = int64(rr.Count)
-	resp.Kvs = make([]*mvccpb.KeyValue, len(rr.KVs))
+	resp.Kvs = make([]*sdmvccpb.KeyValue, len(rr.KVs))
 	for i := range rr.KVs {
 		if r.KeysOnly {
 			rr.KVs[i].Value = nil
@@ -445,7 +445,7 @@ func applyCompare(rv mvcc.ReadView, c *pb.Compare) bool {
 			// nil == empty string in grpc; no way to represent missing value
 			return false
 		}
-		return compareKV(c, mvccpb.KeyValue{})
+		return compareKV(c, sdmvccpb.KeyValue{})
 	}
 	for _, kv := range rr.KVs {
 		if !compareKV(c, kv) {
@@ -455,7 +455,7 @@ func applyCompare(rv mvcc.ReadView, c *pb.Compare) bool {
 	return true
 }
 
-func compareKV(c *pb.Compare, ckv mvccpb.KeyValue) bool {
+func compareKV(c *pb.Compare, ckv sdmvccpb.KeyValue) bool {
 	var result int
 	rev := int64(0)
 	switch c.Target {
@@ -804,7 +804,7 @@ func (a *quotaApplierV3) LeaseGrant(lc *pb.LeaseGrantRequest) (*pb.LeaseGrantRes
 	return resp, err
 }
 
-type kvSort struct{ kvs []mvccpb.KeyValue }
+type kvSort struct{ kvs []sdmvccpb.KeyValue }
 
 func (s *kvSort) Swap(i, j int) {
 	t := s.kvs[i]
@@ -951,7 +951,7 @@ func removeNeedlessRangeReqs(txn *pb.TxnRequest) {
 	txn.Failure = f(txn.Failure)
 }
 
-func pruneKVs(rr *mvcc.RangeResult, isPrunable func(*mvccpb.KeyValue) bool) {
+func pruneKVs(rr *mvcc.RangeResult, isPrunable func(*sdmvccpb.KeyValue) bool) {
 	j := 0
 	for i := range rr.KVs {
 		rr.KVs[j] = rr.KVs[i]

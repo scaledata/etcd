@@ -19,7 +19,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 func TestMessage(t *testing.T) {
@@ -30,29 +30,29 @@ func TestMessage(t *testing.T) {
 		readBytesLimit = originalLimit
 	}()
 	tests := []struct {
-		msg       raftpb.Message
+		msg       sdraftpb.Message
 		encodeErr error
 		decodeErr error
 	}{
 		{
-			raftpb.Message{
-				Type:    raftpb.MsgApp,
+			sdraftpb.Message{
+				Type:    sdraftpb.MsgApp,
 				From:    1,
 				To:      2,
 				Term:    1,
 				LogTerm: 1,
 				Index:   3,
-				Entries: []raftpb.Entry{{Term: 1, Index: 4}},
+				Entries: []sdraftpb.Entry{{Term: 1, Index: 4}},
 			},
 			nil,
 			nil,
 		},
 		{
-			raftpb.Message{
-				Type: raftpb.MsgProp,
+			sdraftpb.Message{
+				Type: sdraftpb.MsgProp,
 				From: 1,
 				To:   2,
-				Entries: []raftpb.Entry{
+				Entries: []sdraftpb.Entry{
 					{Data: []byte("some data")},
 					{Data: []byte("some data")},
 					{Data: []byte("some data")},
@@ -62,11 +62,11 @@ func TestMessage(t *testing.T) {
 			nil,
 		},
 		{
-			raftpb.Message{
-				Type: raftpb.MsgProp,
+			sdraftpb.Message{
+				Type: sdraftpb.MsgProp,
 				From: 1,
 				To:   2,
-				Entries: []raftpb.Entry{
+				Entries: []sdraftpb.Entry{
 					{Data: bytes.Repeat([]byte("a"), int(readBytesLimit+10))},
 				},
 			},

@@ -22,9 +22,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/etcd/pkg/netutil"
-	"github.com/coreos/etcd/pkg/transport"
-	"github.com/coreos/etcd/pkg/types"
+	"github.com/scaledata/etcd/pkg/netutil"
+	"github.com/scaledata/etcd/pkg/transport"
+	"github.com/scaledata/etcd/pkg/types"
 )
 
 // ServerConfig holds the configuration of etcd as taken from the command line or discovery.
@@ -76,7 +76,7 @@ type ServerConfig struct {
 	//
 	// If single-node, it advances ticks regardless.
 	//
-	// See https://github.com/coreos/etcd/issues/9333 for more detail.
+	// See https://github.com/scaledata/etcd/issues/9333 for more detail.
 	InitialElectionTickAdvance bool
 
 	BootstrapTimeout time.Duration

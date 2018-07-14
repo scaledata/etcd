@@ -19,7 +19,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/coreos/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
 
 	"go.uber.org/zap"
 )
@@ -27,7 +27,7 @@ import (
 // Case defines failure/test injection interface.
 // To add a test case:
 //  1. implement "Case" interface
-//  2. define fail case name in "rpcpb.Case"
+//  2. define fail case name in "sdrpcpb.Case"
 type Case interface {
 	// Inject injeccts the failure into the testing cluster at the given
 	// round. When calling the function, the cluster should be in health.
@@ -37,8 +37,8 @@ type Case interface {
 	Recover(clus *Cluster) error
 	// Desc returns a description of the failure
 	Desc() string
-	// TestCase returns "rpcpb.Case" enum type.
-	TestCase() rpcpb.Case
+	// TestCase returns "sdrpcpb.Case" enum type.
+	TestCase() sdrpcpb.Case
 }
 
 type injectMemberFunc func(*Cluster, int) error
@@ -46,7 +46,7 @@ type recoverMemberFunc func(*Cluster, int) error
 
 type caseByFunc struct {
 	desc          string
-	rpcpbCase     rpcpb.Case
+	sdrpcpbCase     sdrpcpb.Case
 	injectMember  injectMemberFunc
 	recoverMember recoverMemberFunc
 }
@@ -55,11 +55,11 @@ func (c *caseByFunc) Desc() string {
 	if c.desc != "" {
 		return c.desc
 	}
-	return c.rpcpbCase.String()
+	return c.sdrpcpbCase.String()
 }
 
-func (c *caseByFunc) TestCase() rpcpb.Case {
-	return c.rpcpbCase
+func (c *caseByFunc) TestCase() sdrpcpb.Case {
+	return c.sdrpcpbCase
 }
 
 type caseFollower struct {
@@ -105,11 +105,11 @@ func (c *caseFollower) Desc() string {
 	if c.desc != "" {
 		return c.desc
 	}
-	return c.rpcpbCase.String()
+	return c.sdrpcpbCase.String()
 }
 
-func (c *caseFollower) TestCase() rpcpb.Case {
-	return c.rpcpbCase
+func (c *caseFollower) TestCase() sdrpcpb.Case {
+	return c.sdrpcpbCase
 }
 
 type caseLeader struct {
@@ -139,8 +139,8 @@ func (c *caseLeader) Recover(clus *Cluster) error {
 	return c.recoverMember(clus, c.last)
 }
 
-func (c *caseLeader) TestCase() rpcpb.Case {
-	return c.rpcpbCase
+func (c *caseLeader) TestCase() sdrpcpb.Case {
+	return c.sdrpcpbCase
 }
 
 type caseQuorum struct {
@@ -171,11 +171,11 @@ func (c *caseQuorum) Desc() string {
 	if c.desc != "" {
 		return c.desc
 	}
-	return c.rpcpbCase.String()
+	return c.sdrpcpbCase.String()
 }
 
-func (c *caseQuorum) TestCase() rpcpb.Case {
-	return c.rpcpbCase
+func (c *caseQuorum) TestCase() sdrpcpb.Case {
+	return c.sdrpcpbCase
 }
 
 func pickQuorum(size int) (picked map[int]struct{}) {
@@ -213,32 +213,32 @@ func (c *caseAll) Desc() string {
 	if c.desc != "" {
 		return c.desc
 	}
-	return c.rpcpbCase.String()
+	return c.sdrpcpbCase.String()
 }
 
-func (c *caseAll) TestCase() rpcpb.Case {
-	return c.rpcpbCase
+func (c *caseAll) TestCase() sdrpcpb.Case {
+	return c.sdrpcpbCase
 }
 
 // caseUntilSnapshot injects a failure/test and waits for a snapshot event
 type caseUntilSnapshot struct {
 	desc      string
-	rpcpbCase rpcpb.Case
+	sdrpcpbCase sdrpcpb.Case
 	Case
 }
 
 // all delay failure cases except the ones failing with latency
 // greater than election timeout (trigger leader election and
 // cluster keeps operating anyways)
-var slowCases = map[rpcpb.Case]bool{
-	rpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER:                        true,
-	rpcpb.Case_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER_UNTIL_TRIGGER_SNAPSHOT:        true,
-	rpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER_UNTIL_TRIGGER_SNAPSHOT: true,
-	rpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_LEADER:                              true,
-	rpcpb.Case_DELAY_PEER_PORT_TX_RX_LEADER_UNTIL_TRIGGER_SNAPSHOT:              true,
-	rpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_LEADER_UNTIL_TRIGGER_SNAPSHOT:       true,
-	rpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_QUORUM:                              true,
-	rpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_ALL:                                 true,
+var slowCases = map[sdrpcpb.Case]bool{
+	sdrpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER:                        true,
+	sdrpcpb.Case_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER_UNTIL_TRIGGER_SNAPSHOT:        true,
+	sdrpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER_UNTIL_TRIGGER_SNAPSHOT: true,
+	sdrpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_LEADER:                              true,
+	sdrpcpb.Case_DELAY_PEER_PORT_TX_RX_LEADER_UNTIL_TRIGGER_SNAPSHOT:              true,
+	sdrpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_LEADER_UNTIL_TRIGGER_SNAPSHOT:       true,
+	sdrpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_QUORUM:                              true,
+	sdrpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_ALL:                                 true,
 }
 
 func (c *caseUntilSnapshot) Inject(clus *Cluster) error {
@@ -316,12 +316,12 @@ func (c *caseUntilSnapshot) Desc() string {
 	if c.desc != "" {
 		return c.desc
 	}
-	if c.rpcpbCase.String() != "" {
-		return c.rpcpbCase.String()
+	if c.sdrpcpbCase.String() != "" {
+		return c.sdrpcpbCase.String()
 	}
 	return c.Case.Desc()
 }
 
-func (c *caseUntilSnapshot) TestCase() rpcpb.Case {
-	return c.rpcpbCase
+func (c *caseUntilSnapshot) TestCase() sdrpcpb.Case {
+	return c.sdrpcpbCase
 }

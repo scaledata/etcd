@@ -27,21 +27,21 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/etcdserver"
-	"github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/etcdserver/membership"
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/mvcc"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/snap"
-	"github.com/coreos/etcd/store"
-	"github.com/coreos/etcd/wal"
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/clientv3"
+	"github.com/scaledata/etcd/etcdserver"
+	"github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/etcdserver/membership"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/mvcc"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/snap"
+	"github.com/scaledata/etcd/store"
+	"github.com/scaledata/etcd/wal"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 
 	bolt "github.com/coreos/bbolt"
 	"go.uber.org/zap"
@@ -412,7 +412,7 @@ func (s *v3Manager) saveWALAndSnap() error {
 	}
 
 	m := s.cl.MemberByName(s.name)
-	md := &etcdserverpb.Metadata{NodeID: uint64(m.ID), ClusterID: uint64(s.cl.ID())}
+	md := &sdetcdserverpb.Metadata{NodeID: uint64(m.ID), ClusterID: uint64(s.cl.ID())}
 	metadata, merr := md.Marshal()
 	if merr != nil {
 		return merr
@@ -432,12 +432,12 @@ func (s *v3Manager) saveWALAndSnap() error {
 		peers[i] = raft.Peer{ID: uint64(id), Context: ctx}
 	}
 
-	ents := make([]raftpb.Entry, len(peers))
+	ents := make([]sdraftpb.Entry, len(peers))
 	nodeIDs := make([]uint64, len(peers))
 	for i, p := range peers {
 		nodeIDs[i] = p.ID
-		cc := raftpb.ConfChange{
-			Type:    raftpb.ConfChangeAddNode,
+		cc := sdraftpb.ConfChange{
+			Type:    sdraftpb.ConfChangeAddNode,
 			NodeID:  p.ID,
 			Context: p.Context,
 		}
@@ -445,8 +445,8 @@ func (s *v3Manager) saveWALAndSnap() error {
 		if err != nil {
 			return err
 		}
-		ents[i] = raftpb.Entry{
-			Type:  raftpb.EntryConfChange,
+		ents[i] = sdraftpb.Entry{
+			Type:  sdraftpb.EntryConfChange,
 			Term:  1,
 			Index: uint64(i + 1),
 			Data:  d,
@@ -454,7 +454,7 @@ func (s *v3Manager) saveWALAndSnap() error {
 	}
 
 	commit, term := uint64(len(ents)), uint64(1)
-	if err := w.Save(raftpb.HardState{
+	if err := w.Save(sdraftpb.HardState{
 		Term:   term,
 		Vote:   peers[0].ID,
 		Commit: commit,
@@ -466,12 +466,12 @@ func (s *v3Manager) saveWALAndSnap() error {
 	if berr != nil {
 		return berr
 	}
-	raftSnap := raftpb.Snapshot{
+	raftSnap := sdraftpb.Snapshot{
 		Data: b,
-		Metadata: raftpb.SnapshotMetadata{
+		Metadata: sdraftpb.SnapshotMetadata{
 			Index: commit,
 			Term:  term,
-			ConfState: raftpb.ConfState{
+			ConfState: sdraftpb.ConfState{
 				Nodes: nodeIDs,
 			},
 		},
@@ -481,5 +481,5 @@ func (s *v3Manager) saveWALAndSnap() error {
 		return err
 	}
 
-	return w.SaveSnapshot(walpb.Snapshot{Index: commit, Term: term})
+	return w.SaveSnapshot(sdwalpb.Snapshot{Index: commit, Term: term})
 }

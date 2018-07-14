@@ -26,11 +26,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/mvcc/backend"
-	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/coreos/etcd/pkg/schedule"
-	"github.com/coreos/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/mvcc/backend"
+	"github.com/scaledata/etcd/mvcc/sdmvccpb"
+	"github.com/scaledata/etcd/pkg/schedule"
+	"github.com/scaledata/etcd/pkg/testutil"
 )
 
 func TestStoreRev(t *testing.T) {
@@ -48,7 +48,7 @@ func TestStoreRev(t *testing.T) {
 }
 
 func TestStorePut(t *testing.T) {
-	kv := mvccpb.KeyValue{
+	kv := sdmvccpb.KeyValue{
 		Key:            []byte("foo"),
 		Value:          []byte("bar"),
 		CreateRevision: 1,
@@ -67,7 +67,7 @@ func TestStorePut(t *testing.T) {
 
 		wrev    revision
 		wkey    []byte
-		wkv     mvccpb.KeyValue
+		wkv     sdmvccpb.KeyValue
 		wputrev revision
 	}{
 		{
@@ -77,7 +77,7 @@ func TestStorePut(t *testing.T) {
 
 			revision{2, 0},
 			newTestKeyBytes(revision{2, 0}, false),
-			mvccpb.KeyValue{
+			sdmvccpb.KeyValue{
 				Key:            []byte("foo"),
 				Value:          []byte("bar"),
 				CreateRevision: 2,
@@ -94,7 +94,7 @@ func TestStorePut(t *testing.T) {
 
 			revision{2, 0},
 			newTestKeyBytes(revision{2, 0}, false),
-			mvccpb.KeyValue{
+			sdmvccpb.KeyValue{
 				Key:            []byte("foo"),
 				Value:          []byte("bar"),
 				CreateRevision: 2,
@@ -111,7 +111,7 @@ func TestStorePut(t *testing.T) {
 
 			revision{3, 0},
 			newTestKeyBytes(revision{3, 0}, false),
-			mvccpb.KeyValue{
+			sdmvccpb.KeyValue{
 				Key:            []byte("foo"),
 				Value:          []byte("bar"),
 				CreateRevision: 2,
@@ -170,7 +170,7 @@ func TestStorePut(t *testing.T) {
 
 func TestStoreRange(t *testing.T) {
 	key := newTestKeyBytes(revision{2, 0}, false)
-	kv := mvccpb.KeyValue{
+	kv := sdmvccpb.KeyValue{
 		Key:            []byte("foo"),
 		Value:          []byte("bar"),
 		CreateRevision: 1,
@@ -211,7 +211,7 @@ func TestStoreRange(t *testing.T) {
 		if err != nil {
 			t.Errorf("#%d: err = %v, want nil", i, err)
 		}
-		if w := []mvccpb.KeyValue{kv}; !reflect.DeepEqual(ret.KVs, w) {
+		if w := []sdmvccpb.KeyValue{kv}; !reflect.DeepEqual(ret.KVs, w) {
 			t.Errorf("#%d: kvs = %+v, want %+v", i, ret.KVs, w)
 		}
 		if ret.Rev != wrev {
@@ -242,7 +242,7 @@ func TestStoreRange(t *testing.T) {
 
 func TestStoreDeleteRange(t *testing.T) {
 	key := newTestKeyBytes(revision{2, 0}, false)
-	kv := mvccpb.KeyValue{
+	kv := sdmvccpb.KeyValue{
 		Key:            []byte("foo"),
 		Value:          []byte("bar"),
 		CreateRevision: 1,
@@ -289,7 +289,7 @@ func TestStoreDeleteRange(t *testing.T) {
 			t.Errorf("#%d: n = %d, want 1", i, n)
 		}
 
-		data, err := (&mvccpb.KeyValue{
+		data, err := (&sdmvccpb.KeyValue{
 			Key: []byte("foo"),
 		}).Marshal()
 		if err != nil {
@@ -357,7 +357,7 @@ func TestStoreRestore(t *testing.T) {
 	fi := s.kvindex.(*fakeIndex)
 
 	putkey := newTestKeyBytes(revision{3, 0}, false)
-	putkv := mvccpb.KeyValue{
+	putkv := sdmvccpb.KeyValue{
 		Key:            []byte("foo"),
 		Value:          []byte("bar"),
 		CreateRevision: 4,
@@ -369,7 +369,7 @@ func TestStoreRestore(t *testing.T) {
 		t.Fatal(err)
 	}
 	delkey := newTestKeyBytes(revision{5, 0}, true)
-	delkv := mvccpb.KeyValue{
+	delkv := sdmvccpb.KeyValue{
 		Key: []byte("foo"),
 	}
 	delkvb, err := delkv.Marshal()

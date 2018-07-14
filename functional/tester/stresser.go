@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/coreos/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
 
 	"go.uber.org/zap"
 )
@@ -36,7 +36,7 @@ type Stresser interface {
 }
 
 // newStresser creates stresser from a comma separated list of stresser types.
-func newStresser(clus *Cluster, m *rpcpb.Member) (stressers []Stresser) {
+func newStresser(clus *Cluster, m *sdrpcpb.Member) (stressers []Stresser) {
 	stressers = make([]Stresser, len(clus.Tester.Stressers))
 	for i, stype := range clus.Tester.Stressers {
 		clus.lg.Info(
@@ -50,7 +50,7 @@ func newStresser(clus *Cluster, m *rpcpb.Member) (stressers []Stresser) {
 			// TODO: Too intensive stressing clients can panic etcd member with
 			// 'out of memory' error. Put rate limits in server side.
 			stressers[i] = &keyStresser{
-				stype:             rpcpb.Stresser_KV,
+				stype:             sdrpcpb.Stresser_KV,
 				lg:                clus.lg,
 				m:                 m,
 				keySize:           int(clus.Tester.StressKeySize),
@@ -64,7 +64,7 @@ func newStresser(clus *Cluster, m *rpcpb.Member) (stressers []Stresser) {
 
 		case "LEASE":
 			stressers[i] = &leaseStresser{
-				stype:        rpcpb.Stresser_LEASE,
+				stype:        sdrpcpb.Stresser_LEASE,
 				lg:           clus.lg,
 				m:            m,
 				numLeases:    10, // TODO: configurable
@@ -84,7 +84,7 @@ func newStresser(clus *Cluster, m *rpcpb.Member) (stressers []Stresser) {
 				"--req-rate", fmt.Sprintf("%v", reqRate),
 			}
 			stressers[i] = newRunnerStresser(
-				rpcpb.Stresser_ELECTION_RUNNER,
+				sdrpcpb.Stresser_ELECTION_RUNNER,
 				m.EtcdClientEndpoint,
 				clus.lg,
 				clus.Tester.RunnerExecPath,
@@ -106,7 +106,7 @@ func newStresser(clus *Cluster, m *rpcpb.Member) (stressers []Stresser) {
 				"--req-rate", fmt.Sprintf("%v", reqRate),
 			}
 			stressers[i] = newRunnerStresser(
-				rpcpb.Stresser_WATCH_RUNNER,
+				sdrpcpb.Stresser_WATCH_RUNNER,
 				m.EtcdClientEndpoint,
 				clus.lg,
 				clus.Tester.RunnerExecPath,
@@ -126,7 +126,7 @@ func newStresser(clus *Cluster, m *rpcpb.Member) (stressers []Stresser) {
 				"--req-rate", fmt.Sprintf("%v", reqRate),
 			}
 			stressers[i] = newRunnerStresser(
-				rpcpb.Stresser_LOCK_RACER_RUNNER,
+				sdrpcpb.Stresser_LOCK_RACER_RUNNER,
 				m.EtcdClientEndpoint,
 				clus.lg,
 				clus.Tester.RunnerExecPath,
@@ -142,7 +142,7 @@ func newStresser(clus *Cluster, m *rpcpb.Member) (stressers []Stresser) {
 				"--endpoints", m.EtcdClientEndpoint,
 			}
 			stressers[i] = newRunnerStresser(
-				rpcpb.Stresser_LEASE_RUNNER,
+				sdrpcpb.Stresser_LEASE_RUNNER,
 				m.EtcdClientEndpoint,
 				clus.lg,
 				clus.Tester.RunnerExecPath,

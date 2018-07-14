@@ -22,9 +22,9 @@ import (
 	"sort"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver/membership"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/version"
+	"github.com/scaledata/etcd/etcdserver/membership"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/version"
 	"github.com/coreos/go-semver/semver"
 )
 

@@ -17,10 +17,10 @@ package etcdserver
 import (
 	"sync"
 
-	"github.com/coreos/etcd/auth"
-	pb "github.com/coreos/etcd/etcdserver/etcdserverpb"
-	"github.com/coreos/etcd/lease"
-	"github.com/coreos/etcd/mvcc"
+	"github.com/scaledata/etcd/auth"
+	pb "github.com/scaledata/etcd/etcdserver/sdetcdserverpb"
+	"github.com/scaledata/etcd/lease"
+	"github.com/scaledata/etcd/mvcc"
 )
 
 type authApplierV3 struct {

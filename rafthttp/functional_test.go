@@ -21,10 +21,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver/stats"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
+	"github.com/scaledata/etcd/etcdserver/stats"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
 )
 
 func TestSendMessage(t *testing.T) {
@@ -41,7 +41,7 @@ func TestSendMessage(t *testing.T) {
 	defer srv.Close()
 
 	// member 2
-	recvc := make(chan raftpb.Message, 1)
+	recvc := make(chan sdraftpb.Message, 1)
 	p := &fakeRaft{recvc: recvc}
 	tr2 := &Transport{
 		ID:          types.ID(2),
@@ -63,19 +63,19 @@ func TestSendMessage(t *testing.T) {
 	}
 
 	data := []byte("some data")
-	tests := []raftpb.Message{
+	tests := []sdraftpb.Message{
 		// these messages are set to send to itself, which facilitates testing.
-		{Type: raftpb.MsgProp, From: 1, To: 2, Entries: []raftpb.Entry{{Data: data}}},
-		{Type: raftpb.MsgApp, From: 1, To: 2, Term: 1, Index: 3, LogTerm: 0, Entries: []raftpb.Entry{{Index: 4, Term: 1, Data: data}}, Commit: 3},
-		{Type: raftpb.MsgAppResp, From: 1, To: 2, Term: 1, Index: 3},
-		{Type: raftpb.MsgVote, From: 1, To: 2, Term: 1, Index: 3, LogTerm: 0},
-		{Type: raftpb.MsgVoteResp, From: 1, To: 2, Term: 1},
-		{Type: raftpb.MsgSnap, From: 1, To: 2, Term: 1, Snapshot: raftpb.Snapshot{Metadata: raftpb.SnapshotMetadata{Index: 1000, Term: 1}, Data: data}},
-		{Type: raftpb.MsgHeartbeat, From: 1, To: 2, Term: 1, Commit: 3},
-		{Type: raftpb.MsgHeartbeatResp, From: 1, To: 2, Term: 1},
+		{Type: sdraftpb.MsgProp, From: 1, To: 2, Entries: []sdraftpb.Entry{{Data: data}}},
+		{Type: sdraftpb.MsgApp, From: 1, To: 2, Term: 1, Index: 3, LogTerm: 0, Entries: []sdraftpb.Entry{{Index: 4, Term: 1, Data: data}}, Commit: 3},
+		{Type: sdraftpb.MsgAppResp, From: 1, To: 2, Term: 1, Index: 3},
+		{Type: sdraftpb.MsgVote, From: 1, To: 2, Term: 1, Index: 3, LogTerm: 0},
+		{Type: sdraftpb.MsgVoteResp, From: 1, To: 2, Term: 1},
+		{Type: sdraftpb.MsgSnap, From: 1, To: 2, Term: 1, Snapshot: sdraftpb.Snapshot{Metadata: sdraftpb.SnapshotMetadata{Index: 1000, Term: 1}, Data: data}},
+		{Type: sdraftpb.MsgHeartbeat, From: 1, To: 2, Term: 1, Commit: 3},
+		{Type: sdraftpb.MsgHeartbeatResp, From: 1, To: 2, Term: 1},
 	}
 	for i, tt := range tests {
-		tr.Send([]raftpb.Message{tt})
+		tr.Send([]sdraftpb.Message{tt})
 		msg := <-recvc
 		if !reflect.DeepEqual(msg, tt) {
 			t.Errorf("#%d: msg = %+v, want %+v", i, msg, tt)
@@ -99,7 +99,7 @@ func TestSendMessageWhenStreamIsBroken(t *testing.T) {
 	defer srv.Close()
 
 	// member 2
-	recvc := make(chan raftpb.Message, 1)
+	recvc := make(chan sdraftpb.Message, 1)
 	p := &fakeRaft{recvc: recvc}
 	tr2 := &Transport{
 		ID:          types.ID(2),
@@ -129,7 +129,7 @@ func TestSendMessageWhenStreamIsBroken(t *testing.T) {
 		// TODO: remove this resend logic when we add retry logic into the code
 		case <-time.After(time.Millisecond):
 			n++
-			tr.Send([]raftpb.Message{{Type: raftpb.MsgHeartbeat, From: 1, To: 2, Term: 1, Commit: 3}})
+			tr.Send([]sdraftpb.Message{{Type: sdraftpb.MsgHeartbeat, From: 1, To: 2, Term: 1, Commit: 3}})
 		case <-recvc:
 			if n > 50 {
 				t.Errorf("disconnection time = %dms, want < 50ms", n)
@@ -158,12 +158,12 @@ func waitStreamWorking(p *peer) bool {
 }
 
 type fakeRaft struct {
-	recvc     chan<- raftpb.Message
+	recvc     chan<- sdraftpb.Message
 	err       error
 	removedID uint64
 }
 
-func (p *fakeRaft) Process(ctx context.Context, m raftpb.Message) error {
+func (p *fakeRaft) Process(ctx context.Context, m sdraftpb.Message) error {
 	select {
 	case p.recvc <- m:
 	default:

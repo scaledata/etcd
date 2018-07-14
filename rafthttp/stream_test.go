@@ -28,11 +28,11 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"github.com/coreos/etcd/etcdserver/stats"
-	"github.com/coreos/etcd/pkg/testutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/version"
+	"github.com/scaledata/etcd/etcdserver/stats"
+	"github.com/scaledata/etcd/pkg/testutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/version"
 	"github.com/coreos/go-semver/semver"
 )
 
@@ -66,7 +66,7 @@ func TestStreamWriterAttachOutgoingConn(t *testing.T) {
 		// if prevwfc == nil, the first connection may be pending, but the first
 		// msgc is already available since it's set on calling startStreamwriter
 		msgc, _ := sw.writec()
-		msgc <- raftpb.Message{}
+		msgc <- sdraftpb.Message{}
 
 		select {
 		case <-wfc.writec:
@@ -97,7 +97,7 @@ func TestStreamWriterAttachBadOutgoingConn(t *testing.T) {
 	wfc := newFakeWriteFlushCloser(errors.New("blah"))
 	sw.attach(&outgoingConn{t: streamTypeMessage, Writer: wfc, Flusher: wfc, Closer: wfc})
 
-	sw.msgc <- raftpb.Message{}
+	sw.msgc <- sdraftpb.Message{}
 	select {
 	case <-wfc.closed:
 	case <-time.After(time.Second):
@@ -265,26 +265,26 @@ func TestStreamReaderDialDetectUnsupport(t *testing.T) {
 // TestStream tests that streamReader and streamWriter can build stream to
 // send messages between each other.
 func TestStream(t *testing.T) {
-	recvc := make(chan raftpb.Message, streamBufSize)
-	propc := make(chan raftpb.Message, streamBufSize)
-	msgapp := raftpb.Message{
-		Type:    raftpb.MsgApp,
+	recvc := make(chan sdraftpb.Message, streamBufSize)
+	propc := make(chan sdraftpb.Message, streamBufSize)
+	msgapp := sdraftpb.Message{
+		Type:    sdraftpb.MsgApp,
 		From:    2,
 		To:      1,
 		Term:    1,
 		LogTerm: 1,
 		Index:   3,
-		Entries: []raftpb.Entry{{Term: 1, Index: 4}},
+		Entries: []sdraftpb.Entry{{Term: 1, Index: 4}},
 	}
 
 	tests := []struct {
 		t  streamType
-		m  raftpb.Message
-		wc chan raftpb.Message
+		m  sdraftpb.Message
+		wc chan sdraftpb.Message
 	}{
 		{
 			streamTypeMessage,
-			raftpb.Message{Type: raftpb.MsgProp, To: 2},
+			sdraftpb.Message{Type: sdraftpb.MsgProp, To: 2},
 			propc,
 		},
 		{
@@ -323,7 +323,7 @@ func TestStream(t *testing.T) {
 		sr.start()
 
 		// wait for stream to work
-		var writec chan<- raftpb.Message
+		var writec chan<- sdraftpb.Message
 		for {
 			var ok bool
 			if writec, ok = sw.writec(); ok {
@@ -333,7 +333,7 @@ func TestStream(t *testing.T) {
 		}
 
 		writec <- tt.m
-		var m raftpb.Message
+		var m sdraftpb.Message
 		select {
 		case m = <-tt.wc:
 		case <-time.After(time.Second):

@@ -17,7 +17,7 @@ package tester
 import (
 	"time"
 
-	"github.com/coreos/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
 
 	"go.uber.org/zap"
 )
@@ -26,7 +26,7 @@ const (
 	// Wait more when it recovers from slow network, because network layer
 	// needs extra time to propagate traffic control (tc command) change.
 	// Otherwise, we get different hash values from the previous revision.
-	// For more detail, please see https://github.com/coreos/etcd/issues/5121.
+	// For more detail, please see https://github.com/scaledata/etcd/issues/5121.
 	waitRecover = 5 * time.Second
 )
 
@@ -37,25 +37,25 @@ func inject_DELAY_PEER_PORT_TX_RX(clus *Cluster, idx int) error {
 		zap.Duration("latency-rv", time.Duration(clus.Tester.DelayLatencyMsRv)*time.Millisecond),
 		zap.String("endpoint", clus.Members[idx].EtcdClientEndpoint),
 	)
-	return clus.sendOp(idx, rpcpb.Operation_DELAY_PEER_PORT_TX_RX)
+	return clus.sendOp(idx, sdrpcpb.Operation_DELAY_PEER_PORT_TX_RX)
 }
 
 func recover_DELAY_PEER_PORT_TX_RX(clus *Cluster, idx int) error {
-	err := clus.sendOp(idx, rpcpb.Operation_UNDELAY_PEER_PORT_TX_RX)
+	err := clus.sendOp(idx, sdrpcpb.Operation_UNDELAY_PEER_PORT_TX_RX)
 	time.Sleep(waitRecover)
 	return err
 }
 
 func new_Case_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER(clus *Cluster, random bool) Case {
 	cc := caseByFunc{
-		rpcpbCase:     rpcpb.Case_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER,
+		sdrpcpbCase:     sdrpcpb.Case_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER,
 		injectMember:  inject_DELAY_PEER_PORT_TX_RX,
 		recoverMember: recover_DELAY_PEER_PORT_TX_RX,
 	}
 	clus.Tester.UpdatedDelayLatencyMs = clus.Tester.DelayLatencyMs
 	if random {
 		clus.UpdateDelayLatencyMs()
-		cc.rpcpbCase = rpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER
+		cc.sdrpcpbCase = sdrpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER
 	}
 	c := &caseFollower{cc, -1, -1}
 	return &caseDelay{
@@ -66,32 +66,32 @@ func new_Case_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER(clus *Cluster, random bool) Cas
 
 func new_Case_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER_UNTIL_TRIGGER_SNAPSHOT(clus *Cluster, random bool) Case {
 	cc := caseByFunc{
-		rpcpbCase:     rpcpb.Case_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER_UNTIL_TRIGGER_SNAPSHOT,
+		sdrpcpbCase:     sdrpcpb.Case_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER_UNTIL_TRIGGER_SNAPSHOT,
 		injectMember:  inject_DELAY_PEER_PORT_TX_RX,
 		recoverMember: recover_DELAY_PEER_PORT_TX_RX,
 	}
 	clus.Tester.UpdatedDelayLatencyMs = clus.Tester.DelayLatencyMs
 	if random {
 		clus.UpdateDelayLatencyMs()
-		cc.rpcpbCase = rpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER_UNTIL_TRIGGER_SNAPSHOT
+		cc.sdrpcpbCase = sdrpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_ONE_FOLLOWER_UNTIL_TRIGGER_SNAPSHOT
 	}
 	c := &caseFollower{cc, -1, -1}
 	return &caseUntilSnapshot{
-		rpcpbCase: cc.rpcpbCase,
+		sdrpcpbCase: cc.sdrpcpbCase,
 		Case:      c,
 	}
 }
 
 func new_Case_DELAY_PEER_PORT_TX_RX_LEADER(clus *Cluster, random bool) Case {
 	cc := caseByFunc{
-		rpcpbCase:     rpcpb.Case_DELAY_PEER_PORT_TX_RX_LEADER,
+		sdrpcpbCase:     sdrpcpb.Case_DELAY_PEER_PORT_TX_RX_LEADER,
 		injectMember:  inject_DELAY_PEER_PORT_TX_RX,
 		recoverMember: recover_DELAY_PEER_PORT_TX_RX,
 	}
 	clus.Tester.UpdatedDelayLatencyMs = clus.Tester.DelayLatencyMs
 	if random {
 		clus.UpdateDelayLatencyMs()
-		cc.rpcpbCase = rpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_LEADER
+		cc.sdrpcpbCase = sdrpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_LEADER
 	}
 	c := &caseLeader{cc, -1, -1}
 	return &caseDelay{
@@ -102,18 +102,18 @@ func new_Case_DELAY_PEER_PORT_TX_RX_LEADER(clus *Cluster, random bool) Case {
 
 func new_Case_DELAY_PEER_PORT_TX_RX_LEADER_UNTIL_TRIGGER_SNAPSHOT(clus *Cluster, random bool) Case {
 	cc := caseByFunc{
-		rpcpbCase:     rpcpb.Case_DELAY_PEER_PORT_TX_RX_LEADER_UNTIL_TRIGGER_SNAPSHOT,
+		sdrpcpbCase:     sdrpcpb.Case_DELAY_PEER_PORT_TX_RX_LEADER_UNTIL_TRIGGER_SNAPSHOT,
 		injectMember:  inject_DELAY_PEER_PORT_TX_RX,
 		recoverMember: recover_DELAY_PEER_PORT_TX_RX,
 	}
 	clus.Tester.UpdatedDelayLatencyMs = clus.Tester.DelayLatencyMs
 	if random {
 		clus.UpdateDelayLatencyMs()
-		cc.rpcpbCase = rpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_LEADER_UNTIL_TRIGGER_SNAPSHOT
+		cc.sdrpcpbCase = sdrpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_LEADER_UNTIL_TRIGGER_SNAPSHOT
 	}
 	c := &caseLeader{cc, -1, -1}
 	return &caseUntilSnapshot{
-		rpcpbCase: cc.rpcpbCase,
+		sdrpcpbCase: cc.sdrpcpbCase,
 		Case:      c,
 	}
 }
@@ -121,7 +121,7 @@ func new_Case_DELAY_PEER_PORT_TX_RX_LEADER_UNTIL_TRIGGER_SNAPSHOT(clus *Cluster,
 func new_Case_DELAY_PEER_PORT_TX_RX_QUORUM(clus *Cluster, random bool) Case {
 	c := &caseQuorum{
 		caseByFunc: caseByFunc{
-			rpcpbCase:     rpcpb.Case_DELAY_PEER_PORT_TX_RX_QUORUM,
+			sdrpcpbCase:     sdrpcpb.Case_DELAY_PEER_PORT_TX_RX_QUORUM,
 			injectMember:  inject_DELAY_PEER_PORT_TX_RX,
 			recoverMember: recover_DELAY_PEER_PORT_TX_RX,
 		},
@@ -130,7 +130,7 @@ func new_Case_DELAY_PEER_PORT_TX_RX_QUORUM(clus *Cluster, random bool) Case {
 	clus.Tester.UpdatedDelayLatencyMs = clus.Tester.DelayLatencyMs
 	if random {
 		clus.UpdateDelayLatencyMs()
-		c.rpcpbCase = rpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_QUORUM
+		c.sdrpcpbCase = sdrpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_QUORUM
 	}
 	return &caseDelay{
 		Case:          c,
@@ -140,14 +140,14 @@ func new_Case_DELAY_PEER_PORT_TX_RX_QUORUM(clus *Cluster, random bool) Case {
 
 func new_Case_DELAY_PEER_PORT_TX_RX_ALL(clus *Cluster, random bool) Case {
 	c := &caseAll{
-		rpcpbCase:     rpcpb.Case_DELAY_PEER_PORT_TX_RX_ALL,
+		sdrpcpbCase:     sdrpcpb.Case_DELAY_PEER_PORT_TX_RX_ALL,
 		injectMember:  inject_DELAY_PEER_PORT_TX_RX,
 		recoverMember: recover_DELAY_PEER_PORT_TX_RX,
 	}
 	clus.Tester.UpdatedDelayLatencyMs = clus.Tester.DelayLatencyMs
 	if random {
 		clus.UpdateDelayLatencyMs()
-		c.rpcpbCase = rpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_ALL
+		c.sdrpcpbCase = sdrpcpb.Case_RANDOM_DELAY_PEER_PORT_TX_RX_ALL
 	}
 	return &caseDelay{
 		Case:          c,

@@ -24,21 +24,21 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/coreos/etcd/etcdserver/stats"
-	"github.com/coreos/etcd/pkg/fileutil"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
-	"github.com/coreos/etcd/rafthttp"
-	"github.com/coreos/etcd/snap"
-	"github.com/coreos/etcd/wal"
-	"github.com/coreos/etcd/wal/walpb"
+	"github.com/scaledata/etcd/etcdserver/stats"
+	"github.com/scaledata/etcd/pkg/fileutil"
+	"github.com/scaledata/etcd/pkg/types"
+	"github.com/scaledata/etcd/raft"
+	"github.com/scaledata/etcd/raft/sdraftpb"
+	"github.com/scaledata/etcd/rafthttp"
+	"github.com/scaledata/etcd/snap"
+	"github.com/scaledata/etcd/wal"
+	"github.com/scaledata/etcd/wal/sdwalpb"
 )
 
 // A key-value stream backed by raft
 type raftNode struct {
 	proposeC    <-chan string            // proposed messages (k,v)
-	confChangeC <-chan raftpb.ConfChange // proposed cluster config changes
+	confChangeC <-chan sdraftpb.ConfChange // proposed cluster config changes
 	commitC     chan<- *string           // entries committed to log (k,v)
 	errorC      chan<- error             // errors from raft session
 
@@ -50,7 +50,7 @@ type raftNode struct {
 	getSnapshot func() ([]byte, error)
 	lastIndex   uint64 // index of log at start
 
-	confState     raftpb.ConfState
+	confState     sdraftpb.ConfState
 	snapshotIndex uint64
 	appliedIndex  uint64
 
@@ -77,7 +77,7 @@ var defaultSnapCount uint64 = 10000
 // commit channel, followed by a nil message (to indicate the channel is
 // current), then new log entries. To shutdown, close proposeC and read errorC.
 func newRaftNode(id int, peers []string, join bool, getSnapshot func() ([]byte, error), proposeC <-chan string,
-	confChangeC <-chan raftpb.ConfChange) (<-chan *string, <-chan error, <-chan *snap.Snapshotter) {
+	confChangeC <-chan sdraftpb.ConfChange) (<-chan *string, <-chan error, <-chan *snap.Snapshotter) {
 
 	commitC := make(chan *string)
 	errorC := make(chan error)
@@ -105,11 +105,11 @@ func newRaftNode(id int, peers []string, join bool, getSnapshot func() ([]byte, 
 	return commitC, errorC, rc.snapshotterReady
 }
 
-func (rc *raftNode) saveSnap(snap raftpb.Snapshot) error {
+func (rc *raftNode) saveSnap(snap sdraftpb.Snapshot) error {
 	// must save the snapshot index to the WAL before saving the
 	// snapshot to maintain the invariant that we only Open the
 	// wal at previously-saved snapshot indexes.
-	walSnap := walpb.Snapshot{
+	walSnap := sdwalpb.Snapshot{
 		Index: snap.Metadata.Index,
 		Term:  snap.Metadata.Term,
 	}
@@ -122,7 +122,7 @@ func (rc *raftNode) saveSnap(snap raftpb.Snapshot) error {
 	return rc.wal.ReleaseLockTo(snap.Metadata.Index)
 }
 
-func (rc *raftNode) entriesToApply(ents []raftpb.Entry) (nents []raftpb.Entry) {
+func (rc *raftNode) entriesToApply(ents []sdraftpb.Entry) (nents []sdraftpb.Entry) {
 	if len(ents) == 0 {
 		return
 	}
@@ -138,10 +138,10 @@ func (rc *raftNode) entriesToApply(ents []raftpb.Entry) (nents []raftpb.Entry) {
 
 // publishEntries writes committed log entries to commit channel and returns
 // whether all entries could be published.
-func (rc *raftNode) publishEntries(ents []raftpb.Entry) bool {
+func (rc *raftNode) publishEntries(ents []sdraftpb.Entry) bool {
 	for i := range ents {
 		switch ents[i].Type {
-		case raftpb.EntryNormal:
+		case sdraftpb.EntryNormal:
 			if len(ents[i].Data) == 0 {
 				// ignore empty messages
 				break
@@ -153,16 +153,16 @@ func (rc *raftNode) publishEntries(ents []raftpb.Entry) bool {
 				return false
 			}
 
-		case raftpb.EntryConfChange:
-			var cc raftpb.ConfChange
+		case sdraftpb.EntryConfChange:
+			var cc sdraftpb.ConfChange
 			cc.Unmarshal(ents[i].Data)
 			rc.confState = *rc.node.ApplyConfChange(cc)
 			switch cc.Type {
-			case raftpb.ConfChangeAddNode:
+			case sdraftpb.ConfChangeAddNode:
 				if len(cc.Context) > 0 {
 					rc.transport.AddPeer(types.ID(cc.NodeID), []string{string(cc.Context)})
 				}
-			case raftpb.ConfChangeRemoveNode:
+			case sdraftpb.ConfChangeRemoveNode:
 				if cc.NodeID == uint64(rc.id) {
 					log.Println("I've been removed from the cluster! Shutting down.")
 					return false
@@ -186,7 +186,7 @@ func (rc *raftNode) publishEntries(ents []raftpb.Entry) bool {
 	return true
 }
 
-func (rc *raftNode) loadSnapshot() *raftpb.Snapshot {
+func (rc *raftNode) loadSnapshot() *sdraftpb.Snapshot {
 	snapshot, err := rc.snapshotter.Load()
 	if err != nil && err != snap.ErrNoSnapshot {
 		log.Fatalf("raftexample: error loading snapshot (%v)", err)
@@ -195,7 +195,7 @@ func (rc *raftNode) loadSnapshot() *raftpb.Snapshot {
 }
 
 // openWAL returns a WAL ready for reading.
-func (rc *raftNode) openWAL(snapshot *raftpb.Snapshot) *wal.WAL {
+func (rc *raftNode) openWAL(snapshot *sdraftpb.Snapshot) *wal.WAL {
 	if !wal.Exist(rc.waldir) {
 		if err := os.Mkdir(rc.waldir, 0750); err != nil {
 			log.Fatalf("raftexample: cannot create dir for wal (%v)", err)
@@ -208,7 +208,7 @@ func (rc *raftNode) openWAL(snapshot *raftpb.Snapshot) *wal.WAL {
 		w.Close()
 	}
 
-	walsnap := walpb.Snapshot{}
+	walsnap := sdwalpb.Snapshot{}
 	if snapshot != nil {
 		walsnap.Index, walsnap.Term = snapshot.Metadata.Index, snapshot.Metadata.Term
 	}
@@ -324,7 +324,7 @@ func (rc *raftNode) stopHTTP() {
 	<-rc.httpdonec
 }
 
-func (rc *raftNode) publishSnapshot(snapshotToSave raftpb.Snapshot) {
+func (rc *raftNode) publishSnapshot(snapshotToSave sdraftpb.Snapshot) {
 	if raft.IsEmptySnap(snapshotToSave) {
 		return
 	}
@@ -470,7 +470,7 @@ func (rc *raftNode) serveRaft() {
 	close(rc.httpdonec)
 }
 
-func (rc *raftNode) Process(ctx context.Context, m raftpb.Message) error {
+func (rc *raftNode) Process(ctx context.Context, m sdraftpb.Message) error {
 	return rc.node.Step(ctx, m)
 }
 func (rc *raftNode) IsIDRemoved(id uint64) bool                           { return false }

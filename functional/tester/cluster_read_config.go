@@ -22,7 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/coreos/etcd/functional/rpcpb"
+	"github.com/scaledata/etcd/functional/sdrpcpb"
 
 	"go.uber.org/zap"
 	yaml "gopkg.in/yaml.v2"
@@ -331,18 +331,18 @@ func read(lg *zap.Logger, fpath string) (*Cluster, error) {
 	}
 
 	for _, v := range clus.Tester.Cases {
-		if _, ok := rpcpb.Case_value[v]; !ok {
-			return nil, fmt.Errorf("%q is not defined in 'rpcpb.Case_value'", v)
+		if _, ok := sdrpcpb.Case_value[v]; !ok {
+			return nil, fmt.Errorf("%q is not defined in 'sdrpcpb.Case_value'", v)
 		}
 	}
 
 	for _, v := range clus.Tester.Stressers {
-		if _, ok := rpcpb.Stresser_value[v]; !ok {
+		if _, ok := sdrpcpb.Stresser_value[v]; !ok {
 			return nil, fmt.Errorf("Stresser is unknown; got %q", v)
 		}
 	}
 	for _, v := range clus.Tester.Checkers {
-		if _, ok := rpcpb.Checker_value[v]; !ok {
+		if _, ok := sdrpcpb.Checker_value[v]; !ok {
 			return nil, fmt.Errorf("Checker is unknown; got %q", v)
 		}
 	}

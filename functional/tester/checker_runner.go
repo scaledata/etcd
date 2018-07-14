@@ -14,23 +14,23 @@
 
 package tester
 
-import "github.com/coreos/etcd/functional/rpcpb"
+import "github.com/scaledata/etcd/functional/sdrpcpb"
 
 type runnerChecker struct {
-	ctype              rpcpb.Checker
+	ctype              sdrpcpb.Checker
 	etcdClientEndpoint string
 	errc               chan error
 }
 
 func newRunnerChecker(ep string, errc chan error) Checker {
 	return &runnerChecker{
-		ctype:              rpcpb.Checker_RUNNER,
+		ctype:              sdrpcpb.Checker_RUNNER,
 		etcdClientEndpoint: ep,
 		errc:               errc,
 	}
 }
 
-func (rc *runnerChecker) Type() rpcpb.Checker {
+func (rc *runnerChecker) Type() sdrpcpb.Checker {
 	return rc.ctype
 }
 
