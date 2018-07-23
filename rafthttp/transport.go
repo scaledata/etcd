@@ -348,6 +348,13 @@ func (t *Transport) ActiveSince(id types.ID) time.Time {
 	return time.Time{}
 }
 
+func (t *Transport) PeerExists(id types.ID) bool {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	_, ok := t.peers[id]
+	return ok
+}
+
 func (t *Transport) SendSnapshot(m snap.Message) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
