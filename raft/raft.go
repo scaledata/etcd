@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -100,6 +101,10 @@ var stmap = [...]string{
 	"StateLeader",
 	"StatePreCandidate",
 }
+
+// useKronosNewRaft being true means we will not ignore lower term
+// preVotes during leader election.
+var useKronosNewRaft = (os.Getenv("KRONOS_NEW_RAFT") == "1")
 
 func (st StateType) String() string {
 	return stmap[uint64(st)]
@@ -663,7 +668,10 @@ func (r *raft) becomePreCandidate() {
 	r.step = stepCandidate
 	r.votes = make(map[uint64]bool)
 	r.tick = r.tickElection
-	r.lead = None
+	r.logger.Infof("Using new Raft: %t", useKronosNewRaft)
+	if useKronosNewRaft {
+		r.lead = None
+	}
 	r.state = StatePreCandidate
 	r.logger.Infof("%x became pre-candidate at term %d", r.id, r.Term)
 }
@@ -787,7 +795,8 @@ func (r *raft) Step(m pb.Message) error {
 		}
 
 	case m.Term < r.Term:
-		if (r.checkQuorum || r.preVote) && (m.Type == pb.MsgHeartbeat || m.Type == pb.MsgApp) {
+		preVoteCondition := (r.preVote && useKronosNewRaft)
+		if (r.checkQuorum || preVoteCondition) && (m.Type == pb.MsgHeartbeat || m.Type == pb.MsgApp) {
 			// We have received messages from a leader at a lower term. It is possible
 			// that these messages were simply delayed in the network, but this could
 			// also mean that this node has advanced its term number during a network
@@ -802,7 +811,7 @@ func (r *raft) Step(m pb.Message) error {
 			// but it will not receive MsgApp or MsgHeartbeat, so it will not create
 			// disruptive term increases
 			r.send(pb.Message{To: m.From, Type: pb.MsgAppResp})
-		} else if m.Type == pb.MsgPreVote {
+		} else if m.Type == pb.MsgPreVote && useKronosNewRaft {
 			// Before Pre-Vote enable, there may have candidate with higher term,
 			// but less log. After update to Pre-Vote, the cluster may deadlock if
 			// we drop messages with a lower term.
